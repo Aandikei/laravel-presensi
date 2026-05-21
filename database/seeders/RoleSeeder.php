@@ -2,45 +2,121 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Reset cache
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Buat permission
+        // Permissions per fitur
         $permissions = [
+            // Instansi
+            'manage-instansi',
+
+            // User & Role
             'manage-users',
             'manage-roles',
             'manage-permissions',
-            'view-dashboard',
+
+            // Master Data
+            'manage-tahun-ajaran',
+            'manage-guru',
+            'manage-siswa',
+            'manage-kelas',
+            'manage-mapel',
+            'manage-jadwal',
+            'manage-kurikulum',
+            'manage-registrasi',
+
+            // Absensi
+            'input-absensi',
+            'edit-absensi',
+            'lock-absensi',
+            'view-absensi',
+
+            // Poin
+            'manage-master-poin',
+            'manage-poin-siswa',
+            'view-poin',
+
+            // Laporan
+            'view-laporan',
+            'export-laporan',
+
+            // Settings
+            'manage-settings',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Buat role & assign permission
+        // Super Admin → semua permission
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
-        $admin      = Role::firstOrCreate(['name' => 'admin']);
-        $user       = Role::firstOrCreate(['name' => 'user']);
-
-        // Super admin dapat semua permission
         $superAdmin->givePermissionTo(Permission::all());
 
-        // Admin dapat sebagian
-        $admin->givePermissionTo(['manage-users', 'view-dashboard']);
+        // Admin Sekolah
+        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin->givePermissionTo([
+            'manage-tahun-ajaran',
+            'manage-guru',
+            'manage-siswa',
+            'manage-kelas',
+            'manage-mapel',
+            'manage-jadwal',
+            'manage-kurikulum',
+            'manage-registrasi',
+            'lock-absensi',
+            'view-absensi',
+            'manage-master-poin',
+            'manage-poin-siswa',
+            'view-poin',
+            'view-laporan',
+            'export-laporan',
+            'manage-settings',
+        ]);
 
-        // User dapat minimal
-        $user->givePermissionTo(['view-dashboard']);
+        // Guru
+        $guru = Role::firstOrCreate(['name' => 'guru']);
+        $guru->givePermissionTo([
+            'input-absensi',
+            'edit-absensi',
+            'view-absensi',
+            'view-laporan',
+            'export-laporan',
+        ]);
+
+        // Wali Kelas (extends guru)
+        $waliKelas = Role::firstOrCreate(['name' => 'wali_kelas']);
+        $waliKelas->givePermissionTo([
+            'input-absensi',
+            'edit-absensi',
+            'view-absensi',
+            'manage-poin-siswa',
+            'view-poin',
+            'view-laporan',
+            'export-laporan',
+        ]);
+
+        // Siswa
+        $siswa = Role::firstOrCreate(['name' => 'siswa']);
+        $siswa->givePermissionTo([
+            'view-absensi',
+            'view-poin',
+        ]);
+
+        // Orang Tua
+        $orangTua = Role::firstOrCreate(['name' => 'orang_tua']);
+        $orangTua->givePermissionTo([
+            'view-absensi',
+            'view-poin',
+        ]);
+
+        // User biasa (default dari boilerplate)
+        Role::firstOrCreate(['name' => 'user']);
     }
 }
