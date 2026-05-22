@@ -1,0 +1,81 @@
+<x-layouts.admin>
+    <x-slot:title>Edit Siswa</x-slot:title>
+
+    <div class="container px-6 mx-auto">
+        <div class="my-6">
+            <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                Edit Siswa
+            </h2>
+            <a href="{{ route('admin.siswa.index') }}"
+                class="text-sm text-purple-600 hover:underline dark:text-purple-400">
+                ← Kembali
+            </a>
+        </div>
+
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <form method="POST" action="{{ route('admin.siswa.update', $siswa) }}">
+                @csrf
+                @method('PUT')
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">Nama Siswa</span>
+                    <input type="text" name="nama_siswa"
+                        value="{{ old('nama_siswa', $siswa->nama_siswa) }}"
+                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nama_siswa') border-red-500 @enderror" />
+                    @error('nama_siswa')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">NISN</span>
+                    <input type="text" name="nisn"
+                        value="{{ old('nisn', $siswa->nisn) }}"
+                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nisn') border-red-500 @enderror" />
+                    @error('nisn')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">Jenis Kelamin</span>
+                    <select name="jenis_kelamin"
+                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        <option value="L" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                        <option value="P" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
+                    </select>
+                </label>
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">Tanggal Lahir</span>
+                    <input type="date" name="tanggal_lahir"
+                        value="{{ old('tanggal_lahir', $siswa->tanggal_lahir?->format('Y-m-d')) }}"
+                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
+                </label>
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">Email</span>
+                    <input type="email" name="email"
+                        value="{{ old('email', $siswa->user->email) }}"
+                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('email') border-red-500 @enderror" />
+                    @error('email')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">
+                        Password <span class="text-gray-400">(kosongkan jika tidak diubah)</span>
+                    </span>
+                    <input type="password" name="password"
+                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
+                </label>
+
+                <button type="submit"
+                    class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                    Update
+                </button>
+            </form>
+        </div>
+    </div>
+</x-layouts.admin>

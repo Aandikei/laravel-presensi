@@ -10,6 +10,7 @@ class Siswa extends Model
     use SoftDeletes;
 
     protected $table = 'siswa';
+
     protected $primaryKey = 'id_siswa';
 
     protected $fillable = [
@@ -56,7 +57,7 @@ class Siswa extends Model
     public function registrasiAktif()
     {
         return $this->hasOne(RegistrasiAkademik::class, 'siswa_id', 'id_siswa')
-            ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true));
+            ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true));
     }
 
     public function absensi()
@@ -89,8 +90,14 @@ class Siswa extends Model
     }
 
     // Total poin akumulasi
+    // public function getTotalPoinAttribute(): int
+    // {
+    //     return $this->logPoin()->sum('jumlah_poin') ?? 0;
+    // }
     public function getTotalPoinAttribute(): int
     {
-        return $this->logPoin()->sum('jumlah_poin') ?? 0;
+        return $this->logPoin()
+            ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
+            ->sum('master_poin.jumlah_poin') ?? 0;
     }
 }

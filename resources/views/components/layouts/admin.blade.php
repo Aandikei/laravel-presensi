@@ -15,8 +15,6 @@
     <script src="{{ asset('/assets/js/charts-pie.js') }}" defer></script>
     {{-- DataTables --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" defer></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" defer></script>
 </head>
 
 <body>
@@ -33,6 +31,9 @@
             </main>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    @stack('scripts')
 </body>
 
 </html>

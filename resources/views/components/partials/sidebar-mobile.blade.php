@@ -263,5 +263,68 @@
             </ul>
         @endrole
 
+        {{-- Admin Only --}}
+        @role('admin')
+            <ul class="mt-4">
+                <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Master Data
+                </li>
+
+                {{-- Tahun Ajaran --}}
+                <li class="relative px-6 py-3">
+                    @php $isTahunAjaran = request()->routeIs('admin.tahun-ajaran.*'); @endphp
+                    @if ($isTahunAjaran)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isTahunAjaran ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.tahun-ajaran.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Tahun Ajaran</span>
+                    </a>
+                </li>
+
+                {{-- Guru --}}
+                <li class="relative px-6 py-3">
+                    @php $isGuru = request()->routeIs('admin.guru.*'); @endphp
+                    @if ($isGuru)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isGuru ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.guru.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Guru</span>
+                    </a>
+                </li>
+
+                {{-- Siswa --}}
+                <li class="relative px-6 py-3">
+                    @php $isSiswa = request()->routeIs('admin.siswa.*'); @endphp
+                    @if ($isSiswa)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isSiswa ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.siswa.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Siswa</span>
+                    </a>
+                </li>
+            </ul>
+        @endrole
+
     </div>
 </aside>
