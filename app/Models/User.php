@@ -8,9 +8,9 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasRoles;
+    use HasRoles, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password', 'instansi_id'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -34,14 +34,28 @@ class User extends Authenticatable
         return $this->hasOne(OrangTua::class, 'user_id', 'id');
     }
 
-    // Helper: dapat instansi dari user apapun rolenya
-    public function getInstansi()
+    public function instansi()
     {
-        if ($this->guru) return $this->guru->instansi;
-        if ($this->siswa) return $this->siswa->instansi;
+        return $this->belongsTo(Instansi::class, 'instansi_id', 'id_instansi');
+    }
+
+    // Helper: dapat instansi dari user apapun rolenya
+    public function getInstansi(): ?Instansi
+    {
+        // Admin punya instansi_id langsung di tabel users
+        if ($this->instansi_id) {
+            return Instansi::find($this->instansi_id);
+        }
+        if ($this->guru) {
+            return $this->guru->instansi;
+        }
+        if ($this->siswa) {
+            return $this->siswa->instansi;
+        }
         if ($this->orangTua) {
             return $this->orangTua->siswa()->first()?->instansi;
         }
+
         return null;
     }
 }

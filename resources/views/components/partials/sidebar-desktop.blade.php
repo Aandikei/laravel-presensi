@@ -247,5 +247,31 @@
             </ul>
         @endrole
 
+        {{-- Tahun Ajaran - Admin Only --}}
+        @role('admin')
+            <ul class="mt-4">
+                <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Master Data
+                </li>
+
+                <li class="relative px-6 py-3">
+                    @php $isTahunAjaran = request()->routeIs('admin.tahun-ajaran.*'); @endphp
+                    @if ($isTahunAjaran)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isTahunAjaran ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.tahun-ajaran.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Tahun Ajaran</span>
+                    </a>
+                </li>
+            </ul>
+        @endrole
+
     </div>
 </aside>

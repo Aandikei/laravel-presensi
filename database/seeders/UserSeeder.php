@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Instansi;
 use App\Models\Guru;
-use App\Models\Siswa;
+use App\Models\Instansi;
 use App\Models\OrangTua;
 use App\Models\OrtuSiswa;
+use App\Models\Siswa;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -25,9 +25,15 @@ class UserSeeder extends Seeder
         $superAdmin->assignRole('super_admin');
 
         // Admin Sekolah
+        $instansi = Instansi::first();
+
         $admin = User::firstOrCreate(
             ['email' => 'admin@app.com'],
-            ['name' => 'Admin Sekolah', 'password' => Hash::make('password')]
+            [
+                'name' => 'Admin Sekolah',
+                'password' => Hash::make('password'),
+                'instansi_id' => $instansi->id_instansi, // tambah ini
+            ]
         );
         $admin->assignRole('admin');
 
@@ -40,11 +46,11 @@ class UserSeeder extends Seeder
         Guru::firstOrCreate(
             ['user_id' => $userGuru->id],
             [
-                'instansi_id'   => $instansi->id_instansi,
-                'nip'           => '198501012010011001',
-                'nama_guru'     => 'Budi Santoso',
+                'instansi_id' => $instansi->id_instansi,
+                'nip' => '198501012010011001',
+                'nama_guru' => 'Budi Santoso',
                 'jenis_kelamin' => 'L',
-                'no_hp'         => '081111111111',
+                'no_hp' => '081111111111',
             ]
         );
 
@@ -57,11 +63,11 @@ class UserSeeder extends Seeder
         Guru::firstOrCreate(
             ['user_id' => $userWali->id],
             [
-                'instansi_id'   => $instansi->id_instansi,
-                'nip'           => '198701012010012002',
-                'nama_guru'     => 'Siti Rahayu',
+                'instansi_id' => $instansi->id_instansi,
+                'nip' => '198701012010012002',
+                'nama_guru' => 'Siti Rahayu',
                 'jenis_kelamin' => 'P',
-                'no_hp'         => '082222222222',
+                'no_hp' => '082222222222',
             ]
         );
 
@@ -74,9 +80,9 @@ class UserSeeder extends Seeder
         $siswa = Siswa::firstOrCreate(
             ['user_id' => $userSiswa->id],
             [
-                'instansi_id'   => $instansi->id_instansi,
-                'nisn'          => '0012345678',
-                'nama_siswa'    => 'Ahmad Fauzi',
+                'instansi_id' => $instansi->id_instansi,
+                'nisn' => '0012345678',
+                'nama_siswa' => 'Ahmad Fauzi',
                 'jenis_kelamin' => 'L',
                 'tanggal_lahir' => '2007-05-15',
             ]
@@ -92,18 +98,18 @@ class UserSeeder extends Seeder
             ['user_id' => $userOrtu->id],
             [
                 'nama_ortu' => 'Fauzi Senior',
-                'no_hp'     => '083333333333',
+                'no_hp' => '083333333333',
             ]
         );
 
         // Link ortu ke siswa
         OrtuSiswa::firstOrCreate(
             [
-                'ortu_id'  => $ortu->id_ortu,
+                'ortu_id' => $ortu->id_ortu,
                 'siswa_id' => $siswa->id_siswa,
             ],
             [
-                'hubungan'   => 'Ayah',
+                'hubungan' => 'Ayah',
                 'is_primary' => true,
             ]
         );
