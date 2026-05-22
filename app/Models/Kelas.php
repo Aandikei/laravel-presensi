@@ -71,4 +71,9 @@ class Kelas extends Model
     {
         return $this->registrasiAkademik()->count();
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id_kelas';
+    }
 }

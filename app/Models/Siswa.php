@@ -100,4 +100,9 @@ class Siswa extends Model
             ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
             ->sum('master_poin.jumlah_poin') ?? 0;
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id_siswa';
+    }
 }

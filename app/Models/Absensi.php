@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Absensi extends Model
 {
     protected $table = 'absensi';
+
     protected $primaryKey = 'id_absen';
 
     protected $fillable = [
@@ -67,14 +68,19 @@ class Absensi extends Model
     // Warna badge per status
     public function getWarnaBadgeAttribute(): string
     {
-        return match($this->status) {
-            'Hadir'     => 'green',
-            'Sakit'     => 'blue',
-            'Izin'      => 'orange',
-            'Alpa'      => 'red',
+        return match ($this->status) {
+            'Hadir' => 'green',
+            'Sakit' => 'blue',
+            'Izin' => 'orange',
+            'Alpa' => 'red',
             'Terlambat' => 'yellow',
-            'Cabut'     => 'gray',
-            default     => 'gray',
+            'Cabut' => 'gray',
+            default => 'gray',
         };
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id_absen';
     }
 }

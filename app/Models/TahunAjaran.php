@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TahunAjaran extends Model
 {
     protected $table = 'tahun_ajaran';
+
     protected $primaryKey = 'id_tahun';
 
     protected $fillable = [
@@ -37,5 +38,10 @@ class TahunAjaran extends Model
     public function registrasiAkademik()
     {
         return $this->hasMany(RegistrasiAkademik::class, 'tahun_id', 'id_tahun');
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id_tahun';
     }
 }

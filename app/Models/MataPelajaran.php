@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MataPelajaran extends Model
 {
     protected $table = 'mata_pelajaran';
+
     protected $primaryKey = 'id_mapel';
 
     protected $fillable = [
@@ -24,5 +25,10 @@ class MataPelajaran extends Model
     public function kurikulum()
     {
         return $this->hasMany(KurikulumKelas::class, 'mapel_id', 'id_mapel');
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id_mapel';
     }
 }

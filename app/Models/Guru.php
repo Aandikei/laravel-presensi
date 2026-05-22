@@ -59,4 +59,9 @@ class Guru extends Model
     {
         return $this->kelasWali()->exists();
     }
+
+    public function getRouteKeyName(): string 
+    {
+        return 'id_guru';
+    }
 }

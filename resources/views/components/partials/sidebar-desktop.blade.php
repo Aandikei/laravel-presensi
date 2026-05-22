@@ -306,6 +306,24 @@
                         <span class="ml-4">Siswa</span>
                     </a>
                 </li>
+
+                {{-- Kelas --}}
+                <li class="relative px-6 py-3">
+                    @php $isKelas = request()->routeIs('admin.kelas.*'); @endphp
+                    @if ($isKelas)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isKelas ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.kelas.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Kelas</span>
+                    </a>
+                </li>
             </ul>
         @endrole
     </div>

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MasterPoin extends Model
 {
     protected $table = 'master_poin';
+
     protected $primaryKey = 'id_poin';
 
     protected $fillable = [
@@ -24,5 +25,10 @@ class MasterPoin extends Model
     public function logPoin()
     {
         return $this->hasMany(LogPoinSiswa::class, 'poin_id', 'id_poin');
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id_poin';
     }
 }
