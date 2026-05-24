@@ -1,0 +1,192 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Guru;
+use App\Models\Kelas;
+use App\Models\KurikulumKelas;
+use App\Models\MataPelajaran;
+use App\Models\TahunAjaran;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
+
+class KurikulumKelasController extends Controller
+{
+    public function index(Request $request)
+    {
+        $instansi = Auth::user()->getInstansi();
+
+        if ($request->ajax()) {
+            $kurikulum = KurikulumKelas::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru'])
+                ->whereHas('kelas', function ($q) use ($instansi, $request) {
+                    $q->where('instansi_id', $instansi->id_instansi);
+
+                    // Filter tahun ajaran
+                    if ($request->tahun_id) {
+                        $q->where('tahun_id', $request->tahun_id);
+                    }
+                })
+                ->select('kurikulum_kelas.*');
+
+            return DataTables::of($kurikulum)
+                ->addIndexColumn()
+                ->addColumn('kelas', fn ($row) => $row->kelas->nama_kelas)
+                ->addColumn('tahun_ajaran', fn ($row) => $row->kelas->tahunAjaran->nama_tahun.' - '.$row->kelas->tahunAjaran->semester)
+                ->addColumn('mata_pelajaran', fn ($row) => $row->mataPelajaran->nama_mapel)
+                ->addColumn('guru', fn ($row) => $row->guru->nama_guru)
+                ->addColumn('aksi', function ($row) {
+                    $edit = '<a href="'.route('admin.kurikulum.edit', $row->id_kurikulum).'"
+                        class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                        Edit</a>';
+                    $delete = '<form method="POST" action="'.route('admin.kurikulum.destroy', $row->id_kurikulum).'" class="inline">
+                        <input type="hidden" name="_token" value="'.csrf_token().'">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit"
+                            class="px-3 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
+                            onclick="return confirm(\'Yakin hapus kurikulum ini?\')">
+                            Hapus</button>
+                        </form>';
+
+                    return $edit.' '.$delete;
+                })
+                ->rawColumns(['aksi'])
+                ->make(true);
+        }
+
+        // Filter tahun ajaran untuk dropdown
+        $instansi = Auth::user()->getInstansi();
+        $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->orderByDesc('is_aktif')
+            ->get();
+
+        return view('admin.kurikulum.index', compact('tahunAjaran'));
+    }
+
+    public function create()
+    {
+        $instansi = Auth::user()->getInstansi();
+
+        $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->orderByDesc('is_aktif')
+            ->get();
+
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->with('tahunAjaran')
+            ->orderBy('nama_kelas')
+            ->get();
+
+        $guru = Guru::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_guru')
+            ->get();
+
+        $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_mapel')
+            ->get();
+
+        return view('admin.kurikulum.create', compact('tahunAjaran', 'kelas', 'guru', 'mapel'));
+    }
+
+    public function store(Request $request)
+    {
+        $instansi = Auth::user()->getInstansi();
+
+        $validated = $request->validate([
+            'kelas_id' => 'required|exists:kelas,id_kelas',
+            'mapel_id' => 'required|exists:mata_pelajaran,id_mapel',
+            'guru_id' => 'required|exists:guru,id_guru',
+        ]);
+
+        // Cek duplikat
+        $exists = KurikulumKelas::where('kelas_id', $validated['kelas_id'])
+            ->where('mapel_id', $validated['mapel_id'])
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut!',
+            ])->withInput();
+        }
+
+        // Pastiin kelas milik instansi ini
+        $kelas = Kelas::findOrFail($validated['kelas_id']);
+        abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+
+        KurikulumKelas::create($validated);
+
+        return redirect()->route('admin.kurikulum.index')
+            ->with('success', 'Kurikulum berhasil ditambahkan!');
+    }
+
+    public function edit(KurikulumKelas $kurikulum)
+    {
+        $this->authorizeInstansi($kurikulum);
+
+        $instansi = Auth::user()->getInstansi();
+
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->with('tahunAjaran')
+            ->orderBy('nama_kelas')
+            ->get();
+
+        $guru = Guru::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_guru')
+            ->get();
+
+        $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_mapel')
+            ->get();
+
+        return view('admin.kurikulum.edit', compact('kurikulum', 'kelas', 'guru', 'mapel'));
+    }
+
+    public function update(Request $request, KurikulumKelas $kurikulum)
+    {
+        $this->authorizeInstansi($kurikulum);
+
+        $validated = $request->validate([
+            'kelas_id' => 'required|exists:kelas,id_kelas',
+            'mapel_id' => 'required|exists:mata_pelajaran,id_mapel',
+            'guru_id' => 'required|exists:guru,id_guru',
+        ]);
+
+        // Cek duplikat kecuali data ini sendiri
+        $exists = KurikulumKelas::where('kelas_id', $validated['kelas_id'])
+            ->where('mapel_id', $validated['mapel_id'])
+            ->where('id_kurikulum', '!=', $kurikulum->id_kurikulum)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut!',
+            ])->withInput();
+        }
+
+        $kurikulum->update($validated);
+
+        return redirect()->route('admin.kurikulum.index')
+            ->with('success', 'Kurikulum berhasil diupdate!');
+    }
+
+    public function destroy(KurikulumKelas $kurikulum)
+    {
+        $this->authorizeInstansi($kurikulum);
+
+        if ($kurikulum->jadwal()->exists()) {
+            return back()->with('error', 'Kurikulum tidak bisa dihapus karena masih ada jadwal terkait!');
+        }
+
+        $kurikulum->delete();
+
+        return redirect()->route('admin.kurikulum.index')
+            ->with('success', 'Kurikulum berhasil dihapus!');
+    }
+
+    private function authorizeInstansi(KurikulumKelas $kurikulum): void
+    {
+        $instansi = Auth::user()->getInstansi();
+        $kelas = $kurikulum->kelas;
+        abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+    }
+}
