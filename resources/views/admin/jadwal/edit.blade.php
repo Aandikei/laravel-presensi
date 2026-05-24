@@ -26,7 +26,7 @@
                     <span class="text-gray-700 dark:text-gray-400">Hari</span>
                     <select name="hari"
                         class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
-                        @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $hari)
+                        @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'] as $hari)
                             <option value="{{ $hari }}" {{ old('hari', $jadwal->hari) == $hari ? 'selected' : '' }}>{{ $hari }}</option>
                         @endforeach
                     </select>

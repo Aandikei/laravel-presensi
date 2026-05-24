@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\GuruController;
+use App\Http\Controllers\Admin\HariLiburController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\KurikulumKelasController;
@@ -50,6 +52,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::resource('jadwal', JadwalController::class)->parameters([
         'jadwal' => 'jadwal',
     ]);
+
     // Helper untuk load kurikulum by kelas (dipakai di form jadwal)
     Route::get('kurikulum-by-kelas/{kelas}', function (Kelas $kelas) {
         return $kelas->kurikulum()
@@ -64,6 +67,20 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Registrasi Akademin
     Route::resource('registrasi', RegistrasiAkademikController::class)->parameters([
-        'registrasi' => 'registrasi'
+        'registrasi' => 'registrasi',
     ]);
+
+    // Absensi
+    Route::get('absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
+    Route::get('absensi/{jadwal}/detail', [AdminAbsensiController::class, 'detail'])->name('absensi.detail');
+    Route::patch('absensi/{jadwal}/lock', [AdminAbsensiController::class, 'lock'])->name('absensi.lock');
+    Route::patch('absensi/{jadwal}/unlock', [AdminAbsensiController::class, 'unlock'])->name('absensi.unlock');
+
+    // Hari Libur
+    Route::resource('hari-libur', HariLiburController::class)
+    ->parameters(['hari-libur' => 'hariLibur'])
+    ->only(['index', 'store', 'destroy']);
+
+    // Tambah route adopt
+    Route::post('hari-libur/adopt', [HariLiburController::class, 'adopt'])->name('hari-libur.adopt');
 });

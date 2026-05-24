@@ -77,7 +77,7 @@ class JadwalController extends Controller
     {
         $validated = $request->validate([
             'kurikulum_id' => 'required|exists:kurikulum_kelas,id_kurikulum',
-            'hari'         => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+            'hari'         => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'jam_mulai'    => 'required|date_format:H:i',
             'jam_selesai'  => 'required|date_format:H:i|after:jam_mulai',
         ]);
@@ -127,7 +127,7 @@ class JadwalController extends Controller
 
         $validated = $request->validate([
             'kurikulum_id' => 'required|exists:kurikulum_kelas,id_kurikulum',
-            'hari'         => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+            'hari'         => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'jam_mulai'    => 'required|date_format:H:i',
             'jam_selesai'  => 'required|date_format:H:i|after:jam_mulai',
         ]);

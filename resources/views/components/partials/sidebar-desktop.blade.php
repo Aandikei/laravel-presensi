@@ -174,8 +174,9 @@
                 @endif
                 <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isDashboard ? 'text-gray-800 dark:text-gray-100' : '' }}"
                     href="@if (auth()->user()->hasRole('super_admin')) {{ route('superadmin.dashboard') }}
-                          @elseif(auth()->user()->hasRole('admin')) {{ route('admin.dashboard') }}
-                          @else {{ route('user.dashboard') }} @endif">
+                        @elseif(auth()->user()->hasRole('admin')) {{ route('admin.dashboard') }}
+                        @elseif(auth()->user()->hasRole('guru')) {{ route('guru.dashboard') }}
+                        @else {{ route('user.dashboard') }} @endif">
                     <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
                         stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -394,6 +395,68 @@
                             </path>
                         </svg>
                         <span class="ml-4">Registrasi</span>
+                    </a>
+                </li>
+
+                {{-- Hari Libur --}}
+                <li class="relative px-6 py-3">
+                    @php $isHariLibur = request()->routeIs('admin.hari-libur.*'); @endphp
+                    @if ($isHariLibur)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isHariLibur ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.hari-libur.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Hari Libur</span>
+                    </a>
+                </li>
+
+                {{-- Monitor Absensi --}}
+                <li class="relative px-6 py-3">
+                    @php $isAbsensiAdmin = request()->routeIs('admin.absensi.*'); @endphp
+                    @if ($isAbsensiAdmin)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isAbsensiAdmin ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.absensi.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Monitor Absensi</span>
+                    </a>
+                </li>
+            </ul>
+        @endrole
+
+        {{-- Guru Only --}}
+        @role('guru|wali_kelas')
+            <ul class="mt-4">
+                <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Mengajar
+                </li>
+
+                <li class="relative px-6 py-3">
+                    @php $isAbsensiGuru = request()->routeIs('guru.absensi.*'); @endphp
+                    @if ($isAbsensiGuru)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isAbsensiGuru ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('guru.absensi.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Input Absensi</span>
                     </a>
                 </li>
             </ul>

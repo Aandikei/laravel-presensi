@@ -44,7 +44,7 @@
                     <select name="hari"
                         class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('hari') border-red-500 @enderror">
                         <option value="">-- Pilih Hari --</option>
-                        @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $hari)
+                        @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'] as $hari)
                             <option value="{{ $hari }}" {{ old('hari') == $hari ? 'selected' : '' }}>{{ $hari }}</option>
                         @endforeach
                     </select>
