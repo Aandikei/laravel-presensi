@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\KurikulumKelasController;
 use App\Http\Controllers\Admin\MataPelajaranController;
+use App\Http\Controllers\Admin\RegistrasiAkademikController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Models\Kelas;
@@ -60,4 +61,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
                 'guru' => $k->guru->nama_guru,
             ]);
     })->middleware(['auth', 'role:admin']);
+
+    // Registrasi Akademin
+    Route::resource('registrasi', RegistrasiAkademikController::class)->parameters([
+        'registrasi' => 'registrasi'
+    ]);
 });
