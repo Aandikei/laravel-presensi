@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\HariLiburController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\KurikulumKelasController;
+use App\Http\Controllers\Admin\LogPoinController;
+use App\Http\Controllers\Admin\MasterPoinController;
 use App\Http\Controllers\Admin\MataPelajaranController;
 use App\Http\Controllers\Admin\RegistrasiAkademikController;
 use App\Http\Controllers\Admin\SiswaController;
@@ -83,4 +85,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Tambah route adopt
     Route::post('hari-libur/adopt', [HariLiburController::class, 'adopt'])->name('hari-libur.adopt');
+
+    // Poin
+    Route::resource('master-poin', MasterPoinController::class)->parameters([
+        'master-poin' => 'masterPoin'
+    ]);
+    Route::resource('log-poin', LogPoinController::class)->parameters([
+        'log-poin' => 'logPoin'
+    ])->only(['index', 'store', 'destroy']);
 });

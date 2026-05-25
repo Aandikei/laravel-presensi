@@ -450,6 +450,41 @@
                         <span class="ml-4">Monitor Absensi</span>
                     </a>
                 </li>
+
+                {{-- Poin Pelanggaran --}}
+                <li class="relative px-6 py-3">
+                    @php $isMasterPoin = request()->routeIs('admin.master-poin.*'); @endphp
+                    @if ($isMasterPoin)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isMasterPoin ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.master-poin.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Master Poin</span>
+                    </a>
+                </li>
+
+                <li class="relative px-6 py-3">
+                    @php $isLogPoin = request()->routeIs('admin.log-poin.*'); @endphp
+                    @if ($isLogPoin)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isLogPoin ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('admin.log-poin.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                            </path>
+                        </svg>
+                        <span class="ml-4">Log Poin</span>
+                    </a>
+                </li>
             </ul>
         @endrole
 
