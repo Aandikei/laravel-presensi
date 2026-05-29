@@ -32,11 +32,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     ]);
 
     // Siswa
+    Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
+    Route::get('siswa/template', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
     Route::resource('siswa', SiswaController::class)->parameters([
         'siswa' => 'siswa',
     ]);
 
     // Kelas
+    Route::get('kelas/{kelas}/detail', [KelasController::class, 'detail'])->name('kelas.detail');
     Route::resource('kelas', KelasController::class)->parameters([
         'kelas' => 'kelas',
     ]);
@@ -81,28 +84,28 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Hari Libur
     Route::resource('hari-libur', HariLiburController::class)
-    ->parameters(['hari-libur' => 'hariLibur'])
-    ->only(['index', 'store', 'destroy']);
+        ->parameters(['hari-libur' => 'hariLibur'])
+        ->only(['index', 'store', 'destroy']);
 
     // Tambah route adopt
     Route::post('hari-libur/adopt', [HariLiburController::class, 'adopt'])->name('hari-libur.adopt');
 
     // Poin
     Route::resource('master-poin', MasterPoinController::class)->parameters([
-        'master-poin' => 'masterPoin'
+        'master-poin' => 'masterPoin',
     ]);
     Route::resource('log-poin', LogPoinController::class)->parameters([
-        'log-poin' => 'logPoin'
+        'log-poin' => 'logPoin',
     ])->only(['index', 'store', 'destroy']);
 
     // Laporan
     Route::prefix('laporan')->name('laporan.')->group(function () {
-    Route::get('/', [LaporanController::class, 'index'])->name('index');
-    Route::get('/rekap-absensi', [LaporanController::class, 'rekapAbsensi'])->name('rekap-absensi');
-    Route::get('/export-absensi-excel', [LaporanController::class, 'exportAbsensiExcel'])->name('export-absensi-excel');
-    Route::get('/export-absensi-pdf', [LaporanController::class, 'exportAbsensiPdf'])->name('export-absensi-pdf');
-    Route::get('/rekap-poin', [LaporanController::class, 'rekapPoin'])->name('rekap-poin');
-    Route::get('/export-poin-excel', [LaporanController::class, 'exportPoinExcel'])->name('export-poin-excel');
-    Route::get('/export-poin-pdf', [LaporanController::class, 'exportPoinPdf'])->name('export-poin-pdf');
-});
+        Route::get('/', [LaporanController::class, 'index'])->name('index');
+        Route::get('/rekap-absensi', [LaporanController::class, 'rekapAbsensi'])->name('rekap-absensi');
+        Route::get('/export-absensi-excel', [LaporanController::class, 'exportAbsensiExcel'])->name('export-absensi-excel');
+        Route::get('/export-absensi-pdf', [LaporanController::class, 'exportAbsensiPdf'])->name('export-absensi-pdf');
+        Route::get('/rekap-poin', [LaporanController::class, 'rekapPoin'])->name('rekap-poin');
+        Route::get('/export-poin-excel', [LaporanController::class, 'exportPoinExcel'])->name('export-poin-excel');
+        Route::get('/export-poin-pdf', [LaporanController::class, 'exportPoinPdf'])->name('export-poin-pdf');
+    });
 });

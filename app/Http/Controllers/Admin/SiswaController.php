@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Imports\SiswaImport;
+use App\Models\Kelas;
 use App\Models\OrangTua;
 use App\Models\OrtuSiswa;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class SiswaController extends Controller
@@ -23,6 +29,12 @@ class SiswaController extends Controller
             $siswa = Siswa::with(['user', 'registrasiAktif.kelas'])
                 ->where('instansi_id', $instansi->id_instansi)
                 ->select('siswa.*');
+
+            // Filter per kelas
+            if ($request->kelas_id) {
+                $siswa->whereHas('registrasiAktif', fn ($q) => $q->where('kelas_id', $request->kelas_id)
+                );
+            }
 
             return DataTables::of($siswa)
                 ->addIndexColumn()
@@ -58,10 +70,21 @@ class SiswaController extends Controller
                     return $edit.' '.$delete;
                 })
                 ->rawColumns(['kelas', 'aksi'])
+                ->filterColumn('nama_siswa', function ($query, $keyword) {
+                    $query->where('nama_siswa', 'like', "%{$keyword}%");
+                })
                 ->make(true);
         }
+        // Tambah data kelas untuk filter
+        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->where('is_aktif', true)->first();
 
-        return view('admin.siswa.index');
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->when($tahunAktif, fn ($q) => $q->where('tahun_id', $tahunAktif->id_tahun))
+            ->orderBy('nama_kelas')
+            ->get();
+
+        return view('admin.siswa.index', compact('kelas'));
     }
 
     public function create()
@@ -222,5 +245,72 @@ class SiswaController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
         abort_if($siswa->instansi_id !== $instansi->id_instansi, 403);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:2048',
+        ]);
+
+        $instansi = Auth::user()->getInstansi();
+        $import = new SiswaImport($instansi->id_instansi);
+
+        Excel::import($import, $request->file('file'));
+
+        $berhasil = $import->getBerhasil();
+        $gagal = $import->getGagal();
+
+        $message = "Import selesai! {$berhasil} siswa berhasil diimport.";
+        if ($gagal > 0) {
+            $message .= " {$gagal} baris dilewati (NISN/email sudah ada).";
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'nama_siswa',
+            'nisn',
+            'jenis_kelamin',
+            'tanggal_lahir',
+            'email_siswa',
+            'nama_ortu',
+            'email_ortu',
+            'hubungan',
+        ];
+
+        $contoh = [
+            'Ahmad Fauzi',
+            '0012345678',
+            'L',
+            '2007-05-15',
+            'ahmad@example.com',
+            'Fauzi Senior',
+            'fauzisenior@example.com',
+            'Ayah',
+        ];
+
+        $filename = 'template-import-siswa.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new class($headers, $contoh) implements FromArray, WithHeadings
+            {
+                public function __construct(private array $headers, private array $contoh) {}
+
+                public function headings(): array
+                {
+                    return $this->headers;
+                }
+
+                public function array(): array
+                {
+                    return [$this->contoh];
+                }
+            },
+            $filename
+        );
     }
 }

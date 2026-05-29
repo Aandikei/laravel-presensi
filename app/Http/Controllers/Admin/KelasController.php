@@ -27,6 +27,9 @@ class KelasController extends Controller
                 ->addColumn('wali_kelas', fn ($row) => $row->waliKelas?->nama_guru ?? '<span class="text-gray-400">Belum ditentukan</span>')
                 ->addColumn('jumlah_siswa', fn ($row) => $row->registrasiAkademik()->count())
                 ->addColumn('aksi', function ($row) {
+                    $detail = '<a href="'.route('admin.kelas.detail', $row->id_kelas).'"
+                        class="px-3 py-1 text-xs font-medium text-white bg-purple-600 rounded hover:bg-purple-700 mr-1">
+                        Detail</a>';
                     $edit = '<a href="'.route('admin.kelas.edit', $row->id_kelas).'"
                         class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
                         Edit</a>';
@@ -39,7 +42,7 @@ class KelasController extends Controller
                             Hapus</button>
                         </form>';
 
-                    return $edit.' '.$delete;
+                    return $detail . $edit.' '.$delete;
                 })
                 ->rawColumns(['wali_kelas', 'aksi'])
                 ->make(true);
@@ -137,5 +140,21 @@ class KelasController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+    }
+
+    public function detail(Kelas $kelas)
+    {
+        $this->authorizeInstansi($kelas);
+
+        $kelas->load([
+            'tahunAjaran',
+            'waliKelas',
+            'kurikulum.mataPelajaran',
+            'kurikulum.guru',
+            'kurikulum.jadwal',
+            'registrasiAkademik.siswa',
+        ]);
+
+        return view('admin.kelas.detail', compact('kelas'));
     }
 }
