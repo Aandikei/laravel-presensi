@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\HariLiburController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\KurikulumKelasController;
+use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\LogPoinController;
 use App\Http\Controllers\Admin\MasterPoinController;
 use App\Http\Controllers\Admin\MataPelajaranController;
@@ -93,4 +94,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::resource('log-poin', LogPoinController::class)->parameters([
         'log-poin' => 'logPoin'
     ])->only(['index', 'store', 'destroy']);
+
+    // Laporan
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+    Route::get('/', [LaporanController::class, 'index'])->name('index');
+    Route::get('/rekap-absensi', [LaporanController::class, 'rekapAbsensi'])->name('rekap-absensi');
+    Route::get('/export-absensi-excel', [LaporanController::class, 'exportAbsensiExcel'])->name('export-absensi-excel');
+    Route::get('/export-absensi-pdf', [LaporanController::class, 'exportAbsensiPdf'])->name('export-absensi-pdf');
+    Route::get('/rekap-poin', [LaporanController::class, 'rekapPoin'])->name('rekap-poin');
+    Route::get('/export-poin-excel', [LaporanController::class, 'exportPoinExcel'])->name('export-poin-excel');
+    Route::get('/export-poin-pdf', [LaporanController::class, 'exportPoinPdf'])->name('export-poin-pdf');
+});
 });
