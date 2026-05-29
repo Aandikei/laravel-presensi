@@ -531,5 +531,51 @@
                 </li>
             </ul>
         @endrole
+
+        {{-- Siswa --}}
+        @role('siswa')
+            <ul class="mt-4">
+                <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</li>
+                @foreach ([['route' => 'siswa.absensi', 'label' => 'Riwayat Absensi', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'], ['route' => 'siswa.poin', 'label' => 'Riwayat Poin', 'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z']] as $item)
+                    <li class="relative px-6 py-3">
+                        @php $isActive = request()->routeIs($item['route']); @endphp
+                        @if ($isActive)
+                            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                        @endif
+                        <a href="{{ route($item['route']) }}"
+                            class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isActive ? 'text-gray-800 dark:text-gray-100' : '' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="{{ $item['icon'] }}" />
+                            </svg>
+                            <span class="ml-4">{{ $item['label'] }}</span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endrole
+
+        {{-- Orang Tua --}}
+        @role('orang_tua')
+            <ul class="mt-4">
+                <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</li>
+                @foreach ([['route' => 'orangtua.absensi', 'label' => 'Absensi Anak', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'], ['route' => 'orangtua.poin', 'label' => 'Poin Anak', 'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z']] as $item)
+                    <li class="relative px-6 py-3">
+                        @php $isActive = request()->routeIs($item['route']); @endphp
+                        @if ($isActive)
+                            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                        @endif
+                        <a href="{{ route($item['route']) }}"
+                            class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isActive ? 'text-gray-800 dark:text-gray-100' : '' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="{{ $item['icon'] }}" />
+                            </svg>
+                            <span class="ml-4">{{ $item['label'] }}</span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endrole
     </div>
 </aside>

@@ -86,8 +86,8 @@ class SiswaController extends Controller
             'nama_ortu' => 'required|string|max:255',
             'no_hp_ortu' => 'nullable|string|max:15',
             'hubungan' => 'required|in:Ayah,Ibu,Wali',
-            'email_ortu' => 'required|email|unique:users,email',
-            'password_ortu' => 'required|min:8',
+            'email_ortu' => 'required|email|',
+            'password_ortu' => 'nullable|min:8',
         ]);
 
         DB::transaction(function () use ($validated, $instansi) {
@@ -109,28 +109,52 @@ class SiswaController extends Controller
                 'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
             ]);
 
-            // Buat user orang tua
-            $userOrtu = User::create([
-                'name' => $validated['nama_ortu'],
-                'email' => $validated['email_ortu'],
-                'password' => Hash::make($validated['password_ortu']),
-            ]);
-            $userOrtu->assignRole('orang_tua');
+            // Buat user orang tua — cek dulu apakah email sudah ada
+            $userOrtu = User::where('email', $validated['email_ortu'])->first();
 
-            // Buat data orang tua
-            $ortu = OrangTua::create([
-                'user_id' => $userOrtu->id,
-                'nama_ortu' => $validated['nama_ortu'],
-                'no_hp' => $validated['no_hp_ortu'] ?? null,
-            ]);
+            if ($userOrtu) {
+                // User sudah ada, cek apakah sudah punya data orang tua
+                $ortu = OrangTua::where('user_id', $userOrtu->id)->first();
+
+                if (! $ortu) {
+                    // Punya akun tapi belum ada data orang tua — buatkan
+                    $ortu = OrangTua::create([
+                        'user_id' => $userOrtu->id,
+                        'nama_ortu' => $validated['nama_ortu'],
+                        'no_hp' => $validated['no_hp_ortu'] ?? null,
+                    ]);
+                    // Assign role kalau belum punya
+                    if (! $userOrtu->hasRole('orang_tua')) {
+                        $userOrtu->assignRole('orang_tua');
+                    }
+                }
+            } else {
+                // User belum ada, buat baru
+                $userOrtu = User::create([
+                    'name' => $validated['nama_ortu'],
+                    'email' => $validated['email_ortu'],
+                    'password' => Hash::make($validated['password_ortu']),
+                ]);
+                $userOrtu->assignRole('orang_tua');
+
+                $ortu = OrangTua::create([
+                    'user_id' => $userOrtu->id,
+                    'nama_ortu' => $validated['nama_ortu'],
+                    'no_hp' => $validated['no_hp_ortu'] ?? null,
+                ]);
+            }
 
             // Link ortu ke siswa
-            OrtuSiswa::create([
-                'ortu_id' => $ortu->id_ortu,
-                'siswa_id' => $siswa->id_siswa,
-                'hubungan' => $validated['hubungan'],
-                'is_primary' => true,
-            ]);
+            OrtuSiswa::firstOrCreate(
+                [
+                    'ortu_id' => $ortu->id_ortu,
+                    'siswa_id' => $siswa->id_siswa,
+                ],
+                [
+                    'hubungan' => $validated['hubungan'],
+                    'is_primary' => true,
+                ]
+            );
         });
 
         return redirect()->route('admin.siswa.index')

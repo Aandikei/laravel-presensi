@@ -45,8 +45,10 @@
                         <select name="jenis_kelamin"
                             class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('jenis_kelamin') border-red-500 @enderror">
                             <option value="">-- Pilih --</option>
-                            <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                            <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki
+                            </option>
+                            <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan
+                            </option>
                         </select>
                         @error('jenis_kelamin')
                             <span class="text-xs text-red-500">{{ $message }}</span>
@@ -54,7 +56,8 @@
                     </label>
 
                     <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">Tanggal Lahir <span class="text-gray-400">(opsional)</span></span>
+                        <span class="text-gray-700 dark:text-gray-400">Tanggal Lahir <span
+                                class="text-gray-400">(opsional)</span></span>
                         <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}"
                             class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
                     </label>
@@ -84,6 +87,11 @@
                         Data Orang Tua
                     </h3>
 
+                    <div
+                        class="mb-3 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
+                        Jika orang tua sudah memiliki akun, cukup masukkan email yang sama. Password bisa dikosongkan.
+                    </div>
+
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Nama Orang Tua</span>
                         <input type="text" name="nama_ortu" value="{{ old('nama_ortu') }}"
@@ -108,7 +116,8 @@
                     </label>
 
                     <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">No HP <span class="text-gray-400">(opsional)</span></span>
+                        <span class="text-gray-700 dark:text-gray-400">No HP <span
+                                class="text-gray-400">(opsional)</span></span>
                         <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}"
                             class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
                     </label>
@@ -123,7 +132,10 @@
                     </label>
 
                     <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">Password Orang Tua</span>
+                        <span class="text-gray-700 dark:text-gray-400">
+                            Password Orang Tua
+                            <span class="text-gray-400">(kosongkan jika akun sudah ada)</span>
+                        </span>
                         <input type="password" name="password_ortu"
                             class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('password_ortu') border-red-500 @enderror" />
                         @error('password_ortu')
