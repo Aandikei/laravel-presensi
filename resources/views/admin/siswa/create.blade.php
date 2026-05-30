@@ -16,6 +16,8 @@
             <form method="POST" action="{{ route('admin.siswa.store') }}">
                 @csrf
 
+                <input type="hidden" name="tahun_id" value="{{ $tahunAktif?->id_tahun }}">
+
                 {{-- Data Siswa --}}
                 <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800 mb-6">
                     <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
@@ -141,6 +143,40 @@
                         @error('password_ortu')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
+                    </label>
+                </div>
+
+                {{-- Registrasi Kelas (Opsional) --}}
+                <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800 mb-6">
+                    <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
+                        Daftarkan ke Kelas
+                        <span class="text-sm font-normal text-gray-400">(opsional)</span>
+                    </h3>
+                    <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">
+                        Kalau diisi, siswa langsung terdaftar di kelas ini. Bisa juga didaftarkan nanti lewat menu
+                        Registrasi.
+                    </p>
+
+                    @if ($tahunAktif)
+                        <div
+                            class="mb-3 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
+                            Tahun ajaran aktif: <strong>{{ $tahunAktif->nama_tahun }} -
+                                {{ $tahunAktif->semester }}</strong>
+                        </div>
+                    @endif
+
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Pilih Kelas</span>
+                        <select name="kelas_id"
+                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            <option value="">-- Tidak sekarang --</option>
+                            @foreach ($kelas as $k)
+                                <option value="{{ $k->id_kelas }}"
+                                    {{ old('kelas_id') == $k->id_kelas ? 'selected' : '' }}>
+                                    {{ $k->nama_kelas }}
+                                </option>
+                            @endforeach
+                        </select>
                     </label>
                 </div>
 

@@ -7,6 +7,7 @@ use App\Imports\SiswaImport;
 use App\Models\Kelas;
 use App\Models\OrangTua;
 use App\Models\OrtuSiswa;
+use App\Models\RegistrasiAkademik;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Models\User;
@@ -84,12 +85,24 @@ class SiswaController extends Controller
             ->orderBy('nama_kelas')
             ->get();
 
-        return view('admin.siswa.index', compact('kelas'));
+        $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->orderByDesc('is_aktif')
+            ->get();
+
+        return view('admin.siswa.index', compact('kelas', 'tahunAjaran'));
     }
 
     public function create()
     {
-        return view('admin.siswa.create');
+        $instansi = Auth::user()->getInstansi();
+        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->where('is_aktif', true)->first();
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->when($tahunAktif, fn ($q) => $q->where('tahun_id', $tahunAktif->id_tahun))
+            ->orderBy('nama_kelas')
+            ->get();
+
+        return view('admin.siswa.create', compact('tahunAktif', 'kelas'));
     }
 
     public function store(Request $request)
@@ -111,6 +124,9 @@ class SiswaController extends Controller
             'hubungan' => 'required|in:Ayah,Ibu,Wali',
             'email_ortu' => 'required|email|',
             'password_ortu' => 'nullable|min:8',
+            // Registrasi opsional
+            'kelas_id' => 'nullable|exists:kelas,id_kelas',
+            'tahun_id' => 'nullable|exists:tahun_ajaran,id_tahun',
         ]);
 
         DB::transaction(function () use ($validated, $instansi) {
@@ -178,6 +194,20 @@ class SiswaController extends Controller
                     'is_primary' => true,
                 ]
             );
+
+            if (! empty($validated['kelas_id']) && ! empty($validated['tahun_id'])) {
+                $sudahTerdaftar = RegistrasiAkademik::where('siswa_id', $siswa->id_siswa)
+                    ->where('tahun_id', $validated['tahun_id'])
+                    ->exists();
+
+                if (! $sudahTerdaftar) {
+                    RegistrasiAkademik::create([
+                        'siswa_id' => $siswa->id_siswa,
+                        'kelas_id' => $validated['kelas_id'],
+                        'tahun_id' => $validated['tahun_id'],
+                    ]);
+                }
+            }
         });
 
         return redirect()->route('admin.siswa.index')
@@ -251,19 +281,24 @@ class SiswaController extends Controller
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls|max:2048',
+            'tahun_id' => 'nullable|exists:tahun_ajaran,id_tahun',
         ]);
 
         $instansi = Auth::user()->getInstansi();
-        $import = new SiswaImport($instansi->id_instansi);
+        $import = new SiswaImport($instansi->id_instansi, $request->tahun_id);
 
         Excel::import($import, $request->file('file'));
 
         $berhasil = $import->getBerhasil();
         $gagal = $import->getGagal();
+        $kelasNotFound = $import->getKelasNotFound();
 
         $message = "Import selesai! {$berhasil} siswa berhasil diimport.";
         if ($gagal > 0) {
             $message .= " {$gagal} baris dilewati (NISN/email sudah ada).";
+        }
+        if (! empty($kelasNotFound)) {
+            $message .= ' Kelas tidak ditemukan: '.implode(', ', $kelasNotFound).' — siswa tetap diimport tapi belum terdaftar di kelas.';
         }
 
         return back()->with('success', $message);
@@ -280,6 +315,7 @@ class SiswaController extends Controller
             'nama_ortu',
             'email_ortu',
             'hubungan',
+            'nama_kelas',
         ];
 
         $contoh = [
@@ -291,11 +327,12 @@ class SiswaController extends Controller
             'Fauzi Senior',
             'fauzisenior@example.com',
             'Ayah',
+            'X IPA 1',
         ];
 
         $filename = 'template-import-siswa.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
+        return Excel::download(
             new class($headers, $contoh) implements FromArray, WithHeadings
             {
                 public function __construct(private array $headers, private array $contoh) {}

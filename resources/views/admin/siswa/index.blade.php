@@ -94,11 +94,35 @@
 
             <form method="POST" action="{{ route('admin.siswa.import') }}" enctype="multipart/form-data">
                 @csrf
+
+                {{-- Tahun Ajaran --}}
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">
+                        Tahun Ajaran
+                        <span class="text-gray-400">(untuk registrasi kelas otomatis)</span>
+                    </span>
+                    <select name="tahun_id"
+                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        <option value="">-- Tidak daftarkan ke kelas --</option>
+                        @foreach($tahunAjaran as $tahun)
+                            <option value="{{ $tahun->id_tahun }}" {{ $tahun->is_aktif ? 'selected' : '' }}>
+                                {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
+                                {{ $tahun->is_aktif ? '(Aktif)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <div class="mb-4 px-3 py-2 text-xs text-yellow-700 bg-yellow-50 rounded-lg dark:bg-yellow-900/30 dark:text-yellow-300">
+                    Nama kelas di kolom <strong>nama_kelas</strong> harus sama persis dengan nama kelas di sistem.
+                </div>
+
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">File Excel (.xlsx)</span>
                     <input type="file" name="file" accept=".xlsx,.xls"
                         class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" required />
                 </label>
+
                 <div class="flex gap-3">
                     <button type="submit"
                         class="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">

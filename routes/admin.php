@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\RegistrasiAkademikController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Models\Kelas;
+use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -39,6 +40,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     ]);
 
     // Kelas
+    Route::get('kelas-by-tahun/{tahun}', function (TahunAjaran $tahun) {
+        return Kelas::where('tahun_id', $tahun->id_tahun)
+            ->orderBy('nama_kelas')
+            ->get(['id_kelas', 'nama_kelas']);
+    })->middleware(['auth', 'role:admin'])->name('kelas-by-tahun');
     Route::get('kelas/{kelas}/detail', [KelasController::class, 'detail'])->name('kelas.detail');
     Route::resource('kelas', KelasController::class)->parameters([
         'kelas' => 'kelas',
