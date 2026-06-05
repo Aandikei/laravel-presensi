@@ -24,21 +24,7 @@
             </div>
         @endif
 
-        {{-- Filter Kelas --}}
-        <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-            <div class="flex items-center gap-4">
-                <label class="text-sm text-gray-700 dark:text-gray-400">Filter Tahun Ajaran:</label>
-                <select id="filter-tahun" class="text-sm form-select dark:bg-gray-700 dark:text-gray-300">
-                    <option value="">Semua</option>
-                    @foreach ($tahunAjaran as $tahun)
-                        <option value="{{ $tahun->id_tahun }}" {{ $tahun->is_aktif ? 'selected' : '' }}>
-                            {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
-                            {{ $tahun->is_aktif ? '(Aktif)' : '' }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
+
 
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
@@ -48,7 +34,6 @@
                             class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
                             <th class="px-4 py-3">#</th>
                             <th class="px-4 py-3">Kelas</th>
-                            <th class="px-4 py-3">Tahun Ajaran</th>
                             <th class="px-4 py-3">Mata Pelajaran</th>
                             <th class="px-4 py-3">Guru</th>
                             <th class="px-4 py-3">Aksi</th>
@@ -68,10 +53,7 @@
                     processing: true,
                     serverSide: true,
                     ajax: {
-                        url: '{{ route('admin.kurikulum.index') }}',
-                        data: function(d) {
-                            d.tahun_id = $('#filter-tahun').val();
-                        }
+                        url: '{{ route('admin.kurikulum.index') }}'
                     },
                     columns: [{
                             data: 'DT_RowIndex',
@@ -80,9 +62,6 @@
                         },
                         {
                             data: 'kelas'
-                        },
-                        {
-                            data: 'tahun_ajaran'
                         },
                         {
                             data: 'mata_pelajaran'
@@ -101,15 +80,7 @@
                     }
                 });
 
-                $('#filter-tahun').on('change', function() {
-                    table.draw();
-                });
 
-                // Auto filter tahun aktif
-                var tahunAktif = $('#filter-tahun').val();
-                if (tahunAktif) {
-                    table.column(2).search(tahunAktif).draw();
-                }
             });
         </script>
     @endpush

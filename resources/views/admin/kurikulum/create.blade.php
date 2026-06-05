@@ -24,7 +24,7 @@
                         @foreach($kelas as $k)
                             <option value="{{ $k->id_kelas }}"
                                 {{ old('kelas_id') == $k->id_kelas ? 'selected' : '' }}>
-                                {{ $k->nama_kelas }} ({{ $k->tahunAjaran->nama_tahun }} - {{ $k->tahunAjaran->semester }})
+                                {{ $k->nama_kelas }} (Tingkat {{ $k->tingkat }})
                             </option>
                         @endforeach
                     </select>

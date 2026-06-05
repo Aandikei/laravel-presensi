@@ -54,7 +54,7 @@ class JadwalController extends Controller
         $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
             ->orderByDesc('is_aktif')->get();
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
@@ -66,7 +66,7 @@ class JadwalController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
@@ -114,7 +114,7 @@ class JadwalController extends Controller
 
         $instansi = Auth::user()->getInstansi();
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 

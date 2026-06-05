@@ -28,13 +28,12 @@ class SiswaController extends Controller
 
         if ($request->ajax()) {
             $siswa = Siswa::with(['user', 'registrasiAktif.kelas'])
-                ->where('instansi_id', $instansi->id_instansi)
+                ->where('instansi_id', '=', $instansi->id_instansi)
                 ->select('siswa.*');
 
             // Filter per kelas
             if ($request->kelas_id) {
-                $siswa->whereHas('registrasiAktif', fn ($q) => $q->where('kelas_id', $request->kelas_id)
-                );
+                $siswa->whereHas('registrasiAktif', fn ($q) => $q->where('kelas_id', '=', $request->kelas_id));
             }
 
             return DataTables::of($siswa)
@@ -77,15 +76,15 @@ class SiswaController extends Controller
                 ->make(true);
         }
         // Tambah data kelas untuk filter
-        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->where('is_aktif', true)->first();
+        $tahunAktif = TahunAjaran::where('instansi_id', '=', $instansi->id_instansi)
+            ->where('is_aktif', '=', true)->first();
 
-        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->when($tahunAktif, fn ($q) => $q->where('tahun_id', $tahunAktif->id_tahun))
+        $kelas = Kelas::where('instansi_id', '=', $instansi->id_instansi)
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
-        $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+        $tahunAjaran = TahunAjaran::where('instansi_id', '=', $instansi->id_instansi)
             ->orderByDesc('is_aktif')
             ->get();
 
@@ -95,10 +94,10 @@ class SiswaController extends Controller
     public function create()
     {
         $instansi = Auth::user()->getInstansi();
-        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->where('is_aktif', true)->first();
-        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->when($tahunAktif, fn ($q) => $q->where('tahun_id', $tahunAktif->id_tahun))
+        $tahunAktif = TahunAjaran::where('instansi_id', '=', $instansi->id_instansi)
+            ->where('is_aktif', '=', true)->first();
+        $kelas = Kelas::where('instansi_id', '=', $instansi->id_instansi)
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
@@ -149,11 +148,11 @@ class SiswaController extends Controller
             ]);
 
             // Buat user orang tua — cek dulu apakah email sudah ada
-            $userOrtu = User::where('email', $validated['email_ortu'])->first();
+            $userOrtu = User::where('email', '=', $validated['email_ortu'])->first();
 
             if ($userOrtu) {
                 // User sudah ada, cek apakah sudah punya data orang tua
-                $ortu = OrangTua::where('user_id', $userOrtu->id)->first();
+                $ortu = OrangTua::where('user_id', '=', $userOrtu->id)->first();
 
                 if (! $ortu) {
                     // Punya akun tapi belum ada data orang tua — buatkan
@@ -196,8 +195,8 @@ class SiswaController extends Controller
             );
 
             if (! empty($validated['kelas_id']) && ! empty($validated['tahun_id'])) {
-                $sudahTerdaftar = RegistrasiAkademik::where('siswa_id', $siswa->id_siswa)
-                    ->where('tahun_id', $validated['tahun_id'])
+                $sudahTerdaftar = RegistrasiAkademik::where('siswa_id', '=', $siswa->id_siswa)
+                    ->where('tahun_id', '=', $validated['tahun_id'])
                     ->exists();
 
                 if (! $sudahTerdaftar) {

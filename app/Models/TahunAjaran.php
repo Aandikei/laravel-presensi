@@ -30,9 +30,12 @@ class TahunAjaran extends Model
         return $this->belongsTo(Instansi::class, 'instansi_id', 'id_instansi');
     }
 
+    /**
+     * Ambil semua kelas yang punya siswa terdaftar di tahun ajaran ini.
+     */
     public function kelas()
     {
-        return $this->hasMany(Kelas::class, 'tahun_id', 'id_tahun');
+        return Kelas::whereHas('registrasiAkademik', fn ($q) => $q->where('tahun_id', $this->id_tahun));
     }
 
     public function registrasiAkademik()

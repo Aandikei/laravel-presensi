@@ -58,4 +58,32 @@ class Instansi extends Model
     {
         return $this->hasMany(MasterPoin::class, 'instansi_id', 'id_instansi');
     }
+
+    /**
+     * Tingkat maksimum berdasarkan jenjang.
+     * SD = 6, SMP = 9, SMA/SMK = 12
+     */
+    public function getTingkatMaksAttribute(): int
+    {
+        return match ($this->jenjang) {
+            'SD'  => 6,
+            'SMP' => 9,
+            'SMA', 'SMK' => 12,
+            default => 12,
+        };
+    }
+
+    /**
+     * Tingkat minimum berdasarkan jenjang.
+     * SD = 1, SMP = 7, SMA/SMK = 10
+     */
+    public function getTingkatMinAttribute(): int
+    {
+        return match ($this->jenjang) {
+            'SD'  => 1,
+            'SMP' => 7,
+            'SMA', 'SMK' => 10,
+            default => 1,
+        };
+    }
 }

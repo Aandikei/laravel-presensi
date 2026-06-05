@@ -20,7 +20,7 @@
                         <option value="">-- Pilih Kelas --</option>
                         @foreach($kelas as $k)
                             <option value="{{ $k->id_kelas }}">
-                                {{ $k->nama_kelas }} ({{ $k->tahunAjaran->nama_tahun }} - {{ $k->tahunAjaran->semester }})
+                                {{ $k->nama_kelas }} (Tingkat {{ $k->tingkat }})
                             </option>
                         @endforeach
                     </select>

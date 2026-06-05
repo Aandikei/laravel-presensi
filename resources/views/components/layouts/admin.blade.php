@@ -27,7 +27,19 @@
         <div class="flex flex-col flex-1 w-full">
             <x-partials.navbar />
             <main class="h-full overflow-y-auto">
-                {{ $slot }}
+                <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                    {{-- Flash Error --}}
+                    @if (session('error'))
+                        <div
+                            class="mb-4 px-4 py-3 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200 flex items-center justify-between">
+                            <span>{{ session('error') }}</span>
+                            <button onclick="this.parentElement.remove()"
+                                class="ml-4 text-red-500 hover:text-red-700">✕</button>
+                        </div>
+                    @endif
+
+                    {{ $slot }}
+                </div>
             </main>
         </div>
     </div>

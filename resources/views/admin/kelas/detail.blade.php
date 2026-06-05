@@ -23,12 +23,7 @@
                         <span class="text-gray-500">Tingkat</span>
                         <span class="font-medium text-gray-700 dark:text-gray-200">{{ $kelas->tingkat }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Tahun Ajaran</span>
-                        <span class="font-medium text-gray-700 dark:text-gray-200">
-                            {{ $kelas->tahunAjaran->nama_tahun }} - {{ $kelas->tahunAjaran->semester }}
-                        </span>
-                    </div>
+
                     <div class="flex justify-between">
                         <span class="text-gray-500">Wali Kelas</span>
                         <span class="font-medium text-gray-700 dark:text-gray-200">
@@ -129,8 +124,13 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                        Daftar Siswa ({{ $kelas->registrasiAkademik->count() }})
+                        Daftar Siswa ({{ $registrasi->count() }})
                     </h3>
+                    @if($tahunAktif)
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ $tahunAktif->nama_tahun }} - {{ $tahunAktif->semester }}
+                        </span>
+                    @endif
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -142,7 +142,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y dark:divide-gray-700">
-                            @forelse($kelas->registrasiAkademik as $i => $reg)
+                            @forelse($registrasi as $i => $reg)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td class="px-4 py-3 text-sm text-gray-500">{{ $i + 1 }}</td>
                                     <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -153,7 +153,7 @@
                             @empty
                                 <tr>
                                     <td colspan="3" class="px-4 py-6 text-center text-gray-500">
-                                        Belum ada siswa terdaftar.
+                                        Belum ada siswa terdaftar di tahun ajaran aktif.
                                     </td>
                                 </tr>
                             @endforelse

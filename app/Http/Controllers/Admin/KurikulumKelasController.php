@@ -19,21 +19,15 @@ class KurikulumKelasController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         if ($request->ajax()) {
-            $kurikulum = KurikulumKelas::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru'])
-                ->whereHas('kelas', function ($q) use ($instansi, $request) {
-                    $q->where('instansi_id', $instansi->id_instansi);
-
-                    // Filter tahun ajaran
-                    if ($request->tahun_id) {
-                        $q->where('tahun_id', $request->tahun_id);
-                    }
+            $kurikulum = KurikulumKelas::with(['kelas', 'mataPelajaran', 'guru'])
+                ->whereHas('kelas', function ($q) use ($instansi) {
+                    $q->where('instansi_id', '=', $instansi->id_instansi);
                 })
                 ->select('kurikulum_kelas.*');
 
             return DataTables::of($kurikulum)
                 ->addIndexColumn()
                 ->addColumn('kelas', fn ($row) => $row->kelas->nama_kelas)
-                ->addColumn('tahun_ajaran', fn ($row) => $row->kelas->tahunAjaran->nama_tahun.' - '.$row->kelas->tahunAjaran->semester)
                 ->addColumn('mata_pelajaran', fn ($row) => $row->mataPelajaran->nama_mapel)
                 ->addColumn('guru', fn ($row) => $row->guru->nama_guru)
                 ->addColumn('aksi', function ($row) {
@@ -55,33 +49,27 @@ class KurikulumKelasController extends Controller
                 ->make(true);
         }
 
-        // Filter tahun ajaran untuk dropdown
-        $instansi = Auth::user()->getInstansi();
-        $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->orderByDesc('is_aktif')
-            ->get();
-
-        return view('admin.kurikulum.index', compact('tahunAjaran'));
+        return view('admin.kurikulum.index');
     }
 
     public function create()
     {
         $instansi = Auth::user()->getInstansi();
 
-        $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+        $tahunAjaran = TahunAjaran::where('instansi_id', '=', $instansi->id_instansi)
             ->orderByDesc('is_aktif')
             ->get();
 
-        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+        $kelas = Kelas::where('instansi_id', '=', $instansi->id_instansi)
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
-        $guru = Guru::where('instansi_id', $instansi->id_instansi)
+        $guru = Guru::where('instansi_id', '=', $instansi->id_instansi)
             ->orderBy('nama_guru')
             ->get();
 
-        $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
+        $mapel = MataPelajaran::where('instansi_id', '=', $instansi->id_instansi)
             ->orderBy('nama_mapel')
             ->get();
 
@@ -99,8 +87,8 @@ class KurikulumKelasController extends Controller
         ]);
 
         // Cek duplikat
-        $exists = KurikulumKelas::where('kelas_id', $validated['kelas_id'])
-            ->where('mapel_id', $validated['mapel_id'])
+        $exists = KurikulumKelas::where('kelas_id', '=', $validated['kelas_id'])
+            ->where('mapel_id', '=', $validated['mapel_id'])
             ->exists();
 
         if ($exists) {
@@ -125,16 +113,16 @@ class KurikulumKelasController extends Controller
 
         $instansi = Auth::user()->getInstansi();
 
-        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+        $kelas = Kelas::where('instansi_id', '=', $instansi->id_instansi)
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
-        $guru = Guru::where('instansi_id', $instansi->id_instansi)
+        $guru = Guru::where('instansi_id', '=', $instansi->id_instansi)
             ->orderBy('nama_guru')
             ->get();
 
-        $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
+        $mapel = MataPelajaran::where('instansi_id', '=', $instansi->id_instansi)
             ->orderBy('nama_mapel')
             ->get();
 
@@ -152,8 +140,8 @@ class KurikulumKelasController extends Controller
         ]);
 
         // Cek duplikat kecuali data ini sendiri
-        $exists = KurikulumKelas::where('kelas_id', $validated['kelas_id'])
-            ->where('mapel_id', $validated['mapel_id'])
+        $exists = KurikulumKelas::where('kelas_id', '=', $validated['kelas_id'])
+            ->where('mapel_id', '=', $validated['mapel_id'])
             ->where('id_kurikulum', '!=', $kurikulum->id_kurikulum)
             ->exists();
 

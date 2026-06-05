@@ -54,7 +54,7 @@ class RegistrasiAkademikController extends Controller
             ->orderByDesc('is_aktif')->get();
 
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
@@ -69,7 +69,7 @@ class RegistrasiAkademikController extends Controller
             ->orderByDesc('is_aktif')->get();
 
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 

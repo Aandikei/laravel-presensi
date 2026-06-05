@@ -11,7 +11,6 @@ class Kelas extends Model
 
     protected $fillable = [
         'instansi_id',
-        'tahun_id',
         'guru_wali_id',
         'nama_kelas',
         'tingkat',
@@ -22,9 +21,13 @@ class Kelas extends Model
         return $this->belongsTo(Instansi::class, 'instansi_id', 'id_instansi');
     }
 
-    public function tahunAjaran()
+    /**
+     * Tingkat maksimum berdasarkan jenjang instansi.
+     * SD = 6, SMP = 9, SMA/SMK = 12
+     */
+    public function getTingkatMaksAttribute(): int
     {
-        return $this->belongsTo(TahunAjaran::class, 'tahun_id', 'id_tahun');
+        return $this->instansi->tingkat_maks ?? 12;
     }
 
     public function waliKelas()

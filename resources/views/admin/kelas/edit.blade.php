@@ -38,19 +38,7 @@
                     @enderror
                 </label>
 
-                <label class="block text-sm mb-4">
-                    <span class="text-gray-700 dark:text-gray-400">Tahun Ajaran</span>
-                    <select name="tahun_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
-                        @foreach($tahunAjaran as $tahun)
-                            <option value="{{ $tahun->id_tahun }}"
-                                {{ old('tahun_id', $kelas->tahun_id) == $tahun->id_tahun ? 'selected' : '' }}>
-                                {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
-                                {{ $tahun->is_aktif ? '(Aktif)' : '' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+
 
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Wali Kelas <span class="text-gray-400">(opsional)</span></span>

@@ -29,11 +29,12 @@
                     {{-- Tahun Ajaran --}}
                     <label class="block text-sm">
                         <span class="text-gray-700 dark:text-gray-400">Tahun Ajaran</span>
-                        <select name="tahun_id" id="tahun_id" onchange="loadKelasByTahun(this.value)"
+                        <select name="tahun_id" id="tahun_id"
                             class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('tahun_id') border-red-500 @enderror">
                             <option value="">-- Pilih Tahun Ajaran --</option>
                             @foreach ($tahunAjaran as $tahun)
-                                <option value="{{ $tahun->id_tahun }}" {{ $tahun->is_aktif ? 'selected' : '' }}>
+                                <option value="{{ $tahun->id_tahun }}" 
+                                    {{ old('tahun_id', $tahunAktif->id_tahun ?? '') == $tahun->id_tahun ? 'selected' : '' }}>
                                     {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
                                     {{ $tahun->is_aktif ? '(Aktif)' : '' }}
                                 </option>
@@ -44,12 +45,17 @@
                         @enderror
                     </label>
 
-                    {{-- Kelas (dynamic) --}}
-                    <label class="block text-sm">
-                        <span class="text-gray-700 dark:text-gray-400">Kelas Tujuan</span>
-                        <select name="kelas_id" id="kelas_id"
+                    {{-- Kelas --}}
+                    <label class="block text-sm mb-4">
+                        <span class="text-gray-700 dark:text-gray-400">Pilih Kelas</span>
+                        <select name="kelas_id"
                             class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('kelas_id') border-red-500 @enderror">
-                            <option value="">-- Pilih tahun ajaran dulu --</option>
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach($kelas as $k)
+                                <option value="{{ $k->id_kelas }}" {{ old('kelas_id') == $k->id_kelas ? 'selected' : '' }}>
+                                    {{ $k->nama_kelas }} (Tingkat {{ $k->tingkat }})
+                                </option>
+                            @endforeach
                         </select>
                         @error('kelas_id')
                             <span class="text-xs text-red-500">{{ $message }}</span>
@@ -137,36 +143,6 @@
                     const nisn = item.dataset.nisn;
                     item.style.display = (name.includes(q) || nisn.includes(q)) ? '' : 'none';
                 });
-            }
-            // Auto load kelas sesuai tahun ajaran aktif saat halaman load
-            document.addEventListener('DOMContentLoaded', function() {
-                const tahunSelect = document.getElementById('tahun_id');
-                if (tahunSelect.value) {
-                    loadKelasByTahun(tahunSelect.value);
-                }
-            });
-
-            function loadKelasByTahun(tahunId) {
-                const kelasSelect = document.getElementById('kelas_id');
-                kelasSelect.innerHTML = '<option value="">Loading...</option>';
-
-                if (!tahunId) {
-                    kelasSelect.innerHTML = '<option value="">-- Pilih tahun ajaran dulu --</option>';
-                    return;
-                }
-
-                fetch(`/admin/kelas-by-tahun/${tahunId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-                        if (data.length === 0) {
-                            kelasSelect.innerHTML = '<option value="">Belum ada kelas di tahun ajaran ini</option>';
-                            return;
-                        }
-                        data.forEach(item => {
-                            kelasSelect.innerHTML += `<option value="${item.id_kelas}">${item.nama_kelas}</option>`;
-                        });
-                    });
             }
         </script>
     @endpush

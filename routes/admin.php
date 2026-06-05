@@ -11,11 +11,14 @@ use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\LogPoinController;
 use App\Http\Controllers\Admin\MasterPoinController;
 use App\Http\Controllers\Admin\MataPelajaranController;
+use App\Http\Controllers\Admin\NaikKelasController;
 use App\Http\Controllers\Admin\RegistrasiAkademikController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -40,15 +43,25 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     ]);
 
     // Kelas
-    Route::get('kelas-by-tahun/{tahun}', function (TahunAjaran $tahun) {
-        return Kelas::where('tahun_id', $tahun->id_tahun)
+    Route::get('kelas-list', function () {
+        $instansi = Auth::user()->getInstansi();
+        return Kelas::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
-            ->get(['id_kelas', 'nama_kelas']);
-    })->middleware(['auth', 'role:admin'])->name('kelas-by-tahun');
+            ->get(['id_kelas', 'nama_kelas', 'tingkat']);
+    })->middleware(['auth', 'role:admin'])->name('kelas-list');
     Route::get('kelas/{kelas}/detail', [KelasController::class, 'detail'])->name('kelas.detail');
     Route::resource('kelas', KelasController::class)->parameters([
         'kelas' => 'kelas',
     ]);
+
+    // Naik Kelas
+    Route::prefix('naik-kelas')->name('naik-kelas.')->group(function () {
+        Route::get('/', [NaikKelasController::class, 'index'])->name('index');
+        Route::get('/preview', [NaikKelasController::class, 'preview'])->name('preview');
+        Route::post('/proses', [NaikKelasController::class, 'proses'])->name('proses');
+        Route::post('/salin-semester', [NaikKelasController::class, 'salinSemester'])->name('salin-semester');
+    });
 
     // Mata Pelajaran
     Route::resource('mata-pelajaran', MataPelajaranController::class)->parameters([
@@ -114,4 +127,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         Route::get('/export-poin-excel', [LaporanController::class, 'exportPoinExcel'])->name('export-poin-excel');
         Route::get('/export-poin-pdf', [LaporanController::class, 'exportPoinPdf'])->name('export-poin-pdf');
     });
+
+    // Setting
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::patch('settings', [SettingsController::class, 'update'])->name('settings.update');
 });

@@ -10,6 +10,7 @@ use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\RegistrasiAkademik;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
@@ -34,13 +35,13 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
     public function model(array $row)
     {
         // Skip kalau NISN sudah ada
-        if (Siswa::where('nisn', $row['nisn'])->exists()) {
+        if (Siswa::where('nisn', '=', $row['nisn'])->exists()) {
             $this->gagal++;
             return null;
         }
 
         // Skip kalau email sudah ada
-        if (User::where('email', $row['email_siswa'])->exists()) {
+        if (User::where('email', '=', $row['email_siswa'])->exists()) {
             $this->gagal++;
             return null;
         }
@@ -65,7 +66,7 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
 
         // Buat orang tua
         if (!empty($row['email_ortu'])) {
-            $userOrtu = User::where('email', $row['email_ortu'])->first();
+            $userOrtu = User::where('email', '=', $row['email_ortu'])->first();
 
             if (!$userOrtu) {
                 $userOrtu = User::create([
@@ -99,26 +100,25 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
         $kelasId  = null;
 
         // Cari kelas berdasarkan nama di kolom excel (kalau ada)
-        if (!empty($row['nama_kelas']) && $tahunId) {
-            $kelas = Kelas::where('instansi_id', $this->instansiId)
-                ->where('tahun_id', $tahunId)
-                ->where('nama_kelas', $row['nama_kelas'])
+        $kelas = null;
+        if (!empty($row['nama_kelas'])) {
+            $kelas = Kelas::where('instansi_id', '=', $this->instansiId)
+                ->where('nama_kelas', '=', $row['nama_kelas'])
                 ->first();
             $kelasId = $kelas?->id_kelas;
         }
 
         if (!$kelas) {
-            \Log::warning('Kelas tidak ditemukan saat import', [
+            Log::warning('Kelas tidak ditemukan saat import', [
                 'nama_kelas'  => $row['nama_kelas'],
-                'tahun_id'    => $tahunId,
                 'instansi_id' => $this->instansiId,
             ]);
             $this->kelasNotFound[] = $row['nama_kelas'];
         }
 
         if ($kelasId && $tahunId) {
-            $sudahTerdaftar = RegistrasiAkademik::where('siswa_id', $siswa->id_siswa)
-                ->where('tahun_id', $tahunId)
+            $sudahTerdaftar = RegistrasiAkademik::where('siswa_id', '=', $siswa->id_siswa)
+                ->where('tahun_id', '=', $tahunId)
                 ->exists();
 
             if (!$sudahTerdaftar) {

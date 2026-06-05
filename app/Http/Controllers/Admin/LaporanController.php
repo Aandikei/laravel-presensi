@@ -23,7 +23,7 @@ class LaporanController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
@@ -44,7 +44,7 @@ class LaporanController extends Controller
         ]);
 
         $instansi = Auth::user()->getInstansi();
-        $kelas    = Kelas::with(['tahunAjaran', 'waliKelas'])->findOrFail($request->kelas_id);
+        $kelas    = Kelas::with(['waliKelas'])->findOrFail($request->kelas_id);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
@@ -116,7 +116,7 @@ class LaporanController extends Controller
         ]);
 
         $instansi = Auth::user()->getInstansi();
-        $kelas    = Kelas::with(['tahunAjaran', 'waliKelas'])->findOrFail($request->kelas_id);
+        $kelas    = Kelas::with(['waliKelas'])->findOrFail($request->kelas_id);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $registrasi = RegistrasiAkademik::with(['siswa'])
@@ -160,7 +160,7 @@ class LaporanController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')->orderBy('nama_kelas')->get();
+            ->orderBy('tingkat')->orderBy('nama_kelas')->get();
 
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
             ->when($request->kelas_id, fn($q) =>

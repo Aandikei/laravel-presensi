@@ -31,9 +31,9 @@
                             <th class="px-4 py-3">#</th>
                             <th class="px-4 py-3">Nama Kelas</th>
                             <th class="px-4 py-3">Tingkat</th>
-                            <th class="px-4 py-3">Tahun Ajaran</th>
                             <th class="px-4 py-3">Wali Kelas</th>
                             <th class="px-4 py-3">Jumlah Siswa</th>
+                            <th class="px-4 py-3">Tahun Ajaran</th>
                             <th class="px-4 py-3">Aksi</th>
                         </tr>
                     </thead>
@@ -55,9 +55,9 @@
                     { data: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'nama_kelas' },
                     { data: 'tingkat' },
-                    { data: 'tahun_ajaran', orderable: false },
                     { data: 'wali_kelas', orderable: false },
                     { data: 'jumlah_siswa', orderable: false, searchable: false },
+                    { data: 'tahun_ajaran', orderable: false, searchable: false },
                     { data: 'aksi', orderable: false, searchable: false },
                 ],
                 language: {

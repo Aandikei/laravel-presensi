@@ -114,7 +114,7 @@ class AbsensiController extends Controller
         }
 
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
-            ->with('tahunAjaran')
+            ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
