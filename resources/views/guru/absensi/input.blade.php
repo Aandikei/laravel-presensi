@@ -40,7 +40,7 @@
                 {{-- Bulk action --}}
                 <div class="px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Set semua:</span>
-                    @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Cabut'] as $status)
+                    @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Bolos'] as $status)
                         <button type="button" onclick="setAll('{{ $status }}')"
                             class="px-3 py-1 text-xs font-medium rounded-full border transition-colors
                             {{ $status == 'Hadir' ? 'border-green-300 text-green-700 hover:bg-green-50' :
@@ -58,6 +58,7 @@
                             <th class="px-5 py-3">Nama Siswa</th>
                             <th class="px-5 py-3">NISN</th>
                             <th class="px-5 py-3">Status</th>
+                            <th class="px-5 py-3">Durasi (mnt)</th>
                             <th class="px-5 py-3">Keterangan</th>
                         </tr>
                     </thead>
@@ -74,14 +75,21 @@
                                 <td class="px-5 py-3">
                                     <select name="absensi[{{ $reg->id_registrasi }}][status]"
                                         class="status-select text-sm form-select dark:bg-gray-700 dark:text-gray-300 py-1"
-                                        onchange="updateRowColor(this)">
-                                        @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Cabut'] as $status)
+                                        onchange="updateRowColor(this); toggleDurasi(this);">
+                                        @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Bolos'] as $status)
                                             <option value="{{ $status }}"
                                                 {{ ($absensiHariIni[$reg->id_registrasi] ?? 'Hadir') == $status ? 'selected' : '' }}>
                                                 {{ $status }}
                                             </option>
                                         @endforeach
                                     </select>
+                                </td>
+                                <td class="px-5 py-3">
+                                    <input type="number"
+                                        name="absensi[{{ $reg->id_registrasi }}][durasi_terlambat]"
+                                        placeholder="mnt"
+                                        class="durasi-input text-sm form-input dark:bg-gray-700 dark:text-gray-300 py-1 w-20 hidden"
+                                        min="0" max="999" />
                                 </td>
                                 <td class="px-5 py-3">
                                     <input type="text"
@@ -114,6 +122,7 @@
             document.querySelectorAll('.status-select').forEach(select => {
                 select.value = status;
                 updateRowColor(select);
+                toggleDurasi(select);
             });
         }
 
@@ -124,7 +133,7 @@
                 'Hadir'    : 'bg-green-50',
                 'Alpa'     : 'bg-red-50',
                 'Terlambat': 'bg-yellow-50',
-                'Cabut'    : 'bg-red-50',
+                'Bolos'    : 'bg-red-50',
                 'Sakit'    : 'bg-blue-50',
                 'Izin'     : 'bg-yellow-50',
             };
@@ -133,8 +142,21 @@
             }
         }
 
-        // Init warna saat load
-        document.querySelectorAll('.status-select').forEach(select => updateRowColor(select));
+        function toggleDurasi(select) {
+            const row = select.closest('tr');
+            const input = row.querySelector('.durasi-input');
+            if (select.value === 'Terlambat') {
+                input.classList.remove('hidden');
+            } else {
+                input.classList.add('hidden');
+                input.value = '';
+            }
+        }
+
+        document.querySelectorAll('.status-select').forEach(select => {
+            updateRowColor(select);
+            toggleDurasi(select);
+        });
     </script>
     @endpush
 </x-layouts.admin>

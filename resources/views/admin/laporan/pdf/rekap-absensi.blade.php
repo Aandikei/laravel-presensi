@@ -39,7 +39,7 @@
                 <th>Izin</th>
                 <th>Alpa</th>
                 <th>Terlambat</th>
-                <th>Cabut</th>
+                <th>Bolos</th>
                 <th>Total</th>
                 <th>% Hadir</th>
             </tr>
@@ -55,7 +55,7 @@
                     <td class="text-center">{{ $reg->izin }}</td>
                     <td class="text-center red">{{ $reg->alpa }}</td>
                     <td class="text-center yellow">{{ $reg->terlambat }}</td>
-                    <td class="text-center">{{ $reg->cabut }}</td>
+                    <td class="text-center">{{ $reg->bolos }}</td>
                     <td class="text-center">{{ $reg->total }}</td>
                     <td class="text-center">
                         <span class="badge {{ $reg->persen >= 75 ? 'badge-green' : ($reg->persen >= 50 ? 'badge-yellow' : 'badge-red') }}">

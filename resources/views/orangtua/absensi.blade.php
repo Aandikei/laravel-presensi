@@ -55,7 +55,7 @@
 
         {{-- Stats --}}
         <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-4">
-            @foreach (['Hadir' => 'green', 'Sakit' => 'blue', 'Izin' => 'yellow', 'Alpa' => 'red', 'Terlambat' => 'orange', 'Cabut' => 'gray'] as $status => $color)
+            @foreach (['Hadir' => 'green', 'Sakit' => 'blue', 'Izin' => 'yellow', 'Alpa' => 'red', 'Terlambat' => 'orange', 'Bolos' => 'pink'] as $status => $color)
                 <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
                     <p class="text-xl font-bold text-{{ $color }}-600">
                         {{ $stats[$status === 'Terlambat' ? 'terlambat' : strtolower($status)] }}</p>
@@ -96,7 +96,7 @@
                                 'Izin' => 'yellow',
                                 'Alpa' => 'red',
                                 'Terlambat' => 'orange',
-                                'Cabut' => 'gray',
+                                'Bolos' => 'pink',
                             ];
                             $color = $colors[$absen->status] ?? 'gray';
                         @endphp

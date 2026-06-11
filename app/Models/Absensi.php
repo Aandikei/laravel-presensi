@@ -16,6 +16,7 @@ class Absensi extends Model
         'tanggal',
         'status',
         'keterangan',
+        'durasi_terlambat',
         'waktu_input',
         'is_locked',
         'created_by',
@@ -25,6 +26,7 @@ class Absensi extends Model
     protected $casts = [
         'tanggal' => 'date',
         'waktu_input' => 'datetime',
+        'durasi_terlambat' => 'integer',
         'is_locked' => 'boolean',
     ];
 
@@ -74,7 +76,7 @@ class Absensi extends Model
             'Izin' => 'orange',
             'Alpa' => 'red',
             'Terlambat' => 'yellow',
-            'Cabut' => 'gray',
+            'Bolos' => 'pink',
             default => 'gray',
         };
     }

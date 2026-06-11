@@ -17,7 +17,7 @@ class RekapBulanan extends Model
         'sakit',
         'izin',
         'alpa',
-        'cabut',
+        'bolos',
         'terlambat',
         'poin_akumulasi',
     ];
@@ -30,7 +30,7 @@ class RekapBulanan extends Model
     // Total pertemuan bulan ini
     public function getTotalPertemuanAttribute(): int
     {
-        return $this->hadir + $this->sakit + $this->izin + $this->alpa + $this->cabut + $this->terlambat;
+        return $this->hadir + $this->sakit + $this->izin + $this->alpa + $this->bolos + $this->terlambat;
     }
 
     // Persentase kehadiran

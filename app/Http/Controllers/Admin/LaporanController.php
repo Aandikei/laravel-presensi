@@ -69,7 +69,7 @@ class LaporanController extends Controller
                 $reg->izin      = $absensi->where('status', 'Izin')->count();
                 $reg->alpa      = $absensi->where('status', 'Alpa')->count();
                 $reg->terlambat = $absensi->where('status', 'Terlambat')->count();
-                $reg->cabut     = $absensi->where('status', 'Cabut')->count();
+                $reg->bolos     = $absensi->where('status', 'Bolos')->count();
                 $reg->total     = $absensi->count();
                 $reg->persen    = $reg->total > 0
                     ? round(($reg->hadir / $reg->total) * 100, 1)
@@ -132,7 +132,7 @@ class LaporanController extends Controller
                 $reg->izin      = $absensi->where('status', 'Izin')->count();
                 $reg->alpa      = $absensi->where('status', 'Alpa')->count();
                 $reg->terlambat = $absensi->where('status', 'Terlambat')->count();
-                $reg->cabut     = $absensi->where('status', 'Cabut')->count();
+                $reg->bolos     = $absensi->where('status', 'Bolos')->count();
                 $reg->total     = $absensi->count();
                 $reg->persen    = $reg->total > 0
                     ? round(($reg->hadir / $reg->total) * 100, 1) : 0;

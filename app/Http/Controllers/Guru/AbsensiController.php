@@ -102,28 +102,31 @@ class AbsensiController extends Controller
 
         $request->validate([
             'absensi' => 'required|array',
-            'absensi.*.status' => 'required|in:Hadir,Sakit,Izin,Alpa,Terlambat,Cabut',
+            'absensi.*.status' => 'required|in:Hadir,Sakit,Izin,Alpa,Terlambat,Bolos',
             'absensi.*.keterangan' => 'nullable|string|max:255',
+            'absensi.*.durasi_terlambat' => 'nullable|integer|min:0|max:999',
         ]);
 
         DB::transaction(function () use ($request, $jadwal) {
             $tanggal = now()->toDateString();
 
             foreach ($request->absensi as $regId => $data) {
-                $absensi = Absensi::updateOrCreate(
-                    [
-                        'reg_id' => $regId,
-                        'jadwal_id' => $jadwal->id_jadwal,
-                        'tanggal' => $tanggal,
-                    ],
-                    [
-                        'status' => $data['status'],
-                        'keterangan' => $data['keterangan'] ?? null,
-                        'waktu_input' => now(),
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id(),
-                    ]
-                );
+                $absensi = Absensi::firstOrNew([
+                    'reg_id' => $regId,
+                    'jadwal_id' => $jadwal->id_jadwal,
+                    'tanggal' => $tanggal,
+                ]);
+
+                if (!$absensi->exists) {
+                    $absensi->waktu_input = now();
+                    $absensi->created_by = Auth::id();
+                }
+
+                $absensi->status = $data['status'];
+                $absensi->keterangan = $data['keterangan'] ?? null;
+                $absensi->durasi_terlambat = $data['durasi_terlambat'] ?? null;
+                $absensi->updated_by = Auth::id();
+                $absensi->save();
 
                 // Update rekap bulanan
                 $this->updateRekap($regId, $tanggal);
@@ -204,7 +207,7 @@ class AbsensiController extends Controller
                 'sakit' => $counts['Sakit'] ?? 0,
                 'izin' => $counts['Izin'] ?? 0,
                 'alpa' => $counts['Alpa'] ?? 0,
-                'cabut' => $counts['Cabut'] ?? 0,
+                'bolos' => $counts['Bolos'] ?? 0,
                 'terlambat' => $counts['Terlambat'] ?? 0,
             ]
         );

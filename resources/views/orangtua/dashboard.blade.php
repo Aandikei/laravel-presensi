@@ -51,7 +51,7 @@
                     ['label' => 'Izin', 'value' => $stats['izin'], 'color' => 'yellow'],
                     ['label' => 'Alpa', 'value' => $stats['alpa'], 'color' => 'red'],
                     ['label' => 'Terlambat', 'value' => $stats['terlambat'], 'color' => 'orange'],
-                    ['label' => 'Cabut', 'value' => $stats['cabut'], 'color' => 'gray'],
+                    ['label' => 'Bolos', 'value' => $stats['bolos'], 'color' => 'pink'],
                 ] as $stat)
                     <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
                         <p class="text-2xl font-bold text-{{ $stat['color'] }}-600">{{ $stat['value'] }}</p>
@@ -102,7 +102,7 @@
                         <tbody class="divide-y dark:divide-gray-700">
                             @foreach($absensiTerbaru as $absen)
                                 @php
-                                    $colors = ['Hadir'=>'green','Sakit'=>'blue','Izin'=>'yellow','Alpa'=>'red','Terlambat'=>'orange','Cabut'=>'gray'];
+                                    $colors = ['Hadir'=>'green','Sakit'=>'blue','Izin'=>'yellow','Alpa'=>'red','Terlambat'=>'orange','Bolos'=>'pink'];
                                     $color = $colors[$absen->status] ?? 'gray';
                                 @endphp
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">

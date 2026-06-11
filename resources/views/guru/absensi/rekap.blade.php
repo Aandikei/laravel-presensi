@@ -74,6 +74,8 @@
                             <th class="px-4 py-3">Jam</th>
                             <th class="px-4 py-3">Nama Siswa</th>
                             <th class="px-4 py-3">Status</th>
+                            <th class="px-4 py-3">Waktu Input</th>
+                            <th class="px-4 py-3">Durasi</th>
                             <th class="px-4 py-3">Ket.</th>
                         </tr>
                     </thead>
@@ -102,18 +104,20 @@
                                         @case('Terlambat')
                                             <span class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">Terlambat</span>
                                             @break
-                                        @case('Cabut')
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-pink-100 text-pink-700">Cabut</span>
+                                        @case('Bolos')
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-pink-100 text-pink-700">Bolos</span>
                                             @break
                                         @default
                                             <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">{{ $a->status }}</span>
                                     @endswitch
                                 </td>
+                                <td class="px-4 py-3 text-sm">{{ $a->waktu_input ? \Carbon\Carbon::parse($a->waktu_input)->format('H:i') : '-' }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $a->durasi_terlambat ? $a->durasi_terlambat . ' mnt' : '-' }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $a->keterangan ?? '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="9" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
                                     Tidak ada data absensi untuk periode ini.
                                 </td>
                             </tr>

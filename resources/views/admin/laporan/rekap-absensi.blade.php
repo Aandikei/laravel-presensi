@@ -45,7 +45,7 @@
                         <th class="px-4 py-3 text-center text-yellow-600">Izin</th>
                         <th class="px-4 py-3 text-center text-red-600">Alpa</th>
                         <th class="px-4 py-3 text-center text-orange-600">Terlambat</th>
-                        <th class="px-4 py-3 text-center text-gray-600">Cabut</th>
+                        <th class="px-4 py-3 text-center text-pink-600">Bolos</th>
                         <th class="px-4 py-3 text-center">Total</th>
                         <th class="px-4 py-3 text-center">% Hadir</th>
                     </tr>
@@ -61,7 +61,7 @@
                             <td class="px-4 py-3 text-center font-semibold text-yellow-600">{{ $reg->izin }}</td>
                             <td class="px-4 py-3 text-center font-semibold text-red-600">{{ $reg->alpa }}</td>
                             <td class="px-4 py-3 text-center font-semibold text-orange-600">{{ $reg->terlambat }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-gray-600">{{ $reg->cabut }}</td>
+                            <td class="px-4 py-3 text-center font-semibold text-pink-600">{{ $reg->bolos }}</td>
                             <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-200">{{ $reg->total }}</td>
                             <td class="px-4 py-3 text-center">
                                 <span class="px-2 py-1 text-xs font-medium rounded-full

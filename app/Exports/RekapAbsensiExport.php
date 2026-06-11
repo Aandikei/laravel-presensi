@@ -56,6 +56,8 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
                 $a->registrasi->siswa->nisn ?? '-',
                 $a->status,
                 $a->keterangan ?? '-',
+                $a->waktu_input ? \Carbon\Carbon::parse($a->waktu_input)->format('H:i') : '-',
+                $a->durasi_terlambat ? $a->durasi_terlambat . ' mnt' : '-',
             ]);
         }
 
@@ -74,6 +76,8 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
             'NISN',
             'Status',
             'Keterangan',
+            'Waktu Input',
+            'Durasi Terlambat',
         ];
     }
 
@@ -100,6 +104,8 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
             'G' => 15,
             'H' => 14,
             'I' => 25,
+            'J' => 14,
+            'K' => 16,
         ];
     }
 

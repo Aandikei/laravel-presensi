@@ -53,7 +53,7 @@ class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTit
             $izin      = $absensi->where('status', 'Izin')->count();
             $alpa      = $absensi->where('status', 'Alpa')->count();
             $terlambat = $absensi->where('status', 'Terlambat')->count();
-            $cabut     = $absensi->where('status', 'Cabut')->count();
+            $bolos     = $absensi->where('status', 'Bolos')->count();
             $total     = $absensi->count();
 
             $rows->push([
@@ -65,7 +65,7 @@ class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTit
                 $izin,
                 $alpa,
                 $terlambat,
-                $cabut,
+                $bolos,
                 $total,
                 $total > 0 ? round(($hadir / $total) * 100, 1) . '%' : '0%',
             ]);
@@ -85,7 +85,7 @@ class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTit
             'Izin',
             'Alpa',
             'Terlambat',
-            'Cabut',
+            'Bolos',
             'Total',
             '% Kehadiran',
         ];

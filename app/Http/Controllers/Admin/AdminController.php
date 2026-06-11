@@ -76,7 +76,7 @@ class AdminController extends Controller
                 $q->where('instansi_id', $instansi->id_instansi)
             )
             ->where('tanggal', $hariIni)
-            ->whereIn('status', ['Alpa', 'Cabut', 'Terlambat'])
+            ->whereIn('status', ['Alpa', 'Bolos', 'Terlambat'])
             ->latest()
             ->take(10)
             ->get();

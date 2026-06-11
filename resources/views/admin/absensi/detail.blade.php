@@ -76,7 +76,7 @@
             $rekap = $absensi->groupBy('status')->map->count();
         @endphp
         <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-4">
-            @foreach(['Hadir' => 'green', 'Sakit' => 'blue', 'Izin' => 'yellow', 'Alpa' => 'red', 'Terlambat' => 'orange', 'Cabut' => 'gray'] as $status => $color)
+            @foreach(['Hadir' => 'green', 'Sakit' => 'blue', 'Izin' => 'yellow', 'Alpa' => 'red', 'Terlambat' => 'orange', 'Bolos' => 'pink'] as $status => $color)
                 <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
                     <p class="text-2xl font-bold text-{{ $color }}-600">{{ $rekap[$status] ?? 0 }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $status }}</p>
@@ -94,6 +94,7 @@
                         <th class="px-5 py-3">NISN</th>
                         <th class="px-5 py-3">Status</th>
                         <th class="px-5 py-3">Keterangan</th>
+                        <th class="px-5 py-3">Durasi</th>
                         <th class="px-5 py-3">Waktu Input</th>
                     </tr>
                 </thead>
@@ -106,7 +107,7 @@
                                 'Izin'      => 'yellow',
                                 'Alpa'      => 'red',
                                 'Terlambat' => 'orange',
-                                'Cabut'     => 'gray',
+                                'Bolos'     => 'pink',
                             ];
                             $color = $colors[$item->status] ?? 'gray';
                         @endphp
@@ -129,12 +130,15 @@
                                 {{ $item->keterangan ?? '-' }}
                             </td>
                             <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                {{ $item->durasi_terlambat ? $item->durasi_terlambat . ' mnt' : '-' }}
+                            </td>
+                            <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
                                 {{ $item->waktu_input ? \Carbon\Carbon::parse($item->waktu_input)->format('H:i') : '-' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="7" class="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
                                 Belum ada data absensi.
                             </td>
                         </tr>

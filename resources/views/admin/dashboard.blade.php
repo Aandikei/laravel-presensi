@@ -112,7 +112,7 @@
                 @if($totalAbsensi > 0)
                     <canvas id="chartDistribusi" height="200"></canvas>
                     <div class="mt-4 space-y-2">
-                        @foreach(['Hadir' => 'green', 'Sakit' => 'blue', 'Izin' => 'yellow', 'Alpa' => 'red', 'Terlambat' => 'orange', 'Cabut' => 'gray'] as $status => $color)
+                        @foreach(['Hadir' => 'green', 'Sakit' => 'blue', 'Izin' => 'yellow', 'Alpa' => 'red', 'Terlambat' => 'orange', 'Bolos' => 'pink'] as $status => $color)
                             @if(($distribusi[$status] ?? 0) > 0)
                                 <div class="flex items-center justify-between text-sm">
                                     <div class="flex items-center gap-2">
@@ -139,7 +139,7 @@
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         Absensi Bermasalah Hari Ini
                     </h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alpa, Cabut, Terlambat</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alpa, Bolos, Terlambat</p>
                 </div>
                 <a href="{{ route('admin.absensi.index') }}"
                     class="text-sm text-purple-600 dark:text-purple-400 hover:underline">
@@ -164,6 +164,7 @@
                                 <th class="px-5 py-3">Kelas</th>
                                 <th class="px-5 py-3">Mata Pelajaran</th>
                                 <th class="px-5 py-3">Status</th>
+                                <th class="px-5 py-3">Durasi</th>
                                 <th class="px-5 py-3">Jam</th>
                             </tr>
                         </thead>
@@ -172,7 +173,7 @@
                                 @php
                                     $colors = [
                                         'Alpa'      => 'red',
-                                        'Cabut'     => 'gray',
+                                        'Bolos'     => 'pink',
                                         'Terlambat' => 'yellow',
                                     ];
                                     $color = $colors[$absen->status] ?? 'gray';
@@ -193,6 +194,9 @@
                                             dark:bg-{{ $color }}-800 dark:text-{{ $color }}-200">
                                             {{ $absen->status }}
                                         </span>
+                                    </td>
+                                    <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $absen->durasi_terlambat ? $absen->durasi_terlambat . ' mnt' : '-' }}
                                     </td>
                                     <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
                                         {{ substr($absen->jadwal->jam_mulai, 0, 5) }}
@@ -240,7 +244,7 @@
         const distribusi = @json($distribusi);
         const statusColors = {
             'Hadir': '#16a34a', 'Sakit': '#2563eb', 'Izin': '#d97706',
-            'Alpa': '#dc2626', 'Terlambat': '#ea580c', 'Cabut': '#6b7280'
+            'Alpa': '#dc2626', 'Terlambat': '#ea580c', 'Bolos': '#ec4899'
         };
         const labels = Object.keys(distribusi);
         new Chart(document.getElementById('chartDistribusi'), {

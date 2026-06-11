@@ -60,7 +60,7 @@ class OrangTuaDashboardController extends Controller
             'izin'      => $absensi->where('status', 'Izin')->count(),
             'alpa'      => $absensi->where('status', 'Alpa')->count(),
             'terlambat' => $absensi->where('status', 'Terlambat')->count(),
-            'cabut'     => $absensi->where('status', 'Cabut')->count(),
+            'bolos'     => $absensi->where('status', 'Bolos')->count(),
             'total'     => $absensi->count(),
         ];
         $stats['persen'] = $stats['total'] > 0
@@ -118,7 +118,7 @@ class OrangTuaDashboardController extends Controller
             'izin'      => $absensi->where('status', 'Izin')->count(),
             'alpa'      => $absensi->where('status', 'Alpa')->count(),
             'terlambat' => $absensi->where('status', 'Terlambat')->count(),
-            'cabut'     => $absensi->where('status', 'Cabut')->count(),
+            'bolos'     => $absensi->where('status', 'Bolos')->count(),
             'total'     => $absensi->count(),
         ];
         $stats['persen'] = $stats['total'] > 0
