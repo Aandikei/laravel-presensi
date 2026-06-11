@@ -74,16 +74,21 @@
 
             {{-- Kehadiran Hari Ini --}}
             <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 border-l-4
-                {{ $persenHadir >= 75 ? 'border-green-500' : ($persenHadir >= 50 ? 'border-yellow-500' : 'border-red-500') }}">
+                {{ $namaLibur ? 'border-gray-400' : ($persenHadir >= 75 ? 'border-green-500' : ($persenHadir >= 50 ? 'border-yellow-500' : 'border-red-500')) }}">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kehadiran Hari Ini</p>
-                        <p class="text-3xl font-bold text-gray-700 dark:text-gray-200 mt-1">{{ $persenHadir }}%</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $totalHadir }}/{{ $totalAbsensi }} siswa hadir</p>
+                        @if($namaLibur)
+                            <p class="text-3xl font-bold text-gray-400 dark:text-gray-500 mt-1">—</p>
+                            <p class="text-xs text-gray-400 mt-1">Hari libur ({{ $namaLibur }})</p>
+                        @else
+                            <p class="text-3xl font-bold text-gray-700 dark:text-gray-200 mt-1">{{ $persenHadir }}%</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ $totalHadir }}/{{ $totalAbsensi }} siswa hadir</p>
+                        @endif
                     </div>
                     <div class="p-3 rounded-full
-                        {{ $persenHadir >= 75 ? 'bg-green-100 dark:bg-green-900/30' : ($persenHadir >= 50 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-red-100 dark:bg-red-900/30') }}">
-                        <svg class="w-6 h-6 {{ $persenHadir >= 75 ? 'text-green-500' : ($persenHadir >= 50 ? 'text-yellow-500' : 'text-red-500') }}"
+                        {{ $namaLibur ? 'bg-gray-100 dark:bg-gray-700' : ($persenHadir >= 75 ? 'bg-green-100 dark:bg-green-900/30' : ($persenHadir >= 50 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-red-100 dark:bg-red-900/30')) }}">
+                        <svg class="w-6 h-6 {{ $namaLibur ? 'text-gray-400' : ($persenHadir >= 75 ? 'text-green-500' : ($persenHadir >= 50 ? 'text-yellow-500' : 'text-red-500')) }}"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
@@ -109,7 +114,11 @@
                 <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
                     Distribusi Status Hari Ini
                 </h3>
-                @if($totalAbsensi > 0)
+                @if($namaLibur)
+                    <div class="flex items-center justify-center h-40 text-gray-400 dark:text-gray-500">
+                        <p class="text-sm">Hari libur ({{ $namaLibur }})</p>
+                    </div>
+                @elseif($totalAbsensi > 0)
                     <canvas id="chartDistribusi" height="200"></canvas>
                     <div class="mt-4 space-y-2">
                         @foreach(['Hadir' => 'green', 'Sakit' => 'blue', 'Izin' => 'yellow', 'Alpa' => 'red', 'Terlambat' => 'orange', 'Bolos' => 'pink'] as $status => $color)
@@ -147,7 +156,15 @@
                 </a>
             </div>
 
-            @if($absensiTerbaru->isEmpty())
+            @if($namaLibur)
+                <div class="px-5 py-8 text-center text-gray-400 dark:text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm">Hari libur ({{ $namaLibur }}), tidak ada absensi.</p>
+                </div>
+            @elseif($absensiTerbaru->isEmpty())
                 <div class="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
                     <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

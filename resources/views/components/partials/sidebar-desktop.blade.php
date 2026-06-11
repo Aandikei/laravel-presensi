@@ -212,7 +212,7 @@
 
     {{-- Super Admin Only --}}
     @role('super_admin')
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-superadmin', @json(request()->routeIs('superadmin.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-superadmin') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-superadmin', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300">
           <span>Super Admin</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -254,7 +254,7 @@
 
     {{-- Admin Only --}}
     @role('admin')
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-masterdata', @json(request()->routeIs('admin.tahun-ajaran.*') || request()->routeIs('admin.guru.*') || request()->routeIs('admin.siswa.*') || request()->routeIs('admin.kelas.*') || request()->routeIs('admin.naik-kelas.*') || request()->routeIs('admin.mata-pelajaran.*') || request()->routeIs('admin.kurikulum.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-masterdata') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-masterdata', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Master Data</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -364,7 +364,7 @@
         </ul>
       </div>
 
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-akademik', @json(request()->routeIs('admin.jadwal.*') || request()->routeIs('admin.registrasi.*') || request()->routeIs('admin.hari-libur.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-akademik') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-akademik', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Akademik</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -417,7 +417,7 @@
         </ul>
       </div>
 
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-pelanggaran', @json(request()->routeIs('admin.master-poin.*') || request()->routeIs('admin.log-poin.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-pelanggaran') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-pelanggaran', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Pelanggaran</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -456,7 +456,7 @@
         </ul>
       </div>
 
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-monitoring', @json(request()->routeIs('admin.absensi.*') || request()->routeIs('admin.laporan.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-monitoring') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-monitoring', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Monitoring</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -495,7 +495,7 @@
         </ul>
       </div>
 
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-pengaturan', @json(request()->routeIs('admin.settings.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-pengaturan') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-pengaturan', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Pengaturan</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -524,7 +524,7 @@
 
     {{-- Wali Kelas --}}
     @if(auth()->user()->hasRole('wali_kelas') || auth()->user()->guru?->isWaliKelas())
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-walikelas', @json(request()->routeIs('guru.wali-kelas.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-walikelas') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-walikelas', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Wali Kelas</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -564,7 +564,7 @@
 
     {{-- Guru & Wali Kelas --}}
     @role('guru|wali_kelas')
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-mengajar', @json(request()->routeIs('guru.absensi.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-mengajar') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-mengajar', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Mengajar</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -609,7 +609,7 @@
 
     {{-- Siswa --}}
     @role('siswa')
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-siswa', @json(request()->routeIs('siswa.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-siswa') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-siswa', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Menu</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -639,7 +639,7 @@
 
     {{-- Orang Tua --}}
     @role('orang_tua')
-      <div class="mt-4" x-data="{ open: sidebarState('sidebar-orangtua', @json(request()->routeIs('orangtua.*'))) }">
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-orangtua') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-orangtua', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300">
           <span>Menu</span>
           <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
@@ -669,3 +669,6 @@
   </div>
 
 </aside>
+
+
+

@@ -24,20 +24,20 @@ class AdminController extends Controller
         // Kehadiran hari ini
         $hariIni       = now()->toDateString();
         $namaLibur     = HariLibur::getNamaLibur($hariIni, $instansi->id_instansi);
-        $totalAbsensi  = Absensi::whereHas('registrasi.kelas', fn($q) =>
+        $totalAbsensi  = $namaLibur ? 0 : Absensi::whereHas('registrasi.kelas', fn($q) =>
                 $q->where('instansi_id', $instansi->id_instansi)
             )
             ->where('tanggal', $hariIni)
             ->count();
-        $totalHadir    = Absensi::whereHas('registrasi.kelas', fn($q) =>
+        $totalHadir    = $namaLibur ? 0 : Absensi::whereHas('registrasi.kelas', fn($q) =>
                 $q->where('instansi_id', $instansi->id_instansi)
             )
             ->where('tanggal', $hariIni)
             ->where('status', 'Hadir')
             ->count();
-        $persenHadir   = $totalAbsensi > 0
+        $persenHadir   = $namaLibur ? 0 : ($totalAbsensi > 0
             ? round(($totalHadir / $totalAbsensi) * 100, 1)
-            : 0;
+            : 0);
 
         // Chart: kehadiran 7 hari terakhir
         $chartData = [];
@@ -67,7 +67,7 @@ class AdminController extends Controller
         }
 
         // Absensi terbaru hari ini
-        $absensiTerbaru = Absensi::with([
+        $absensiTerbaru = $namaLibur ? collect() : Absensi::with([
                 'registrasi.siswa',
                 'registrasi.kelas',
                 'jadwal.kurikulum.mataPelajaran'
@@ -82,7 +82,7 @@ class AdminController extends Controller
             ->get();
 
         // Distribusi status hari ini
-        $distribusi = Absensi::whereHas('registrasi.kelas', fn($q) =>
+        $distribusi = $namaLibur ? collect() : Absensi::whereHas('registrasi.kelas', fn($q) =>
                 $q->where('instansi_id', $instansi->id_instansi)
             )
             ->where('tanggal', $hariIni)
