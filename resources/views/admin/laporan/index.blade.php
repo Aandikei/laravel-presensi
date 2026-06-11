@@ -17,9 +17,14 @@
                     Rekap kehadiran siswa per kelas per bulan
                 </p>
                 <form method="GET" action="{{ route('admin.laporan.rekap-absensi') }}">
+                    @if ($errors->any())
+                        <div class="px-4 py-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
                     <label class="block text-sm mb-3">
                         <span class="text-gray-700 dark:text-gray-400">Kelas</span>
-                        <select name="kelas_id"
+                        <select name="kelas_id" required
                             class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($kelas as $k)

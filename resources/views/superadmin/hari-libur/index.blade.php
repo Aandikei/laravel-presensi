@@ -13,52 +13,63 @@
                 {{ session('success') }}
             </div>
         @endif
+        @if(session('error'))
+            <div class="px-4 py-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
+                {{ session('error') }}
+            </div>
+        @endif
 
         {{-- Form Tambah Libur Nasional (Range Tanggal) --}}
-        <div class="max-w-lg p-6 mb-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
-            <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
-                Tambah Libur Nasional
-            </h3>
-            <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">
-                Bisa input range tanggal (contoh: libur Idul Fitri 1-7 hari sekaligus)
-            </p>
+        <div class="p-6 mb-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                        Tambah Libur Nasional
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Bisa input range tanggal (contoh: libur Idul Fitri 1-7 hari sekaligus)
+                    </p>
+                </div>
+            </div>
             <form method="POST" action="{{ route('superadmin.hari-libur.store') }}">
                 @csrf
 
-                <label class="block text-sm mb-4">
-                    <span class="text-gray-700 dark:text-gray-400">Nama Libur</span>
-                    <input type="text" name="nama_libur" value="{{ old('nama_libur') }}"
-                        placeholder="contoh: Idul Fitri"
-                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nama_libur') border-red-500 @enderror" />
-                    @error('nama_libur')
-                        <span class="text-xs text-red-500">{{ $message }}</span>
-                    @enderror
-                </label>
+                <div class="grid gap-4 md:grid-cols-3">
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Nama Libur</span>
+                        <input type="text" name="nama_libur" value="{{ old('nama_libur') }}"
+                            placeholder="contoh: Idul Fitri"
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('nama_libur') border-red-500 @enderror" />
+                        @error('nama_libur')
+                            <span class="text-xs text-red-500">{{ $message }}</span>
+                        @enderror
+                    </label>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <label class="block text-sm mb-4">
+                    <label class="block text-sm">
                         <span class="text-gray-700 dark:text-gray-400">Tanggal Mulai</span>
                         <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('tanggal_mulai') border-red-500 @enderror" />
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('tanggal_mulai') border-red-500 @enderror" />
                         @error('tanggal_mulai')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
                     </label>
 
-                    <label class="block text-sm mb-4">
+                    <label class="block text-sm">
                         <span class="text-gray-700 dark:text-gray-400">Tanggal Selesai</span>
                         <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('tanggal_selesai') border-red-500 @enderror" />
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('tanggal_selesai') border-red-500 @enderror" />
                         @error('tanggal_selesai')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
                     </label>
                 </div>
 
-                <button type="submit"
-                    class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
-                    Tambah Libur Nasional
-                </button>
+                <div class="mt-4">
+                    <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                        Tambah Libur Nasional
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -67,7 +78,7 @@
             <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
                 Daftar Libur Nasional
             </h3>
-            <table id="tabel-libur-nasional" class="w-full">
+            <table id="tabel-libur-nasional" class="w-full whitespace-nowrap">
                 <thead>
                     <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                         <th class="px-4 py-3">#</th>

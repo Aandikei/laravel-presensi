@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SekolahController;
-use App\Http\Controllers\SuperAdmin\RoleController;
 use App\Http\Controllers\SuperAdmin\HariLiburController;
 
 Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('superadmin')->name('superadmin.')->group(function () {
@@ -17,11 +16,6 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('superadmin'
     // Assign admin to sekolah
     Route::get('sekolah/{instansi}/assign-admin', [SekolahController::class, 'assignAdmin'])->name('sekolah.assign-admin');
     Route::post('sekolah/{instansi}/assign-admin', [SekolahController::class, 'storeAdmin'])->name('sekolah.store-admin');
-
-    // Manage Roles
-    Route::resource('roles', RoleController::class)->parameters([
-        'roles' => 'role',
-    ])->except(['show']);
 
     // Hari Libur Nasional
     Route::get('hari-libur', [HariLiburController::class, 'index'])->name('hari-libur.index');

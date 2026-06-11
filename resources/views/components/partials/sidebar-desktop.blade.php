@@ -220,20 +220,6 @@
           </svg>
         </button>
         <ul x-show="open" x-transition:enter="transition-all ease-in-out duration-300" x-transition:enter-start="opacity-25 max-h-0" x-transition:enter-end="opacity-100 max-h-xl" x-transition:leave="transition-all ease-in-out duration-300" x-transition:leave-start="opacity-100 max-h-xl" x-transition:leave-end="opacity-0 max-h-0" class="overflow-hidden">
-        {{-- Dashboard --}}
-        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
-          @php $isDashboard = request()->routeIs('superadmin.dashboard'); @endphp
-          @if ($isDashboard)
-            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
-          @endif
-          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isDashboard ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
-            href="{{ route('superadmin.dashboard') }}">
-            <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-              <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-            </svg>
-            <span class="ml-4">Dashboard</span>
-          </a>
-        </li>
         {{-- Sekolah --}}
         <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
           @php $isSekolah = request()->routeIs('superadmin.sekolah.*'); @endphp
@@ -241,7 +227,7 @@
             <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
           @endif
           <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isSekolah ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
-            href="{{ route('superadmin.dashboard') }}">
+            href="{{ route('superadmin.sekolah.index') }}">
             <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
               <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
             </svg>
@@ -260,20 +246,6 @@
               <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             <span class="ml-4">Libur Nasional</span>
-          </a>
-        </li>
-        {{-- Roles --}}
-        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
-          @php $isRoles = request()->routeIs('superadmin.roles.*'); @endphp
-          @if ($isRoles)
-            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
-          @endif
-          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isRoles ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
-            href="{{ route('superadmin.roles.index') }}">
-            <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-              <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-            </svg>
-            <span class="ml-4">Manage Roles</span>
           </a>
         </li>
         </ul>

@@ -12,11 +12,11 @@ export default {
 
     safelist: [
         {
-            pattern: /^(bg|text|border|ring)-(green|blue|yellow|red|orange|pink|gray)-(50|100|200|300|400|500|600|700|800|900)$/,
+            pattern: /^(bg|text|border|ring)-(green|blue|yellow|red|orange|pink|gray|teal|cyan|amber|rose)-(50|100|200|300|400|500|600|700|800|900)$/,
             variants: ['dark'],
         },
         {
-            pattern: /^(bg|text|border|ring)-(green|blue|yellow|red|orange|pink|gray)-(50|100|200|300|400|500|600|700|800|900)$/,
+            pattern: /^(bg|text|border|ring)-(green|blue|yellow|red|orange|pink|gray|teal|cyan|amber|rose)-(50|100|200|300|400|500|600|700|800|900)$/,
             variants: ['hover', 'dark'],
         },
     ],
