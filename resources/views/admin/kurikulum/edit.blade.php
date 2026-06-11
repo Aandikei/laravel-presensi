@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.kurikulum.update', $kurikulum) }}">
                 @csrf
                 @method('PUT')
@@ -20,7 +20,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Kelas</span>
                     <select name="kelas_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                         @foreach($kelas as $k)
                             <option value="{{ $k->id_kelas }}"
                                 {{ old('kelas_id', $kurikulum->kelas_id) == $k->id_kelas ? 'selected' : '' }}>
@@ -33,7 +33,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Mata Pelajaran</span>
                     <select name="mapel_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('mapel_id') border-red-500 @enderror">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('mapel_id') border-red-500 @enderror">
                         @foreach($mapel as $m)
                             <option value="{{ $m->id_mapel }}"
                                 {{ old('mapel_id', $kurikulum->mapel_id) == $m->id_mapel ? 'selected' : '' }}>
@@ -50,7 +50,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Guru Pengampu</span>
                     <select name="guru_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                         @foreach($guru as $g)
                             <option value="{{ $g->id_guru }}"
                                 {{ old('guru_id', $kurikulum->guru_id) == $g->id_guru ? 'selected' : '' }}>

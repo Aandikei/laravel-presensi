@@ -8,7 +8,7 @@
 
         {{-- Tambah di atas filter, di orangtua/absensi.blade.php dan orangtua/poin.blade.php --}}
         @if ($anak->count() > 1)
-            <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs flex items-center gap-4">
+            <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 flex items-center gap-4">
                 <span class="text-sm text-gray-700 dark:text-gray-400 font-medium">Anak:</span>
                 <div class="flex gap-2 flex-wrap">
                     @foreach ($anak as $a)
@@ -26,11 +26,11 @@
 
         {{-- Filter --}}
         <form method="GET" action="{{ route('siswa.poin') }}"
-            class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs flex flex-wrap gap-4 items-end">
+            class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 flex flex-wrap gap-4 items-end">
             <input type="hidden" name="anak_id" value="{{ $anakDipilih?->id_siswa }}">
             <label class="block text-sm">
                 <span class="text-gray-700 dark:text-gray-400">Bulan</span>
-                <select name="bulan" class="block mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                <select name="bulan" class="block mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                     @for ($i = 1; $i <= 12; $i++)
                         <option value="{{ $i }}" {{ $bulan == $i ? 'selected' : '' }}>
                             {{ \Carbon\Carbon::create()->month($i)->locale('id')->monthName }}
@@ -40,7 +40,7 @@
             </label>
             <label class="block text-sm">
                 <span class="text-gray-700 dark:text-gray-400">Tahun</span>
-                <select name="tahun" class="block mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                <select name="tahun" class="block mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                     @for ($y = now()->year; $y >= 2020; $y--)
                         <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}
                         </option>
@@ -54,7 +54,7 @@
         </form>
 
         {{-- Total Poin --}}
-        <div class="mb-4 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
+        <div class="mb-4 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-center">
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Poin
                 {{ ucfirst($bulanNama) }} {{ $tahun }}</p>
             <p
@@ -68,11 +68,11 @@
         </div>
 
         {{-- Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
             <table class="w-full">
                 <thead>
                     <tr
-                        class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                        class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                         <th class="px-5 py-3">Tanggal</th>
                         <th class="px-5 py-3">Pelanggaran</th>
                         <th class="px-5 py-3">Poin</th>
@@ -82,7 +82,7 @@
                 </thead>
                 <tbody class="divide-y dark:divide-gray-700">
                     @forelse($logPoin as $log)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                             <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
                                 {{ \Carbon\Carbon::parse($log->tanggal)->format('d M Y') }}
                             </td>

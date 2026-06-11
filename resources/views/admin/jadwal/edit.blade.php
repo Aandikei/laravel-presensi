@@ -8,7 +8,7 @@
                 class="text-sm text-purple-600 hover:underline dark:text-purple-400">← Kembali</a>
         </div>
 
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.jadwal.update', $jadwal) }}">
                 @csrf
                 @method('PUT')
@@ -25,7 +25,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Hari</span>
                     <select name="hari"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                         @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'] as $hari)
                             <option value="{{ $hari }}" {{ old('hari', $jadwal->hari) == $hari ? 'selected' : '' }}>{{ $hari }}</option>
                         @endforeach

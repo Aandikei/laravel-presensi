@@ -11,7 +11,7 @@
 
         {{-- Alert Hari Libur --}}
         @if($namaLibur)
-            <div class="mb-6 px-4 py-3 text-sm text-blue-700 bg-blue-100 rounded-lg dark:bg-blue-800 dark:text-blue-200 flex items-center gap-2">
+            <div class="mb-6 px-4 py-3 text-sm text-blue-700 bg-blue-100 rounded-lg dark:bg-blue-900/50 dark:text-blue-300 dark:border dark:border-blue-800 flex items-center gap-2">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -24,7 +24,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
             {{-- Total Guru --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs border-l-4 border-blue-500">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 border-l-4 border-blue-500">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Guru</p>
@@ -40,7 +40,7 @@
             </div>
 
             {{-- Total Siswa --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs border-l-4 border-green-500">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 border-l-4 border-green-500">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Siswa</p>
@@ -56,7 +56,7 @@
             </div>
 
             {{-- Total Kelas --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs border-l-4 border-purple-500">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 border-l-4 border-purple-500">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Kelas</p>
@@ -73,7 +73,7 @@
             </div>
 
             {{-- Kehadiran Hari Ini --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs border-l-4
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 border-l-4
                 {{ $persenHadir >= 75 ? 'border-green-500' : ($persenHadir >= 50 ? 'border-yellow-500' : 'border-red-500') }}">
                 <div class="flex items-center justify-between">
                     <div>
@@ -97,7 +97,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
 
             {{-- Line Chart --}}
-            <div class="lg:col-span-2 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="lg:col-span-2 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
                     Tren Kehadiran 7 Hari Terakhir
                 </h3>
@@ -105,7 +105,7 @@
             </div>
 
             {{-- Donut Chart --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
                     Distribusi Status Hari Ini
                 </h3>
@@ -133,7 +133,7 @@
         </div>
 
         {{-- Absensi Bermasalah Hari Ini --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
@@ -159,7 +159,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                                 <th class="px-5 py-3">Siswa</th>
                                 <th class="px-5 py-3">Kelas</th>
                                 <th class="px-5 py-3">Mata Pelajaran</th>
@@ -178,7 +178,7 @@
                                     ];
                                     $color = $colors[$absen->status] ?? 'gray';
                                 @endphp
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
                                     <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">
                                         {{ $absen->registrasi->siswa->nama_siswa }}
                                     </td>

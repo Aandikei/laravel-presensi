@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.mata-pelajaran.update', $mataPelajaran) }}">
                 @csrf
                 @method('PUT')
@@ -37,7 +37,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Kelompok</span>
                     <select name="kelompok"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                         <option value="Umum" {{ old('kelompok', $mataPelajaran->kelompok) == 'Umum' ? 'selected' : '' }}>Umum</option>
                         <option value="Jurusan" {{ old('kelompok', $mataPelajaran->kelompok) == 'Jurusan' ? 'selected' : '' }}>Jurusan</option>
                         <option value="Muatan Lokal" {{ old('kelompok', $mataPelajaran->kelompok) == 'Muatan Lokal' ? 'selected' : '' }}>Muatan Lokal</option>

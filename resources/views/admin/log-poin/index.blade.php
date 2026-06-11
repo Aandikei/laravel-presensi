@@ -20,7 +20,7 @@
         <div class="grid gap-6 lg:grid-cols-3 mb-6">
 
             {{-- Form Tambah Poin --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Tambah Poin Pelanggaran
                 </h3>
@@ -30,7 +30,7 @@
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Siswa</span>
                         <select name="siswa_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('siswa_id') border-red-500 @enderror">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('siswa_id') border-red-500 @enderror">
                             <option value="">-- Pilih Siswa --</option>
                             @foreach($siswa as $s)
                                 <option value="{{ $s->id_siswa }}" {{ old('siswa_id') == $s->id_siswa ? 'selected' : '' }}>
@@ -46,7 +46,7 @@
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Jenis Pelanggaran</span>
                         <select name="poin_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('poin_id') border-red-500 @enderror">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('poin_id') border-red-500 @enderror">
                             <option value="">-- Pilih Pelanggaran --</option>
                             @foreach($masterPoin as $poin)
                                 <option value="{{ $poin->id_poin }}" {{ old('poin_id') == $poin->id_poin ? 'selected' : '' }}>
@@ -84,12 +84,12 @@
             </div>
 
             {{-- Tabel Log --}}
-            <div class="lg:col-span-2 bg-white rounded-lg shadow-xs dark:bg-gray-800 p-4">
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 p-4">
 
                 {{-- Filter --}}
                 <div class="mb-4 flex items-center gap-3">
                     <label class="text-sm text-gray-700 dark:text-gray-400">Filter Siswa:</label>
-                    <select id="filter-siswa" class="text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                    <select id="filter-siswa" class="text-sm dark:bg-gray-700 dark:text-gray-300">
                         <option value="">Semua Siswa</option>
                         @foreach($siswa as $s)
                             <option value="{{ $s->id_siswa }}">{{ $s->nama_siswa }}</option>
@@ -97,21 +97,23 @@
                     </select>
                 </div>
 
-                <table id="tabel-log-poin" class="w-full">
-                    <thead>
-                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
-                            <th class="px-4 py-3">#</th>
-                            <th class="px-4 py-3">Nama Siswa</th>
-                            <th class="px-4 py-3">Pelanggaran</th>
-                            <th class="px-4 py-3">Poin</th>
-                            <th class="px-4 py-3">Tanggal</th>
-                            <th class="px-4 py-3">Keterangan</th>
-                            <th class="px-4 py-3">Dicatat Oleh</th>
-                            <th class="px-4 py-3">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800"></tbody>
-                </table>
+                <div class="w-full overflow-x-auto">
+                    <table id="tabel-log-poin" class="w-full whitespace-nowrap">
+                        <thead>
+                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
+                                <th class="px-4 py-3">#</th>
+                                <th class="px-4 py-3">Nama Siswa</th>
+                                <th class="px-4 py-3">Pelanggaran</th>
+                                <th class="px-4 py-3">Poin</th>
+                                <th class="px-4 py-3">Tanggal</th>
+                                <th class="px-4 py-3">Keterangan</th>
+                                <th class="px-4 py-3">Dicatat Oleh</th>
+                                <th class="px-4 py-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

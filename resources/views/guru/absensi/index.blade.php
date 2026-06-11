@@ -23,13 +23,13 @@
         @endif
 
         @if($jadwalHariIni->isEmpty())
-            <div class="p-8 text-center bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="p-8 text-center bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 <p class="text-gray-500 dark:text-gray-400">Tidak ada jadwal mengajar hari ini.</p>
             </div>
         @else
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 @foreach($jadwalHariIni as $jadwal)
-                    <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs border-l-4
+                    <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 border-l-4
                         {{ $jadwal->sudah_input ? 'border-green-500' : 'border-yellow-500' }}">
                         <p class="font-semibold text-gray-700 dark:text-gray-200">
                             {{ $jadwal->kurikulum->mataPelajaran->nama_mapel }}

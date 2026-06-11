@@ -20,7 +20,7 @@
         <div class="grid gap-6 lg:grid-cols-2 mb-6">
 
             {{-- Form Tambah Libur Sekolah (Range Tanggal) --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Tambah Hari Libur Sekolah
                 </h3>
@@ -68,7 +68,7 @@
             </div>
 
             {{-- Libur Nasional Referensi --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
@@ -132,13 +132,13 @@
         </div>
 
         {{-- Tabel Hari Libur Sekolah --}}
-        <div class="bg-white rounded-lg shadow-xs dark:bg-gray-800 p-4">
+        <div class="bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 p-4">
             <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
                 Daftar Hari Libur Sekolah Ini
             </h3>
             <table id="tabel-libur" class="w-full">
                 <thead>
-                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                         <th class="px-4 py-3">#</th>
                         <th class="px-4 py-3">Tanggal</th>
                         <th class="px-4 py-3">Nama Libur</th>

@@ -23,7 +23,7 @@
         @endif
 
         {{-- Form Tambah Poin --}}
-        <div class="p-5 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+        <div class="p-5 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Tambah Poin Pelanggaran</h3>
             <form method="POST" action="{{ route('guru.wali-kelas.tambah-poin') }}" class="flex flex-wrap items-end gap-4">
                 @csrf
@@ -62,9 +62,9 @@
         {{-- Tabel Siswa --}}
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto">
-                <table class="w-full whitespace-no-wrap">
+                <table class="w-full whitespace-nowrap">
                     <thead>
-                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                             <th class="px-4 py-3">No</th>
                             <th class="px-4 py-3">NISN</th>
                             <th class="px-4 py-3">Nama Siswa</th>

@@ -9,7 +9,7 @@
         </div>
 
         {{-- Info --}}
-        <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs flex items-center gap-6 text-sm">
+        <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 flex items-center gap-6 text-sm">
             <div>
                 <p class="text-gray-500 dark:text-gray-400">Dari</p>
                 <p class="font-semibold text-gray-700 dark:text-gray-200">
@@ -28,7 +28,7 @@
         </div>
 
         @if($kelasAsal->isEmpty())
-            <div class="p-8 text-center bg-white dark:bg-gray-800 rounded-lg shadow-xs text-gray-500">
+            <div class="p-8 text-center bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-gray-500">
                 Tidak ada kelas di tahun ajaran asal.
             </div>
         @else
@@ -46,7 +46,7 @@
                     $kelasTujuanTetap  = $semuaKelas[$kelas->tingkat] ?? collect();
                 @endphp
 
-                <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+                <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
                     {{-- Header Kelas --}}
                     <div class="px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -68,7 +68,7 @@
                                 {{-- Bulk pilih kelas naik --}}
                                 @if($kelasTujuanNaik->isNotEmpty())
                                     <select onchange="bulkSetKelas('{{ $kelas->id_kelas }}', 'naik', this.value)"
-                                        class="text-xs form-select dark:bg-gray-700 dark:text-gray-300 py-1">
+                                        class="text-xs dark:bg-gray-700 dark:text-gray-300 py-1">
                                         <option value="">Bulk Naik → Pilih Kelas</option>
                                         @foreach($kelasTujuanNaik as $kt)
                                             <option value="{{ $kt->id_kelas }}">{{ $kt->nama_kelas }}</option>
@@ -79,7 +79,7 @@
                                 {{-- Bulk pilih kelas tidak naik --}}
                                 @if($kelasTujuanTetap->isNotEmpty())
                                     <select onchange="bulkSetKelas('{{ $kelas->id_kelas }}', 'tidak_naik', this.value)"
-                                        class="text-xs form-select dark:bg-gray-700 dark:text-gray-300 py-1">
+                                        class="text-xs dark:bg-gray-700 dark:text-gray-300 py-1">
                                         <option value="">Bulk Tidak Naik → Pilih Kelas</option>
                                         @foreach($kelasTujuanTetap as $kt)
                                             <option value="{{ $kt->id_kelas }}">{{ $kt->nama_kelas }}</option>
@@ -113,7 +113,7 @@
                     {{-- Daftar Siswa --}}
                     <table class="w-full">
                         <thead>
-                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                                 <th class="px-4 py-3">No</th>
                                 <th class="px-4 py-3">Nama Siswa</th>
                                 <th class="px-4 py-3">NISN</th>
@@ -126,7 +126,7 @@
                                 @php
                                     $sudah = in_array($reg->siswa_id, $sudahTerdaftar);
                                 @endphp
-                                <tr class="{{ $sudah ? 'opacity-50' : 'hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+                                <tr class="{{ $sudah ? 'opacity-50' : 'hover:bg-gray-50 dark:hover:bg-gray-700/70' }}">
                                     <td class="px-4 py-3 text-sm text-gray-500">{{ $i + 1 }}</td>
                                     <td class="px-4 py-3 font-medium text-gray-700 dark:text-gray-200">
                                         {{ $reg->siswa->nama_siswa }}
@@ -145,7 +145,7 @@
                                         @else
                                             <select
                                                 name="siswa[{{ $reg->siswa_id }}][action]"
-                                                class="action-select action-select-{{ $kelas->id_kelas }} text-xs form-select dark:bg-gray-700 dark:text-gray-300 py-1"
+                                                class="action-select action-select-{{ $kelas->id_kelas }} text-xs dark:bg-gray-700 dark:text-gray-300 py-1"
                                                 data-siswa-id="{{ $reg->siswa_id }}"
                                                 data-tingkat="{{ $kelas->tingkat }}"
                                                 onchange="onActionChange(this)">
@@ -173,7 +173,7 @@
                                             {{-- Default: dropdown kelas naik --}}
                                             <select
                                                 name="siswa[{{ $reg->siswa_id }}][kelas_tujuan_id]"
-                                                class="kelas-select kelas-select-{{ $kelas->id_kelas }} text-xs form-select dark:bg-gray-700 dark:text-gray-300 py-1"
+                                                class="kelas-select kelas-select-{{ $kelas->id_kelas }} text-xs dark:bg-gray-700 dark:text-gray-300 py-1"
                                                 data-siswa-id="{{ $reg->siswa_id }}">
                                                 <option value="">-- Pilih Kelas --</option>
                                                 @foreach($kelasTujuanNaik as $kt)
@@ -246,7 +246,7 @@
             }
 
             let html = `<select name="siswa[${siswaId}][kelas_tujuan_id]"
-                class="text-xs form-select dark:bg-gray-700 dark:text-gray-300 py-1">
+                class="text-xs dark:bg-gray-700 dark:text-gray-300 py-1">
                 <option value="">-- Pilih Kelas --</option>`;
             opsi.forEach(k => {
                 html += `<option value="${k.id_kelas}">${k.nama_kelas}</option>`;

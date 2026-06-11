@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.guru.update', $guru) }}">
                 @csrf
                 @method('PUT')
@@ -61,7 +61,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Jenis Kelamin</span>
                     <select name="jenis_kelamin"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                         <option value="L" {{ old('jenis_kelamin', $guru->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
                         <option value="P" {{ old('jenis_kelamin', $guru->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
                     </select>

@@ -8,7 +8,7 @@
                 class="text-sm text-purple-600 hover:underline dark:text-purple-400">← Kembali</a>
         </div>
 
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.master-poin.store') }}">
                 @csrf
 

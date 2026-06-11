@@ -12,14 +12,14 @@
             </a>
         </div>
 
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.kurikulum.store') }}">
                 @csrf
 
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Kelas</span>
                     <select name="kelas_id" id="kelas_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('kelas_id') border-red-500 @enderror">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('kelas_id') border-red-500 @enderror">
                         <option value="">-- Pilih Kelas --</option>
                         @foreach($kelas as $k)
                             <option value="{{ $k->id_kelas }}"
@@ -36,7 +36,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Mata Pelajaran</span>
                     <select name="mapel_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('mapel_id') border-red-500 @enderror">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('mapel_id') border-red-500 @enderror">
                         <option value="">-- Pilih Mata Pelajaran --</option>
                         @foreach($mapel as $m)
                             <option value="{{ $m->id_mapel }}"
@@ -54,7 +54,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Guru Pengampu</span>
                     <select name="guru_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('guru_id') border-red-500 @enderror">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('guru_id') border-red-500 @enderror">
                         <option value="">-- Pilih Guru --</option>
                         @foreach($guru as $g)
                             <option value="{{ $g->id_guru }}"

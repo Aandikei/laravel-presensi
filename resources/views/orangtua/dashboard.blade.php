@@ -10,7 +10,7 @@
 
         {{-- Child Selector --}}
         @if($anak->count() > 1)
-            <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs flex items-center gap-4">
+            <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 flex items-center gap-4">
                 <span class="text-sm text-gray-700 dark:text-gray-400 font-medium">Pilih Anak:</span>
                 <div class="flex gap-2 flex-wrap">
                     @foreach($anak as $a)
@@ -53,7 +53,7 @@
                     ['label' => 'Terlambat', 'value' => $stats['terlambat'], 'color' => 'orange'],
                     ['label' => 'Bolos', 'value' => $stats['bolos'], 'color' => 'pink'],
                 ] as $stat)
-                    <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
+                    <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-center">
                         <p class="text-2xl font-bold text-{{ $stat['color'] }}-600">{{ $stat['value'] }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $stat['label'] }}</p>
                     </div>
@@ -61,7 +61,7 @@
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 mb-6">
-                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-center">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Kehadiran Bulan Ini</p>
                     <p class="text-4xl font-bold {{ $stats['persen'] >= 75 ? 'text-green-600' : ($stats['persen'] >= 50 ? 'text-yellow-600' : 'text-red-600') }}">
                         {{ $stats['persen'] }}%
@@ -70,7 +70,7 @@
                     <a href="{{ route('orangtua.absensi', ['anak_id' => $anakDipilih->id_siswa]) }}"
                         class="mt-3 inline-block text-xs text-purple-600 hover:underline">Lihat detail →</a>
                 </div>
-                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-center">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Poin Pelanggaran</p>
                     <p class="text-4xl font-bold {{ $totalPoin >= 100 ? 'text-red-600' : ($totalPoin >= 50 ? 'text-yellow-600' : 'text-green-600') }}">
                         {{ $totalPoin }}
@@ -82,7 +82,7 @@
             </div>
 
             {{-- Absensi Terbaru --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Absensi Terbaru</h3>
                     <a href="{{ route('orangtua.absensi', ['anak_id' => $anakDipilih->id_siswa]) }}"
@@ -93,7 +93,7 @@
                 @else
                     <table class="w-full">
                         <thead>
-                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                                 <th class="px-5 py-3">Tanggal</th>
                                 <th class="px-5 py-3">Mata Pelajaran</th>
                                 <th class="px-5 py-3">Status</th>
@@ -105,7 +105,7 @@
                                     $colors = ['Hadir'=>'green','Sakit'=>'blue','Izin'=>'yellow','Alpa'=>'red','Terlambat'=>'orange','Bolos'=>'pink'];
                                     $color = $colors[$absen->status] ?? 'gray';
                                 @endphp
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                                     <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
                                         {{ \Carbon\Carbon::parse($absen->tanggal)->format('d M Y') }}
                                     </td>
@@ -124,7 +124,7 @@
                 @endif
             </div>
         @else
-            <div class="px-4 py-8 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="px-4 py-8 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 Tidak ada data anak yang terdaftar.
             </div>
         @endif

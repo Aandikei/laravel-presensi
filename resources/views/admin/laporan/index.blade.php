@@ -9,7 +9,7 @@
         <div class="grid gap-6 md:grid-cols-2">
 
             {{-- Rekap Absensi --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Rekap Absensi
                 </h3>
@@ -20,7 +20,7 @@
                     <label class="block text-sm mb-3">
                         <span class="text-gray-700 dark:text-gray-400">Kelas</span>
                         <select name="kelas_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($kelas as $k)
                                 <option value="{{ $k->id_kelas }}">
@@ -32,7 +32,7 @@
                     <label class="block text-sm mb-3">
                         <span class="text-gray-700 dark:text-gray-400">Mata Pelajaran <span class="text-gray-400">(opsional)</span></span>
                         <select name="mapel_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             <option value="">Semua Mapel</option>
                             @foreach($mapel as $m)
                                 <option value="{{ $m->id_mapel }}">{{ $m->nama_mapel }}</option>
@@ -43,7 +43,7 @@
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Bulan</span>
                             <select name="bulan"
-                                class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                                class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                                 @for($i = 1; $i <= 12; $i++)
                                     <option value="{{ $i }}" {{ now()->month == $i ? 'selected' : '' }}>
                                         {{ \Carbon\Carbon::create()->month($i)->locale('id')->monthName }}
@@ -54,7 +54,7 @@
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Tahun</span>
                             <select name="tahun"
-                                class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                                class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                                 @for($y = now()->year; $y >= 2020; $y--)
                                     <option value="{{ $y }}" {{ now()->year == $y ? 'selected' : '' }}>{{ $y }}</option>
                                 @endfor
@@ -69,7 +69,7 @@
             </div>
 
             {{-- Rekap Poin --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Rekap Poin Pelanggaran
                 </h3>
@@ -80,7 +80,7 @@
                     <label class="block text-sm mb-3">
                         <span class="text-gray-700 dark:text-gray-400">Kelas <span class="text-gray-400">(opsional)</span></span>
                         <select name="kelas_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             <option value="">Semua Kelas</option>
                             @foreach($kelas as $k)
                                 <option value="{{ $k->id_kelas }}">{{ $k->nama_kelas }}</option>
@@ -91,7 +91,7 @@
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Bulan</span>
                             <select name="bulan"
-                                class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                                class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                                 @for($i = 1; $i <= 12; $i++)
                                     <option value="{{ $i }}" {{ now()->month == $i ? 'selected' : '' }}>
                                         {{ \Carbon\Carbon::create()->month($i)->locale('id')->monthName }}
@@ -102,7 +102,7 @@
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Tahun</span>
                             <select name="tahun"
-                                class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                                class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                                 @for($y = now()->year; $y >= 2020; $y--)
                                     <option value="{{ $y }}" {{ now()->year == $y ? 'selected' : '' }}>{{ $y }}</option>
                                 @endfor

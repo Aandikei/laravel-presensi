@@ -19,7 +19,7 @@
         @endif
 
         {{-- Daftar Admin --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden mb-6">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Admin Saat Ini</h3>
             </div>
@@ -48,7 +48,7 @@
         </div>
 
         {{-- Form Tambah Admin --}}
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <h3 class="text-md font-semibold text-gray-700 dark:text-gray-200 mb-4">Tambah Admin Baru</h3>
             <form method="POST" action="{{ route('superadmin.sekolah.store-admin', $instansi->id_instansi) }}">
                 @csrf

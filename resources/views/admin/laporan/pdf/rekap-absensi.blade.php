@@ -19,6 +19,8 @@
         .badge-green { background: #dcfce7; color: #16a34a; }
         .badge-yellow { background: #fef9c3; color: #ca8a04; }
         .badge-red { background: #fee2e2; color: #dc2626; }
+        .pink { color: #db2777; font-weight: bold; }
+        .badge-pink { background: #fce7f3; color: #db2777; }
     </style>
 </head>
 <body>
@@ -55,7 +57,7 @@
                     <td class="text-center">{{ $reg->izin }}</td>
                     <td class="text-center red">{{ $reg->alpa }}</td>
                     <td class="text-center yellow">{{ $reg->terlambat }}</td>
-                    <td class="text-center">{{ $reg->bolos }}</td>
+                    <td class="text-center pink">{{ $reg->bolos }}</td>
                     <td class="text-center">{{ $reg->total }}</td>
                     <td class="text-center">
                         <span class="badge {{ $reg->persen >= 75 ? 'badge-green' : ($reg->persen >= 50 ? 'badge-yellow' : 'badge-red') }}">

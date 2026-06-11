@@ -26,7 +26,7 @@
         {{-- Section: Kelas Saya --}}
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Kelas Saya</h3>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-lg">
@@ -65,7 +65,7 @@
 
         <div class="grid gap-6 lg:grid-cols-2 mb-6">
             {{-- Siswa dengan Poin Tertinggi --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         🚨 Siswa dengan Poin Tertinggi
@@ -77,7 +77,7 @@
                 @else
                     <div class="divide-y dark:divide-gray-700">
                         @foreach($siswaPoinTinggi as $i => $siswa)
-                            <div class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <div class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/70">
                                 <div class="flex items-center gap-3">
                                     <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                                         {{ $i == 0 ? 'bg-red-500 text-white' : ($i == 1 ? 'bg-orange-500 text-white' : ($i == 2 ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-600')) }}">
@@ -97,7 +97,7 @@
             </div>
 
             {{-- Tambah Poin Cepat --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         ➕ Tambah Poin ke Siswa
@@ -109,7 +109,7 @@
                         <label class="block text-sm mb-4">
                             <span class="text-gray-700 dark:text-gray-400">Siswa</span>
                             <select name="siswa_id" id="siswa-select"
-                                class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('siswa_id') border-red-500 @enderror">
+                                class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('siswa_id') border-red-500 @enderror">
                                 <option value="">-- Pilih Siswa --</option>
                             </select>
                             @error('siswa_id')
@@ -120,7 +120,7 @@
                         <label class="block text-sm mb-4">
                             <span class="text-gray-700 dark:text-gray-400">Pelanggaran</span>
                             <select name="poin_id"
-                                class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('poin_id') border-red-500 @enderror">
+                                class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('poin_id') border-red-500 @enderror">
                                 <option value="">-- Pilih --</option>
                                 @foreach($masterPoin as $poin)
                                     <option value="{{ $poin->id_poin }}" {{ old('poin_id') == $poin->id_poin ? 'selected' : '' }}>
@@ -154,13 +154,13 @@
         </h3>
 
         @if ($jadwalHariIni->isEmpty())
-            <div class="p-8 text-center bg-white dark:bg-gray-800 rounded-lg shadow-xs mb-6">
+            <div class="p-8 text-center bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 mb-6">
                 <p class="text-gray-500 dark:text-gray-400">Tidak ada jadwal mengajar hari ini.</p>
             </div>
         @else
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 mb-6">
                 @foreach ($jadwalHariIni as $jadwal)
-                    <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs border-l-4
+                    <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 border-l-4
                         {{ $jadwal->sudah_input ? 'border-green-500' : 'border-yellow-500' }}">
                         <div class="flex items-start justify-between">
                             <div>

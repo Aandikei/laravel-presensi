@@ -68,9 +68,12 @@ class AbsensiController extends Controller
                     $detail = '<a href="'.route('admin.absensi.detail', [
                         'jadwal' => $row->id_jadwal,
                         'tanggal' => $tanggal,
-                    ]).'"
-            class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 mr-1">
-            Detail</a>';
+                    ]).'" title="Detail" class="text-purple-600 hover:text-purple-800 mr-2">
+            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+        </a>';
 
                     if ($terkunci) {
                         $toggleBtn = '<form method="POST" action="'.route('admin.absensi.unlock', [
@@ -79,8 +82,11 @@ class AbsensiController extends Controller
                         ]).'" class="inline">
                 <input type="hidden" name="_token" value="'.csrf_token().'">
                 <input type="hidden" name="_method" value="PATCH">
-                <button type="submit" class="px-3 py-1 text-xs font-medium  text-green-700 bg-green-100 rounded hover:bg-green-700"
-                    onclick="return confirm(\'Buka kunci?\')">Buka Kunci</button>
+                <button type="submit" title="Buka Kunci" class="text-green-600 hover:text-green-800" onclick="return confirm(\'Buka kunci?\')">
+                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                    </svg>
+                </button>
                 </form>';
                     } else {
                         $toggleBtn = '<form method="POST" action="'.route('admin.absensi.lock', [
@@ -89,8 +95,11 @@ class AbsensiController extends Controller
                         ]).'" class="inline">
                 <input type="hidden" name="_token" value="'.csrf_token().'">
                 <input type="hidden" name="_method" value="PATCH">
-                <button type="submit" class="px-3 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
-                    onclick="return confirm(\'Kunci absensi?\')">Kunci</button>
+                <button type="submit" title="Kunci" class="text-red-600 hover:text-red-800" onclick="return confirm(\'Kunci absensi?\')">
+                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </button>
                 </form>';
                     }
 

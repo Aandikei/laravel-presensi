@@ -15,7 +15,7 @@
         @endif
 
         {{-- Form Tambah Libur Nasional (Range Tanggal) --}}
-        <div class="max-w-lg p-6 mb-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 mb-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                 Tambah Libur Nasional
             </h3>
@@ -63,13 +63,13 @@
         </div>
 
         {{-- Tabel Libur Nasional --}}
-        <div class="bg-white rounded-lg shadow-xs dark:bg-gray-800 p-4">
+        <div class="bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 p-4">
             <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
                 Daftar Libur Nasional
             </h3>
             <table id="tabel-libur-nasional" class="w-full">
                 <thead>
-                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                         <th class="px-4 py-3">#</th>
                         <th class="px-4 py-3">Tanggal</th>
                         <th class="px-4 py-3">Nama Libur</th>

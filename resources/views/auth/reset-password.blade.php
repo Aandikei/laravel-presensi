@@ -14,7 +14,7 @@
 <body>
     <div class="flex items-center justify-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
 
-        <div class="w-full max-w-md bg-white rounded-lg shadow-xl dark:bg-gray-800">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-xl dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <div class="p-6 sm:p-12">
 
                 <h1 class="mb-2 text-xl font-semibold text-gray-700 dark:text-gray-200">

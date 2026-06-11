@@ -12,7 +12,7 @@
 
         {{-- Info Kelas --}}
         <div class="grid gap-4 md:grid-cols-3 mb-6">
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Info Kelas</p>
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
@@ -40,7 +40,7 @@
             </div>
 
             {{-- Stats Absensi Hari Ini --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Kehadiran Hari Ini</p>
                 @php
                     $hariIni = now()->toDateString();
@@ -61,7 +61,7 @@
             </div>
 
             {{-- Jumlah Mapel --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Mata Pelajaran</p>
                 <p class="text-3xl font-bold text-center text-purple-600">{{ $kelas->kurikulum->count() }}</p>
                 <p class="text-xs text-center text-gray-400 mt-1">Total mata pelajaran</p>
@@ -71,14 +71,14 @@
         <div class="grid gap-6 lg:grid-cols-2">
 
             {{-- Jadwal Pelajaran --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Jadwal Pelajaran</h3>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                                 <th class="px-4 py-3">Hari</th>
                                 <th class="px-4 py-3">Jam</th>
                                 <th class="px-4 py-3">Mata Pelajaran</th>
@@ -94,7 +94,7 @@
                                 ]);
                             @endphp
                             @forelse($jadwalAll as $jadwal)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                                     <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200">
                                         {{ $jadwal->hari }}
                                     </td>
@@ -121,7 +121,7 @@
             </div>
 
             {{-- Daftar Siswa --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         Daftar Siswa ({{ $registrasi->count() }})
@@ -135,7 +135,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                                 <th class="px-4 py-3">No</th>
                                 <th class="px-4 py-3">Nama Siswa</th>
                                 <th class="px-4 py-3">NISN</th>
@@ -143,7 +143,7 @@
                         </thead>
                         <tbody class="divide-y dark:divide-gray-700">
                             @forelse($registrasi as $i => $reg)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                                     <td class="px-4 py-3 text-sm text-gray-500">{{ $i + 1 }}</td>
                                     <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200">
                                         {{ $reg->siswa->nama_siswa }}

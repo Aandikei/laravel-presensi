@@ -21,7 +21,7 @@
             </div>
         @endif
 
-        <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.registrasi.store') }}">
                 @csrf
 
@@ -30,7 +30,7 @@
                     <label class="block text-sm">
                         <span class="text-gray-700 dark:text-gray-400">Tahun Ajaran</span>
                         <select name="tahun_id" id="tahun_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('tahun_id') border-red-500 @enderror">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('tahun_id') border-red-500 @enderror">
                             <option value="">-- Pilih Tahun Ajaran --</option>
                             @foreach ($tahunAjaran as $tahun)
                                 <option value="{{ $tahun->id_tahun }}" 
@@ -49,7 +49,7 @@
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Pilih Kelas</span>
                         <select name="kelas_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('kelas_id') border-red-500 @enderror">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('kelas_id') border-red-500 @enderror">
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($kelas as $k)
                                 <option value="{{ $k->id_kelas }}" {{ old('kelas_id') == $k->id_kelas ? 'selected' : '' }}>
@@ -97,7 +97,7 @@
                             class="max-h-72 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700">
                             @foreach ($siswa as $s)
                                 <label
-                                    class="siswa-item flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                                    class="siswa-item flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/70 cursor-pointer"
                                     data-name="{{ strtolower($s->nama_siswa) }}" data-nisn="{{ $s->nisn }}">
                                     <input type="checkbox" name="siswa_id[]" value="{{ $s->id_siswa }}"
                                         class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />

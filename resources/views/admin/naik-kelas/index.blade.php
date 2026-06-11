@@ -25,7 +25,7 @@
         <div class="grid gap-6 md:grid-cols-2">
 
             {{-- Naik Kelas --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">Naik Kelas</h3>
                 <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
                     Pindahkan siswa ke tingkat kelas berikutnya
@@ -35,7 +35,7 @@
                     <label class="block text-sm mb-3">
                         <span class="text-gray-700 dark:text-gray-400">Tahun Ajaran Asal</span>
                         <select name="tahun_asal_id" id="naik-asal" onchange="updateTujuan('naik')"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             @foreach ($tahunAjaran as $tahun)
                                 <option value="{{ $tahun->id_tahun }}" {{ $tahun->is_aktif ? 'selected' : '' }}>
                                     {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
@@ -48,7 +48,7 @@
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Tahun Ajaran Tujuan</span>
                         <select name="tahun_tujuan_id" id="naik-tujuan"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             <option value="">-- Pilih tahun asal dulu --</option>
                         </select>
                     </label>
@@ -61,7 +61,7 @@
             </div>
 
             {{-- Ganti Semester --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">Ganti Semester</h3>
                 <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
                     Salin siswa ke semester baru dengan kelas yang sama
@@ -72,7 +72,7 @@
                     <label class="block text-sm mb-3">
                         <span class="text-gray-700 dark:text-gray-400">Semester Asal</span>
                         <select name="tahun_asal_id" id="semester-asal" onchange="updateTujuan('semester')"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             @foreach ($tahunAjaran as $tahun)
                                 <option value="{{ $tahun->id_tahun }}" {{ $tahun->is_aktif ? 'selected' : '' }}>
                                     {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
@@ -85,7 +85,7 @@
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Semester Tujuan</span>
                         <select name="tahun_tujuan_id" id="semester-tujuan"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             <option value="">-- Pilih semester asal dulu --</option>
                         </select>
                     </label>

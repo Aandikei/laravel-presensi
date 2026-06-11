@@ -12,7 +12,7 @@
             </div>
         @endif
 
-        <div class="max-w-2xl p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-2xl p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
 
             {{-- Preview Logo --}}
             <div class="mb-6 flex items-center gap-4">
@@ -61,7 +61,7 @@
                     <label class="block text-sm">
                         <span class="text-gray-700 dark:text-gray-400">Jenjang</span>
                         <select name="jenjang"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             @foreach(['SD','SMP','SMA','SMK'] as $j)
                                 <option value="{{ $j }}" {{ old('jenjang', $instansi->jenjang) == $j ? 'selected' : '' }}>
                                     {{ $j }}

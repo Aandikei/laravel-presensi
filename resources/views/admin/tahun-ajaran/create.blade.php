@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.tahun-ajaran.store') }}">
                 @csrf
 
@@ -31,7 +31,7 @@
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Semester</span>
                     <select name="semester"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('semester') border-red-500 @enderror">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('semester') border-red-500 @enderror">
                         <option value="">-- Pilih Semester --</option>
                         <option value="Ganjil" {{ old('semester') == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
                         <option value="Genap" {{ old('semester') == 'Genap' ? 'selected' : '' }}>Genap</option>

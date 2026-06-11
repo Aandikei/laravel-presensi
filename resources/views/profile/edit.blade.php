@@ -39,7 +39,7 @@
         <div class="grid gap-6">
 
             {{-- Update Profile Info --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Profile Information
                 </h3>
@@ -50,7 +50,7 @@
             </div>
 
             {{-- Update Password --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Update Password
                 </h3>
@@ -61,7 +61,7 @@
             </div>
 
             {{-- Delete Account --}}
-            <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Delete Account
                 </h3>

@@ -30,7 +30,7 @@
                 ['label' => 'Terlambat', 'value' => $stats['terlambat'], 'color' => 'orange'],
                 ['label' => 'Bolos', 'value' => $stats['bolos'], 'color' => 'pink'],
             ] as $stat)
-                <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
+                <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-center">
                     <p class="text-2xl font-bold text-{{ $stat['color'] }}-600">{{ $stat['value'] }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $stat['label'] }}</p>
                 </div>
@@ -39,7 +39,7 @@
 
         <div class="grid gap-4 md:grid-cols-3 mb-6">
             {{-- % Kehadiran --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-center">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Kehadiran Bulan Ini</p>
                 <p class="text-4xl font-bold {{ $stats['persen'] >= 75 ? 'text-green-600' : ($stats['persen'] >= 50 ? 'text-yellow-600' : 'text-red-600') }}">
                     {{ $stats['persen'] }}%
@@ -48,7 +48,7 @@
             </div>
 
             {{-- Total Poin --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs text-center">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 text-center">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Poin Pelanggaran</p>
                 <p class="text-4xl font-bold {{ $totalPoin >= 100 ? 'text-red-600' : ($totalPoin >= 50 ? 'text-yellow-600' : 'text-green-600') }}">
                     {{ $totalPoin }}
@@ -57,7 +57,7 @@
             </div>
 
             {{-- Info Kelas --}}
-            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+            <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Info Kelas</p>
                 @if($registrasi)
                     <div class="space-y-2 text-sm">
@@ -81,7 +81,7 @@
         </div>
 
         {{-- Absensi Terbaru --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Absensi Terbaru</h3>
                 <a href="{{ route('siswa.absensi') }}" class="text-sm text-purple-600 dark:text-purple-400 hover:underline">
@@ -95,7 +95,7 @@
             @else
                 <table class="w-full">
                     <thead>
-                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                             <th class="px-5 py-3">Tanggal</th>
                             <th class="px-5 py-3">Mata Pelajaran</th>
                             <th class="px-5 py-3">Status</th>
@@ -107,7 +107,7 @@
                                 $colors = ['Hadir'=>'green','Sakit'=>'blue','Izin'=>'yellow','Alpa'=>'red','Terlambat'=>'orange','Bolos'=>'pink'];
                                 $color = $colors[$absen->status] ?? 'gray';
                             @endphp
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                                 <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
                                     {{ \Carbon\Carbon::parse($absen->tanggal)->format('d M Y') }}
                                 </td>

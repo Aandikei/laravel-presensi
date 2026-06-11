@@ -19,7 +19,7 @@
                 <input type="hidden" name="tahun_id" value="{{ $tahunAktif?->id_tahun }}">
 
                 {{-- Data Siswa --}}
-                <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800 mb-6">
+                <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 mb-6">
                     <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
                         Data Siswa
                     </h3>
@@ -45,7 +45,7 @@
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Jenis Kelamin</span>
                         <select name="jenis_kelamin"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('jenis_kelamin') border-red-500 @enderror">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('jenis_kelamin') border-red-500 @enderror">
                             <option value="">-- Pilih --</option>
                             <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki
                             </option>
@@ -84,7 +84,7 @@
                 </div>
 
                 {{-- Data Orang Tua --}}
-                <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800 mb-6">
+                <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 mb-6">
                     <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
                         Data Orang Tua
                     </h3>
@@ -106,7 +106,7 @@
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Hubungan</span>
                         <select name="hubungan"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300 @error('hubungan') border-red-500 @enderror">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('hubungan') border-red-500 @enderror">
                             <option value="">-- Pilih --</option>
                             <option value="Ayah" {{ old('hubungan') == 'Ayah' ? 'selected' : '' }}>Ayah</option>
                             <option value="Ibu" {{ old('hubungan') == 'Ibu' ? 'selected' : '' }}>Ibu</option>
@@ -147,7 +147,7 @@
                 </div>
 
                 {{-- Registrasi Kelas (Opsional) --}}
-                <div class="p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800 mb-6">
+                <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 mb-6">
                     <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
                         Daftarkan ke Kelas
                         <span class="text-sm font-normal text-gray-400">(opsional)</span>
@@ -168,7 +168,7 @@
                     <label class="block text-sm">
                         <span class="text-gray-700 dark:text-gray-400">Pilih Kelas</span>
                         <select name="kelas_id"
-                            class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             <option value="">-- Tidak sekarang --</option>
                             @foreach ($kelas as $k)
                                 <option value="{{ $k->id_kelas }}"

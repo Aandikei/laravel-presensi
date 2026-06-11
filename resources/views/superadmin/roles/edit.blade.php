@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        <div class="max-w-2xl p-6 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="max-w-2xl p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('superadmin.roles.update', $role->id) }}">
                 @csrf
                 @method('PUT')
@@ -31,7 +31,7 @@
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     @foreach($permissions as $perm)
-                        <label class="flex items-center gap-2 text-sm p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <label class="flex items-center gap-2 text-sm p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700/70">
                             <input type="checkbox" name="permissions[]" value="{{ $perm->id }}"
                                 class="form-checkbox text-purple-600"
                                 {{ $role->permissions->contains('id', $perm->id) ? 'checked' : '' }}>

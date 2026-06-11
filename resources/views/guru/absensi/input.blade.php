@@ -9,7 +9,7 @@
         </div>
 
         {{-- Info Jadwal --}}
-        <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+        <div class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
                     <p class="text-gray-500 dark:text-gray-400">Mata Pelajaran</p>
@@ -33,7 +33,7 @@
         </div>
 
         {{-- Form Absensi --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
             <form method="POST" action="{{ route('guru.absensi.store', $jadwal->id_jadwal) }}">
                 @csrf
 
@@ -44,8 +44,9 @@
                         <button type="button" onclick="setAll('{{ $status }}')"
                             class="px-3 py-1 text-xs font-medium rounded-full border transition-colors
                             {{ $status == 'Hadir' ? 'border-green-300 text-green-700 hover:bg-green-50' :
-                               ($status == 'Alpa' ? 'border-red-300 text-red-700 hover:bg-red-50' :
-                               'border-gray-300 text-gray-600 hover:bg-gray-50') }}">
+                                ($status == 'Alpa' ? 'border-red-300 text-red-700 hover:bg-red-50' :
+                                ($status == 'Bolos' ? 'border-pink-300 text-pink-700 hover:bg-pink-50' :
+                                'border-gray-300 text-gray-600 hover:bg-gray-50')) }}">
                             {{ $status }}
                         </button>
                     @endforeach
@@ -53,7 +54,7 @@
 
                 <table class="w-full">
                     <thead>
-                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                             <th class="px-5 py-3">No</th>
                             <th class="px-5 py-3">Nama Siswa</th>
                             <th class="px-5 py-3">NISN</th>
@@ -64,7 +65,7 @@
                     </thead>
                     <tbody class="divide-y dark:divide-gray-700">
                         @foreach($registrasi as $i => $reg)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                                 <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
                                 <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">
                                     {{ $reg->siswa->nama_siswa }}
@@ -74,7 +75,7 @@
                                 </td>
                                 <td class="px-5 py-3">
                                     <select name="absensi[{{ $reg->id_registrasi }}][status]"
-                                        class="status-select text-sm form-select dark:bg-gray-700 dark:text-gray-300 py-1"
+                                        class="status-select text-sm dark:bg-gray-700 dark:text-gray-300 py-1"
                                         onchange="updateRowColor(this); toggleDurasi(this);">
                                         @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Bolos'] as $status)
                                             <option value="{{ $status }}"
@@ -133,7 +134,7 @@
                 'Hadir'    : 'bg-green-50',
                 'Alpa'     : 'bg-red-50',
                 'Terlambat': 'bg-yellow-50',
-                'Bolos'    : 'bg-red-50',
+                'Bolos'    : 'bg-pink-50',
                 'Sakit'    : 'bg-blue-50',
                 'Izin'     : 'bg-yellow-50',
             };

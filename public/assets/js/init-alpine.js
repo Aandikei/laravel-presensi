@@ -1,3 +1,9 @@
+function sidebarState(key, routeActive) {
+  let stored = window.localStorage.getItem(key);
+  if (stored !== null) return stored === 'true';
+  return routeActive;
+}
+
 function data() {
   function getThemeFromLocalStorage() {
     // if user already changed the theme, use it

@@ -42,9 +42,9 @@
         @endif
 
         {{-- Filter --}}
-        <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800 flex items-center gap-4 flex-wrap">
+        <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 flex items-center gap-4 flex-wrap">
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Kelas:</label>
-            <select id="filter-kelas" class="text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+            <select id="filter-kelas" class="text-sm dark:bg-gray-700 dark:text-gray-300">
                 <option value="">Semua Kelas</option>
                 @foreach($kelas as $k)
                     <option value="{{ $k->id_kelas }}">{{ $k->nama_kelas }}</option>
@@ -52,7 +52,7 @@
             </select>
 
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Status:</label>
-            <select id="filter-status" class="text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+            <select id="filter-status" class="text-sm dark:bg-gray-700 dark:text-gray-300">
                 <option value="">Semua Status</option>
                 <option value="aktif">Aktif</option>
                 <option value="alumni">Alumni</option>
@@ -62,9 +62,9 @@
 
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
-                <table id="tabel-siswa" class="w-full whitespace-no-wrap">
+                <table id="tabel-siswa" class="w-full whitespace-nowrap">
                     <thead>
-                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                             <th class="px-4 py-3">#</th>
                             <th class="px-4 py-3">Nama Siswa</th>
                             <th class="px-4 py-3">NISN</th>
@@ -110,7 +110,7 @@
                         <span class="text-gray-400">(untuk registrasi kelas otomatis)</span>
                     </span>
                     <select name="tahun_id"
-                        class="block w-full mt-1 text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                         <option value="">-- Tidak daftarkan ke kelas --</option>
                         @foreach($tahunAjaran as $tahun)
                             <option value="{{ $tahun->id_tahun }}" {{ $tahun->is_aktif ? 'selected' : '' }}>

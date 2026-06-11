@@ -25,10 +25,10 @@
             </div>
         </div>
 
-        <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+        <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
             <table class="w-full">
                 <thead>
-                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                         <th class="px-4 py-3">No</th>
                         <th class="px-4 py-3">Nama Siswa</th>
                         <th class="px-4 py-3">NISN</th>
@@ -39,7 +39,7 @@
                 </thead>
                 <tbody class="divide-y dark:divide-gray-700">
                     @forelse($siswa as $i => $s)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
                             <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
                             <td class="px-4 py-3 font-medium text-gray-700 dark:text-gray-200">{{ $s->nama_siswa }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500">{{ $s->nisn }}</td>
