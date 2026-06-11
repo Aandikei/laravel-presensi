@@ -193,7 +193,10 @@
                 <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isDashboard ? 'text-gray-800 dark:text-gray-100' : '' }}"
                     href="@if (auth()->user()->hasRole('super_admin')) {{ route('superadmin.dashboard') }}
                         @elseif(auth()->user()->hasRole('admin')) {{ route('admin.dashboard') }}
+                        @elseif(auth()->user()->hasRole('wali_kelas')) {{ route('guru.wali-kelas.dashboard') }}
                         @elseif(auth()->user()->hasRole('guru')) {{ route('guru.dashboard') }}
+                        @elseif(auth()->user()->hasRole('siswa')) {{ route('siswa.dashboard') }}
+                        @elseif(auth()->user()->hasRole('orang_tua')) {{ route('orangtua.dashboard') }}
                         @else {{ route('user.dashboard') }} @endif">
                     <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
                         stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -249,14 +252,58 @@
                 <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Super Admin
                 </li>
+                {{-- Dashboard --}}
                 <li class="relative px-6 py-3">
-                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                        href="#">
-                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                            <path
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                            </path>
+                    @php $isDashboard = request()->routeIs('superadmin.dashboard'); @endphp
+                    @if ($isDashboard)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isDashboard ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('superadmin.dashboard') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span class="ml-4">Dashboard</span>
+                    </a>
+                </li>
+                {{-- Sekolah --}}
+                <li class="relative px-6 py-3">
+                    @php $isSekolah = request()->routeIs('superadmin.sekolah.*'); @endphp
+                    @if ($isSekolah)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isSekolah ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('superadmin.dashboard') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                        <span class="ml-4">Kelola Sekolah</span>
+                    </a>
+                </li>
+                {{-- Hari Libur --}}
+                <li class="relative px-6 py-3">
+                    @php $isLibur = request()->routeIs('superadmin.hari-libur.*'); @endphp
+                    @if ($isLibur)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isLibur ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('superadmin.hari-libur.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="ml-4">Libur Nasional</span>
+                    </a>
+                </li>
+                {{-- Roles --}}
+                <li class="relative px-6 py-3">
+                    @php $isRoles = request()->routeIs('superadmin.roles.*'); @endphp
+                    @if ($isRoles)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isRoles ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('superadmin.roles.index') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                         </svg>
                         <span class="ml-4">Manage Roles</span>
                     </a>
@@ -541,7 +588,55 @@
             </ul>
         @endrole
 
-        {{-- Guru Only --}}
+        {{-- Wali Kelas --}}
+        @if(auth()->user()->hasRole('wali_kelas') || auth()->user()->guru?->isWaliKelas())
+            <ul class="mt-4">
+                <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Wali Kelas
+                </li>
+                <li class="relative px-6 py-3">
+                    @php $isWaliDash = request()->routeIs('guru.wali-kelas.dashboard'); @endphp
+                    @if ($isWaliDash)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isWaliDash ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('guru.wali-kelas.dashboard') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span class="ml-4">Dashboard Kelas</span>
+                    </a>
+                </li>
+                <li class="relative px-6 py-3">
+                    @php $isPoinSiswa = request()->routeIs('guru.wali-kelas.siswa-poin'); @endphp
+                    @if ($isPoinSiswa)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isPoinSiswa ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('guru.wali-kelas.siswa-poin') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <span class="ml-4">Poin Siswa</span>
+                    </a>
+                </li>
+                <li class="relative px-6 py-3">
+                    @php $isLogPoin = request()->routeIs('guru.wali-kelas.log-poin'); @endphp
+                    @if ($isLogPoin)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isLogPoin ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('guru.wali-kelas.log-poin') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        <span class="ml-4">Log Poin</span>
+                    </a>
+                </li>
+            </ul>
+        @endif
+
+        {{-- Guru & Wali Kelas --}}
         @role('guru|wali_kelas')
             <ul class="mt-4">
                 <li class="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -549,11 +644,11 @@
                 </li>
 
                 <li class="relative px-6 py-3">
-                    @php $isAbsensiGuru = request()->routeIs('guru.absensi.*'); @endphp
-                    @if ($isAbsensiGuru)
+                    @php $isInputAbsen = request()->routeIs('guru.absensi.index'); @endphp
+                    @if ($isInputAbsen)
                         <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
                     @endif
-                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isAbsensiGuru ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isInputAbsen ? 'text-gray-800 dark:text-gray-100' : '' }}"
                         href="{{ route('guru.absensi.index') }}">
                         <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
                             stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -562,6 +657,20 @@
                             </path>
                         </svg>
                         <span class="ml-4">Input Absensi</span>
+                    </a>
+                </li>
+                <li class="relative px-6 py-3">
+                    @php $isRekapAbsen = request()->routeIs('guru.absensi.rekap*'); @endphp
+                    @if ($isRekapAbsen)
+                        <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                    @endif
+                    <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isRekapAbsen ? 'text-gray-800 dark:text-gray-100' : '' }}"
+                        href="{{ route('guru.absensi.rekap') }}">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="ml-4">Rekap Absensi</span>
                     </a>
                 </li>
             </ul>

@@ -27,13 +27,22 @@ class SiswaController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         if ($request->ajax()) {
-            $siswa = Siswa::with(['user', 'registrasiAktif.kelas'])
+            $siswa = Siswa::with(['user', 'registrasiAktif.kelas', 'registrasiAkademik'])
                 ->where('instansi_id', '=', $instansi->id_instansi)
                 ->select('siswa.*');
 
             // Filter per kelas
             if ($request->kelas_id) {
                 $siswa->whereHas('registrasiAktif', fn ($q) => $q->where('kelas_id', '=', $request->kelas_id));
+            }
+
+            // Filter status
+            if ($request->status === 'aktif') {
+                $siswa->has('registrasiAktif');
+            } elseif ($request->status === 'alumni') {
+                $siswa->whereDoesntHave('registrasiAktif')->has('registrasiAkademik', '>', 0);
+            } elseif ($request->status === 'belum_terdaftar') {
+                $siswa->whereDoesntHave('registrasiAkademik');
             }
 
             return DataTables::of($siswa)
@@ -44,6 +53,10 @@ class SiswaController extends Controller
                     if ($kelas) {
                         return '<span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full dark:bg-purple-800 dark:text-purple-200">'
                             .$kelas->nama_kelas.'</span>';
+                    }
+
+                    if ($row->registrasiAkademik->isNotEmpty() && !$row->registrasiAktif) {
+                        return '<span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full dark:bg-orange-800 dark:text-orange-200">Alumni</span>';
                     }
 
                     return '<span class="px-2 py-1 text-xs text-gray-500">Belum terdaftar</span>';

@@ -20,6 +20,10 @@ class OrangTuaDashboardController extends Controller
         $ortu   = $this->getOrangTua();
         $anakId = request('anak_id');
 
+        if (!$ortu) {
+            return [collect(), null];
+        }
+
         $anak = $ortu->siswa()->with('instansi')->get();
 
         $anakDipilih = $anakId

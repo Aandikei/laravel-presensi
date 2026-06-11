@@ -9,9 +9,13 @@ use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\RegistrasiAkademik;
 use App\Models\RekapBulanan;
+use App\Exports\RekapAbsensiExport;
+use App\Models\MataPelajaran;
+use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AbsensiController extends Controller
 {
@@ -134,11 +138,50 @@ class AbsensiController extends Controller
     {
         $guru = Auth::user()->guru;
 
+        $mapelId = $request->input('mapel_id');
+        $bulan = $request->input('bulan', now()->month);
+        $tahun = $request->input('tahun', now()->year);
+        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)
+            ->where('instansi_id', $guru->instansi_id)
+            ->first();
+
+        $riwayat = Absensi::with([
+                'jadwal.kurikulum.mataPelajaran',
+                'jadwal.kurikulum.kelas',
+                'registrasi.siswa'
+            ])
+            ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('jadwal_id')
+            ->paginate(50)->withQueryString();
+
         $kelas = Kelas::whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
-            ->with('tahunAjaran')
             ->get();
 
-        return view('guru.absensi.rekap', compact('kelas', 'guru'));
+        $mapels = MataPelajaran::where('instansi_id', $guru->instansi_id)
+            ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
+            ->get();
+
+        return view('guru.absensi.rekap', compact('riwayat', 'kelas', 'guru', 'mapels', 'mapelId', 'bulan', 'tahun', 'tahunAjaranAktif'));
+    }
+
+    public function exportRekap(Request $request)
+    {
+        $guru = Auth::user()->guru;
+
+        $bulan   = $request->input('bulan', now()->month);
+        $tahun   = $request->input('tahun', now()->year);
+        $mapelId = $request->input('mapel_id');
+
+        $namaBulan = \Carbon\Carbon::create()->month((int) $bulan)->locale('id')->monthName;
+
+        return Excel::download(
+            new RekapAbsensiExport($guru->id_guru, (int) $bulan, (int) $tahun, $mapelId ? (int) $mapelId : null),
+            "rekap-absensi-{$namaBulan}-{$tahun}.xlsx"
+        );
     }
 
     private function updateRekap(int $regId, string $tanggal): void

@@ -108,6 +108,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Tambah route adopt
     Route::post('hari-libur/adopt', [HariLiburController::class, 'adopt'])->name('hari-libur.adopt');
+    Route::post('hari-libur/adopt-all', [HariLiburController::class, 'adoptAll'])->name('hari-libur.adopt-all');
 
     // Poin
     Route::resource('master-poin', MasterPoinController::class)->parameters([

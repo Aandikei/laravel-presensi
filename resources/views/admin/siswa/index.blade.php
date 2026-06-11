@@ -41,14 +41,22 @@
             </div>
         @endif
 
-        {{-- Filter Kelas --}}
-        <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800 flex items-center gap-4">
+        {{-- Filter --}}
+        <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800 flex items-center gap-4 flex-wrap">
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Kelas:</label>
             <select id="filter-kelas" class="text-sm form-select dark:bg-gray-700 dark:text-gray-300">
                 <option value="">Semua Kelas</option>
                 @foreach($kelas as $k)
                     <option value="{{ $k->id_kelas }}">{{ $k->nama_kelas }}</option>
                 @endforeach
+            </select>
+
+            <label class="text-sm text-gray-700 dark:text-gray-400">Filter Status:</label>
+            <select id="filter-status" class="text-sm form-select dark:bg-gray-700 dark:text-gray-300">
+                <option value="">Semua Status</option>
+                <option value="aktif">Aktif</option>
+                <option value="alumni">Alumni</option>
+                <option value="belum_terdaftar">Belum Terdaftar</option>
             </select>
         </div>
 
@@ -148,6 +156,7 @@
                     url: '{{ route('admin.siswa.index') }}',
                     data: function(d) {
                         d.kelas_id = $('#filter-kelas').val();
+                        d.status = $('#filter-status').val();
                     }
                 },
                 columns: [
@@ -165,7 +174,7 @@
                 }
             });
 
-            $('#filter-kelas').on('change', function() {
+            $('#filter-kelas, #filter-status').on('change', function() {
                 table.draw();
             });
 

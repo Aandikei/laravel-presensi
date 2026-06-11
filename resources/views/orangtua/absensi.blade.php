@@ -25,7 +25,7 @@
         @endif
 
         {{-- Filter --}}
-        <form method="GET" action="{{ route('siswa.absensi') }}"
+        <form method="GET" action="{{ route('orangtua.absensi') }}"
             class="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs flex flex-wrap gap-4 items-end">
             <input type="hidden" name="anak_id" value="{{ $anakDipilih?->id_siswa }}">
             <label class="block text-sm">

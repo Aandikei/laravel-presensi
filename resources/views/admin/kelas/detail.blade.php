@@ -153,7 +153,7 @@
                             @empty
                                 <tr>
                                     <td colspan="3" class="px-4 py-6 text-center text-gray-500">
-                                        Belum ada siswa terdaftar di tahun ajaran aktif.
+                                        Belum ada siswa terdaftar di kelas.
                                     </td>
                                 </tr>
                             @endforelse

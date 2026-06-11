@@ -33,8 +33,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('superadmin.dashboard');
         } elseif ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->hasRole('guru') || $user->hasRole('wali_kelas')) {
+        } elseif ($user->hasRole('guru')) {
             return redirect()->route('guru.dashboard');
+        } elseif ($user->hasRole('wali_kelas')) {
+            return redirect()->route('guru.wali-kelas.dashboard');
         } elseif ($user->hasRole('siswa')) {
             return redirect()->route('siswa.dashboard');
         } elseif ($user->hasRole('orang_tua')) {

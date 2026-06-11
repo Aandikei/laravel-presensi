@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HariLibur;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
@@ -39,8 +40,8 @@ class HariLiburController extends Controller
                 ->make(true);
         }
 
-        // Data untuk view
-        $liburNasional = HariLibur::where('is_nasional', true)
+        $liburNasional = HariLibur::whereNull('instansi_id')
+            ->where('is_nasional', true)
             ->orderBy('tanggal')
             ->get();
 
@@ -55,28 +56,43 @@ class HariLiburController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         $validated = $request->validate([
-            'tanggal'    => 'required|date',
-            'nama_libur' => 'required|string|max:255',
+            'nama_libur'      => 'required|string|max:255',
+            'tanggal_mulai'   => 'required|date',
+            'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
         ]);
 
-        $exists = HariLibur::where('tanggal', $validated['tanggal'])
-            ->where('instansi_id', $instansi->id_instansi)
-            ->exists();
+        $tanggalMulai = $validated['tanggal_mulai'];
+        $tanggalSelesai = $validated['tanggal_selesai'] ?? $tanggalMulai;
 
-        if ($exists) {
-            return back()->withErrors([
-                'tanggal' => 'Tanggal ini sudah ditandai sebagai hari libur!'
-            ])->withInput();
+        $period = CarbonPeriod::create($tanggalMulai, $tanggalSelesai);
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach ($period as $date) {
+            $exists = HariLibur::where('tanggal', $date->format('Y-m-d'))
+                ->where('instansi_id', $instansi->id_instansi)
+                ->exists();
+
+            if ($exists) {
+                $skipped++;
+                continue;
+            }
+
+            HariLibur::create([
+                'instansi_id' => $instansi->id_instansi,
+                'tanggal'     => $date->format('Y-m-d'),
+                'nama_libur'  => $validated['nama_libur'],
+                'is_nasional' => false,
+            ]);
+            $inserted++;
         }
 
-        HariLibur::create([
-            'instansi_id' => $instansi->id_instansi,
-            'tanggal'     => $validated['tanggal'],
-            'nama_libur'  => $validated['nama_libur'],
-            'is_nasional' => false,
-        ]);
+        $msg = $inserted . ' hari libur berhasil ditambahkan.';
+        if ($skipped > 0) {
+            $msg .= ' ' . $skipped . ' tanggal sudah ada (di-skip).';
+        }
 
-        return back()->with('success', 'Hari libur sekolah berhasil ditambahkan!');
+        return back()->with('success', $msg);
     }
 
     public function adopt(Request $request)
@@ -88,16 +104,6 @@ class HariLiburController extends Controller
             'nama_libur' => 'required|string|max:255',
         ]);
 
-        // Pastiin memang ada di libur nasional
-        $liburNasional = HariLibur::where('tanggal', $validated['tanggal'])
-            ->where('is_nasional', true)
-            ->exists();
-
-        if (!$liburNasional) {
-            return back()->with('error', 'Libur nasional tidak ditemukan!');
-        }
-
-        // Cek duplikat
         $exists = HariLibur::where('tanggal', $validated['tanggal'])
             ->where('instansi_id', $instansi->id_instansi)
             ->exists();
@@ -106,8 +112,6 @@ class HariLiburController extends Controller
             return back()->with('error', 'Tanggal ini sudah ada di daftar libur sekolah!');
         }
 
-        // Simpan sebagai libur sekolah dengan flag is_nasional = true
-        // supaya keliatan asalnya dari libur nasional
         HariLibur::create([
             'instansi_id' => $instansi->id_instansi,
             'tanggal'     => $validated['tanggal'],
@@ -116,6 +120,44 @@ class HariLiburController extends Controller
         ]);
 
         return back()->with('success', 'Berhasil mengikuti libur nasional!');
+    }
+
+    public function adoptAll()
+    {
+        $instansi = Auth::user()->getInstansi();
+
+        $nasional = HariLibur::whereNull('instansi_id')
+            ->where('is_nasional', true)
+            ->get();
+
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach ($nasional as $libur) {
+            $exists = HariLibur::where('tanggal', $libur->tanggal)
+                ->where('instansi_id', $instansi->id_instansi)
+                ->exists();
+
+            if ($exists) {
+                $skipped++;
+                continue;
+            }
+
+            HariLibur::create([
+                'instansi_id' => $instansi->id_instansi,
+                'tanggal'     => $libur->tanggal,
+                'nama_libur'  => $libur->nama_libur,
+                'is_nasional' => true,
+            ]);
+            $inserted++;
+        }
+
+        $msg = $inserted . ' libur nasional berhasil diikuti.';
+        if ($skipped > 0) {
+            $msg .= ' ' . $skipped . ' sudah ada sebelumnya.';
+        }
+
+        return back()->with('success', $msg);
     }
 
     public function destroy(HariLibur $hariLibur)

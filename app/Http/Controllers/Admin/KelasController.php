@@ -73,7 +73,7 @@ class KelasController extends Controller
 
                     return $detail.$edit.' '.$delete;
                 })
-                ->rawColumns(['wali_kelas', 'aksi'])
+                ->rawColumns(['wali_kelas', 'tahun_ajaran', 'aksi'])
                 ->make(true);
         }
 

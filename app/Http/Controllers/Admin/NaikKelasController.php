@@ -22,7 +22,15 @@ class NaikKelasController extends Controller
             ->orderByDesc('id_tahun')
             ->get();
 
-        return view('admin.naik-kelas.index', compact('tahunAjaran', 'instansi'));
+        $tahunAjaranData = $tahunAjaran->map(fn($t) => [
+            'id' => $t->id_tahun,
+            'nama_tahun' => $t->nama_tahun,
+            'semester' => $t->semester,
+            'label' => $t->nama_tahun . ' - ' . $t->semester . ($t->is_aktif ? ' (Aktif)' : ''),
+            'is_aktif' => $t->is_aktif,
+        ])->values()->toArray();
+
+        return view('admin.naik-kelas.index', compact('tahunAjaran', 'instansi', 'tahunAjaranData'));
     }
 
     public function preview(Request $request)
