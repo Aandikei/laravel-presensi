@@ -64,11 +64,6 @@ class AbsensiController extends Controller
             $instansi->id_instansi
         );
 
-        if ($namaLibur) {
-            return redirect()->route('guru.absensi.index')
-                ->with('error', "Hari ini adalah hari libur: {$namaLibur}. Absensi tidak bisa diinput.");
-        }
-
         // Cek apakah sudah dikunci
         $sudahLocked = $jadwal->absensi()
             ->where('tanggal', now()->toDateString())
@@ -92,13 +87,20 @@ class AbsensiController extends Controller
             ->where('tanggal', now()->toDateString())
             ->pluck('status', 'reg_id');
 
-        return view('guru.absensi.input', compact('jadwal', 'registrasi', 'absensiHariIni'));
+        return view('guru.absensi.input', compact('jadwal', 'registrasi', 'absensiHariIni', 'namaLibur'));
     }
 
     public function store(Request $request, Jadwal $jadwal)
     {
         $guru = Auth::user()->guru;
         abort_if($jadwal->kurikulum->guru_id !== $guru->id_guru, 403);
+
+        $instansi = Auth::user()->getInstansi();
+        $namaLibur = HariLibur::getNamaLibur(now()->toDateString(), $instansi->id_instansi);
+        if ($namaLibur) {
+            return redirect()->route('guru.absensi.index')
+                ->with('error', "Hari ini adalah hari libur: {$namaLibur}. Absensi tidak bisa diinput.");
+        }
 
         $request->validate([
             'absensi' => 'required|array',

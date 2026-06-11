@@ -32,6 +32,15 @@
             </div>
         </div>
 
+        {{-- Hari Libur --}}
+        @if(isset($namaLibur) && $namaLibur)
+            <div class="mb-4 p-8 text-center bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
+                <p class="text-lg font-semibold text-gray-500 dark:text-gray-400">
+                    Hari ini libur: <strong>{{ $namaLibur }}</strong>
+                </p>
+                <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Tidak dapat melakukan absensi pada hari libur.</p>
+            </div>
+        @else
         {{-- Form Absensi --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
             <form method="POST" action="{{ route('guru.absensi.store', $jadwal->id_jadwal) }}">
@@ -44,9 +53,12 @@
                         <button type="button" onclick="setAll('{{ $status }}')"
                             class="px-3 py-1 text-xs font-medium rounded-full border transition-colors
                             {{ $status == 'Hadir' ? 'border-green-300 text-green-700 hover:bg-green-50' :
+                                ($status == 'Sakit' ? 'border-blue-300 text-blue-700 hover:bg-blue-50' :
+                                ($status == 'Izin' ? 'border-amber-300 text-amber-700 hover:bg-amber-50' :
                                 ($status == 'Alpa' ? 'border-red-300 text-red-700 hover:bg-red-50' :
+                                ($status == 'Terlambat' ? 'border-orange-300 text-orange-700 hover:bg-orange-50' :
                                 ($status == 'Bolos' ? 'border-pink-300 text-pink-700 hover:bg-pink-50' :
-                                'border-gray-300 text-gray-600 hover:bg-gray-50')) }}">
+                                'border-gray-300 text-gray-600 hover:bg-gray-50'))))) }}">
                             {{ $status }}
                         </button>
                     @endforeach
@@ -76,7 +88,7 @@
                                 <td class="px-5 py-3">
                                     <select name="absensi[{{ $reg->id_registrasi }}][status]"
                                         class="status-select text-sm dark:bg-gray-700 dark:text-gray-300 py-1"
-                                        onchange="updateRowColor(this); toggleDurasi(this);">
+                                        onchange="toggleDurasi(this);">
                                         @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Bolos'] as $status)
                                             <option value="{{ $status }}"
                                                 {{ ($absensiHariIni[$reg->id_registrasi] ?? 'Hadir') == $status ? 'selected' : '' }}>
@@ -115,6 +127,7 @@
                 </div>
             </form>
         </div>
+    @endif
     </div>
 
     @push('scripts')
@@ -122,25 +135,8 @@
         function setAll(status) {
             document.querySelectorAll('.status-select').forEach(select => {
                 select.value = status;
-                updateRowColor(select);
                 toggleDurasi(select);
             });
-        }
-
-        function updateRowColor(select) {
-            const row = select.closest('tr');
-            row.classList.remove('bg-green-50', 'bg-red-50', 'bg-yellow-50', 'bg-blue-50', 'bg-gray-50');
-            const colors = {
-                'Hadir'    : 'bg-green-50',
-                'Alpa'     : 'bg-red-50',
-                'Terlambat': 'bg-yellow-50',
-                'Bolos'    : 'bg-pink-50',
-                'Sakit'    : 'bg-blue-50',
-                'Izin'     : 'bg-yellow-50',
-            };
-            if (colors[select.value]) {
-                row.classList.add(colors[select.value]);
-            }
         }
 
         function toggleDurasi(select) {
@@ -155,7 +151,6 @@
         }
 
         document.querySelectorAll('.status-select').forEach(select => {
-            updateRowColor(select);
             toggleDurasi(select);
         });
     </script>
