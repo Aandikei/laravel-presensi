@@ -51,8 +51,7 @@ class SiswaController extends Controller
                 ->addColumn('kelas', function ($row) {
                     $kelas = $row->registrasiAktif?->kelas;
                     if ($kelas) {
-                        return '<span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full dark:bg-purple-800 dark:text-purple-200">'
-                            .$kelas->nama_kelas.'</span>';
+                        return $kelas->nama_kelas;
                     }
 
                     if ($row->registrasiAkademik->isNotEmpty() && !$row->registrasiAktif) {

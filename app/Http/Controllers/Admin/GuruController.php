@@ -28,10 +28,9 @@ class GuruController extends Controller
                 ->addColumn('wali_kelas', function ($row) {
                     $kelas = $row->kelasWali()->first();
                     if ($kelas) {
-                        return '<span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full dark:bg-purple-800 dark:text-purple-200">'
-                            . $kelas->nama_kelas . '</span>';
+                        return $kelas->nama_kelas;
                     }
-                    return '<span class="px-2 py-1 text-xs text-gray-500">-</span>';
+                    return '<span class="text-gray-500">-</span>';
                 })
                 ->addColumn('aksi', function ($row) {
                     $edit = '<a href="' . route('admin.guru.edit', $row->id_guru) . '" title="Edit" class="text-blue-600 hover:text-blue-800">

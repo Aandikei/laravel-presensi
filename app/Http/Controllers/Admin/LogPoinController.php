@@ -31,6 +31,7 @@ class LogPoinController extends Controller
 
             return DataTables::of($logPoin)
                 ->addIndexColumn()
+                ->editColumn('tanggal', fn($row) => $row->tanggal->format('d M Y'))
                 ->addColumn('nama_siswa', fn($row) => $row->siswa->nama_siswa)
                 ->addColumn('pelanggaran', fn($row) => $row->masterPoin->nama_pelanggaran)
                 ->addColumn('poin', fn($row) => $row->masterPoin->jumlah_poin)

@@ -21,6 +21,7 @@ class HariLiburController extends Controller
 
             return DataTables::of($hariLibur)
                 ->addIndexColumn()
+                ->editColumn('tanggal', fn($row) => $row->tanggal->format('d M Y'))
                 ->addColumn('tipe', function($row) {
                     return $row->is_nasional
                         ? '<span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Nasional</span>'

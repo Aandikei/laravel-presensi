@@ -73,7 +73,7 @@
                     <label class="block text-sm md:col-span-2">
                         <span class="text-gray-700 dark:text-gray-400">Alamat</span>
                         <textarea name="alamat" rows="2"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300">{{ old('alamat', $instansi->alamat) }}</textarea>
+                            class="block w-full mt-1 text-sm form-textarea dark:bg-gray-700 dark:text-gray-300">{{ old('alamat', $instansi->alamat) }}</textarea>
                     </label>
 
                     <label class="block text-sm">
@@ -95,8 +95,16 @@
                             Logo Sekolah
                             <span class="text-gray-400">(PNG/JPG, maks 2MB)</span>
                         </span>
-                        <input type="file" name="logo" accept=".png,.jpg,.jpeg"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
+                        <div class="relative mt-1">
+                            <input type="file" name="logo" accept=".png,.jpg,.jpeg"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            <div class="flex items-center justify-between px-3 py-2 text-sm border border-gray-300 rounded-lg cursor-pointer dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                <span class="truncate text-gray-400">Pilih file...</span>
+                                <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                        </div>
                         @error('logo')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
