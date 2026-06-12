@@ -103,7 +103,7 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
         $kelas = null;
         if (!empty($row['nama_kelas'])) {
             $kelas = Kelas::where('instansi_id', '=', $this->instansiId)
-                ->where('nama_kelas', '=', $row['nama_kelas'])
+                ->where('nama_kelas', '=', strtoupper($row['nama_kelas']))
                 ->first();
             $kelasId = $kelas?->id_kelas;
         }

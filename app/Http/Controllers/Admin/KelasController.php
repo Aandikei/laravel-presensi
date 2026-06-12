@@ -107,6 +107,8 @@ class KelasController extends Controller
             'guru_wali_id' => 'nullable|exists:guru,id_guru',
         ]);
 
+        $validated['nama_kelas'] = strtoupper($validated['nama_kelas']);
+
         Kelas::create([
             ...$validated,
             'instansi_id' => $instansi->id_instansi,
@@ -140,6 +142,8 @@ class KelasController extends Controller
             'tingkat' => 'required|integer|min:1|max:12',
             'guru_wali_id' => 'nullable|exists:guru,id_guru',
         ]);
+
+        $validated['nama_kelas'] = strtoupper($validated['nama_kelas']);
 
         $kelas->update($validated);
 

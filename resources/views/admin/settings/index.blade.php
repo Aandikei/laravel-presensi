@@ -96,15 +96,20 @@
                             <span class="text-gray-400">(PNG/JPG, maks 2MB)</span>
                         </span>
                         <div class="relative mt-1">
-                            <input type="file" name="logo" accept=".png,.jpg,.jpeg"
+                            <input type="file" name="logo" accept=".png,.jpg,.jpeg" id="logo-input"
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                             <div class="flex items-center justify-between px-3 py-2 text-sm border border-gray-300 rounded-lg cursor-pointer dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                <span class="truncate text-gray-400">Pilih file...</span>
+                                <span id="logo-label" class="truncate text-gray-400">Pilih file...</span>
                                 <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             </div>
                         </div>
+                        <script>
+                            document.getElementById('logo-input').addEventListener('change', function() {
+                                document.getElementById('logo-label').textContent = this.files[0]?.name || 'Pilih file...';
+                            });
+                        </script>
                         @error('logo')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror

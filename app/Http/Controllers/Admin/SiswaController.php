@@ -55,10 +55,10 @@ class SiswaController extends Controller
                     }
 
                     if ($row->registrasiAkademik->isNotEmpty() && !$row->registrasiAktif) {
-                        return '<span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full dark:bg-orange-800 dark:text-orange-200">Alumni</span>';
+                        return '<span class="font-medium text-green-600 dark:text-green-400">Alumni</span>';
                     }
 
-                    return '<span class="px-2 py-1 text-xs text-gray-500">Belum terdaftar</span>';
+                    return '<span class="text-gray-500">Belum terdaftar</span>';
                 })
                 // ->addColumn('total_poin', fn($row) => $row->logPoin()->sum('jumlah_poin') ?? 0)
                 ->addColumn('total_poin', function ($row) {

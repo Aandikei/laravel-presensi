@@ -127,8 +127,21 @@
 
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">File Excel (.xlsx)</span>
-                    <input type="file" name="file" accept=".xlsx,.xls"
-                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" required />
+                    <div class="relative mt-1">
+                        <input type="file" name="file" accept=".xlsx,.xls" id="file-import-input" required
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                        <div class="flex items-center justify-between px-3 py-2 text-sm border border-gray-300 rounded-lg cursor-pointer dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                            <span id="file-import-label" class="truncate text-gray-400">Pilih file...</span>
+                            <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <script>
+                        document.getElementById('file-import-input').addEventListener('change', function() {
+                            document.getElementById('file-import-label').textContent = this.files[0]?.name || 'Pilih file...';
+                        });
+                    </script>
                 </label>
 
                 <div class="flex gap-3">
