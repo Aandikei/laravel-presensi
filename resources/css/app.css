@@ -41,13 +41,36 @@ select {
     background-size: 1.25rem;
 }
 
-/* DataTables refinements */
+/* ================================
+   DataTable — Windmill Theme
+   ================================ */
+
+/* -- Layout & typography -- */
 .dataTables_wrapper {
     @apply text-sm;
 }
-.dataTables_wrapper .dataTables_filter input {
-    @apply ml-2 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500;
+
+/* Float layout: length kiri, filter kanan */
+.dataTables_wrapper .dataTables_length {
+    float: left;
 }
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    text-align: right;
+}
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    @apply text-gray-600 dark:text-gray-400 pb-3;
+}
+
+/* Clearfix supaya parent membungkus float */
+.dataTables_wrapper:after {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+/* -- Length selector (Show X entries) -- */
 .dataTables_wrapper .dataTables_length select {
     @apply mx-1 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 pr-7 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 appearance-none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
@@ -55,56 +78,142 @@ select {
     background-position: right 0.35rem center;
     background-size: 1rem;
 }
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter,
-.dataTables_wrapper .dataTables_info,
+
+/* -- Search filter -- */
+.dataTables_wrapper .dataTables_filter input {
+    @apply ml-2 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500;
+}
+
+/* -- Info text (Showing X to Y of Z) -- */
+.dataTables_wrapper .dataTables_info {
+    @apply text-gray-500 dark:text-gray-400 text-sm pt-3;
+    clear: both;
+    float: left;
+}
+
+/* -- Processing indicator -- */
 .dataTables_wrapper .dataTables_processing {
     @apply text-gray-600 dark:text-gray-400;
 }
+
+/* -- Pagination -- */
 .dataTables_wrapper .dataTables_paginate {
-    @apply mt-4;
+    @apply pt-3;
+    float: right;
+    text-align: right;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-    @apply inline-block px-3 py-1.5 mx-0.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150;
+    @apply inline-block px-3 py-1.5 mx-0.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150 select-none;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
     @apply bg-purple-600 text-white border-purple-600 hover:bg-purple-700 hover:border-purple-700;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-    @apply opacity-50 cursor-not-allowed hover:bg-white dark:hover:bg-gray-700;
+    @apply opacity-50 cursor-not-allowed;
 }
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+    @apply bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300;
+}
+
+/* -- Table base -- */
 .dataTables_wrapper table.dataTable {
-    @apply border-collapse;
-}
-.dataTables_wrapper table.dataTable thead th {
-    @apply border-b-2 border-gray-200 dark:border-gray-700;
+    @apply w-full border-collapse;
+    clear: both;
 }
 .dataTables_wrapper table.dataTable.no-footer {
     @apply border-b border-gray-200 dark:border-gray-700;
 }
-table.dataTable thead .sorting:after,
-table.dataTable thead .sorting_asc:after,
-table.dataTable thead .sorting_desc:after {
-    @apply text-gray-400 dark:text-gray-500;
+
+/* -- Table header -- */
+.dataTables_wrapper table.dataTable thead th {
+    @apply border-b-2 border-gray-200 dark:border-gray-700 text-xs font-semibold tracking-wide text-left text-gray-500 uppercase bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50 px-4 py-3;
 }
 
-/* Dark mode DataTables refinements */
-.dark table.dataTable {
-    color: #e5e7eb;
+/* -- Sorting arrows -- */
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc,
+table.dataTable thead .sorting_asc_disabled,
+table.dataTable thead .sorting_desc_disabled {
+    @apply cursor-pointer relative pr-6;
 }
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:after {
+    @apply absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 opacity-60 text-xs;
+}
+table.dataTable thead .sorting:after {
+    content: "⇅";
+    opacity: 0.3;
+}
+table.dataTable thead .sorting_asc:after {
+    content: "▲";
+}
+table.dataTable thead .sorting_desc:after {
+    content: "▼";
+}
+table.dataTable thead .sorting_asc_disabled:after {
+    content: "▲";
+    @apply opacity-30;
+}
+table.dataTable thead .sorting_desc_disabled:after {
+    content: "▼";
+    @apply opacity-30;
+}
+
+/* -- Table body rows -- */
+table.dataTable tbody th,
+table.dataTable tbody td {
+    @apply px-4 py-3 text-sm text-gray-700 dark:text-gray-300;
+}
+
+/* -- Striped rows -- */
+table.dataTable.stripe tbody tr.odd,
+table.dataTable.display tbody tr.odd {
+    @apply bg-gray-50 dark:bg-gray-800/60;
+}
+
+/* -- Hover rows -- */
+table.dataTable.hover tbody tr:hover,
+table.dataTable.display tbody tr:hover {
+    @apply bg-gray-100 dark:bg-gray-700/60;
+}
+table.dataTable.hover tbody tr.odd:hover,
+table.dataTable.display tbody tr.odd:hover {
+    @apply bg-gray-100 dark:bg-gray-700/60;
+}
+
+/* -- Dark mode table body colors -- */
 .dark table.dataTable tbody tr {
     background-color: #1f2937;
 }
-.dark table.dataTable tbody tr:hover {
-    background-color: #374151 !important;
+.dark table.dataTable.stripe tbody tr.odd,
+.dark table.dataTable.display tbody tr.odd {
+    background-color: rgba(31, 41, 55, 0.6);
 }
+.dark table.dataTable tbody tr:hover,
+.dark table.dataTable.display tbody tr:hover,
+.dark table.dataTable.hover tbody tr:hover,
 .dark table.dataTable.display tbody tr:hover {
     background-color: #374151 !important;
 }
 
-/* DataTables info text in dark mode */
-.dark .dataTables_wrapper .dataTables_info {
-    color: #9ca3af;
+/* -- Responsive tweaks -- */
+@media (max-width: 767px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        float: none;
+        text-align: left;
+    }
+    .dataTables_wrapper .dataTables_filter {
+        @apply mt-2;
+    }
 }
 
 /* Chart containers in dark mode - subtle border matching the card style */

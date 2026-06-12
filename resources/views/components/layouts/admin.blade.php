@@ -14,8 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
     <script src="{{ asset('/assets/js/charts-lines.js') }}" defer></script>
     <script src="{{ asset('/assets/js/charts-pie.js') }}" defer></script>
-    {{-- DataTables --}}
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    {{-- DataTables (styled via app.css) --}}
 </head>
 
 <body>
