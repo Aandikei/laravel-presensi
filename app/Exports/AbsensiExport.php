@@ -3,7 +3,7 @@
 namespace App\Exports;
 
 use App\Models\RegistrasiAkademik;
-use App\Models\Jadwal;
+use App\Models\TahunAjaran;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -19,34 +19,37 @@ class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTit
     protected $bulan;
     protected $tahun;
     protected $mapelId;
+    protected $tahunAktifId;
 
-    public function __construct(int $kelasId, int $bulan, int $tahun, ?int $mapelId = null)
+    public function __construct(int $kelasId, int $bulan, int $tahun, ?int $mapelId = null, ?int $tahunAktifId = null)
     {
-        $this->kelasId  = $kelasId;
-        $this->bulan    = $bulan;
-        $this->tahun    = $tahun;
-        $this->mapelId  = $mapelId;
+        $this->kelasId      = $kelasId;
+        $this->bulan        = $bulan;
+        $this->tahun        = $tahun;
+        $this->mapelId      = $mapelId;
+        $this->tahunAktifId = $tahunAktifId ?? TahunAjaran::where('is_aktif', true)->value('id_tahun');
     }
 
     public function collection()
     {
-        $registrasi = RegistrasiAkademik::with(['siswa', 'absensi.jadwal.kurikulum.mataPelajaran'])
+        $registrasi = RegistrasiAkademik::with(['siswa', 'absensi' => function ($q) {
+                $q->whereMonth('tanggal', $this->bulan)
+                  ->whereYear('tanggal', $this->tahun)
+                  ->when($this->mapelId, fn($q) =>
+                      $q->whereHas('jadwal.kurikulum', fn($q) =>
+                          $q->where('mapel_id', $this->mapelId)
+                      )
+                  );
+            }])
             ->where('kelas_id', $this->kelasId)
+            ->where('tahun_id', $this->tahunAktifId)
             ->get();
 
         $rows = collect();
         $no   = 1;
 
         foreach ($registrasi as $reg) {
-            $absensi = $reg->absensi()
-                ->whereMonth('tanggal', $this->bulan)
-                ->whereYear('tanggal', $this->tahun)
-                ->when($this->mapelId, fn($q) =>
-                    $q->whereHas('jadwal.kurikulum', fn($q) =>
-                        $q->where('mapel_id', $this->mapelId)
-                    )
-                )
-                ->get();
+            $absensi = $reg->absensi;
 
             $hadir     = $absensi->where('status', 'Hadir')->count();
             $sakit     = $absensi->where('status', 'Sakit')->count();

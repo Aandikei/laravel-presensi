@@ -44,25 +44,30 @@ class LaporanController extends Controller
         ]);
 
         $instansi = Auth::user()->getInstansi();
+        $tahunAktif = TahunAjaran::where('is_aktif', true)
+            ->where('instansi_id', $instansi->id_instansi)
+            ->firstOrFail();
+
         $kelas    = Kelas::with(['waliKelas'])->findOrFail($request->kelas_id);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
             ->orderBy('nama_mapel')->get();
 
-        $registrasi = RegistrasiAkademik::with(['siswa'])
+        $registrasi = RegistrasiAkademik::with(['siswa', 'absensi' => function ($q) use ($request) {
+                $q->whereMonth('tanggal', $request->bulan)
+                  ->whereYear('tanggal', $request->tahun)
+                  ->when($request->mapel_id, fn($q) =>
+                      $q->whereHas('jadwal.kurikulum', fn($q) =>
+                          $q->where('mapel_id', $request->mapel_id)
+                      )
+                  );
+            }])
             ->where('kelas_id', $request->kelas_id)
+            ->where('tahun_id', $tahunAktif->id_tahun)
             ->get()
-            ->map(function($reg) use ($request) {
-                $absensi = $reg->absensi()
-                    ->whereMonth('tanggal', $request->bulan)
-                    ->whereYear('tanggal', $request->tahun)
-                    ->when($request->mapel_id, fn($q) =>
-                        $q->whereHas('jadwal.kurikulum', fn($q) =>
-                            $q->where('mapel_id', $request->mapel_id)
-                        )
-                    )
-                    ->get();
+            ->map(function($reg) {
+                $absensi = $reg->absensi;
 
                 $reg->hadir     = $absensi->where('status', 'Hadir')->count();
                 $reg->sakit     = $absensi->where('status', 'Sakit')->count();
@@ -94,14 +99,18 @@ class LaporanController extends Controller
             'tahun'    => 'required|integer|min:2020',
         ]);
 
-        $instansi = Auth::user()->getInstansi();
+        $instansi  = Auth::user()->getInstansi();
+        $tahunAktif = TahunAjaran::where('is_aktif', true)
+            ->where('instansi_id', $instansi->id_instansi)
+            ->firstOrFail();
+
         $kelas    = Kelas::findOrFail($request->kelas_id);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $filename = 'rekap-absensi-' . $kelas->nama_kelas . '-' . $request->bulan . '-' . $request->tahun . '.xlsx';
 
         return Excel::download(
-            new AbsensiExport($request->kelas_id, $request->bulan, $request->tahun, $request->mapel_id),
+            new AbsensiExport($request->kelas_id, $request->bulan, $request->tahun, $request->mapel_id, $tahunAktif->id_tahun),
             $filename
         );
     }
@@ -116,17 +125,23 @@ class LaporanController extends Controller
         ]);
 
         $instansi = Auth::user()->getInstansi();
+        $tahunAktif = TahunAjaran::where('is_aktif', true)
+            ->where('instansi_id', $instansi->id_instansi)
+            ->firstOrFail();
+
         $kelas    = Kelas::with(['waliKelas'])->findOrFail($request->kelas_id);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
-        $registrasi = RegistrasiAkademik::with(['siswa'])
+        $registrasi = RegistrasiAkademik::with(['siswa', 'absensi' => function ($q) use ($request) {
+                $q->whereMonth('tanggal', $request->bulan)
+                  ->whereYear('tanggal', $request->tahun);
+            }])
             ->where('kelas_id', $request->kelas_id)
+            ->where('tahun_id', $tahunAktif->id_tahun)
             ->get()
-            ->map(function($reg) use ($request) {
-                $absensi    = $reg->absensi()
-                    ->whereMonth('tanggal', $request->bulan)
-                    ->whereYear('tanggal', $request->tahun)
-                    ->get();
+            ->map(function($reg) {
+                $absensi = $reg->absensi;
+
                 $reg->hadir     = $absensi->where('status', 'Hadir')->count();
                 $reg->sakit     = $absensi->where('status', 'Sakit')->count();
                 $reg->izin      = $absensi->where('status', 'Izin')->count();
@@ -168,17 +183,16 @@ class LaporanController extends Controller
                     $q->where('kelas_id', $request->kelas_id)
                 )
             )
+            ->with(['logPoin' => fn($q) => $q
+                ->whereMonth('tanggal', $request->bulan)
+                ->whereYear('tanggal', $request->tahun),
+                'logPoin.masterPoin',
+            ])
             ->orderBy('nama_siswa')
             ->get()
-            ->map(function($s) use ($request) {
-                $logPoin = LogPoinSiswa::where('siswa_id', $s->id_siswa)
-                    ->whereMonth('tanggal', $request->bulan)
-                    ->whereYear('tanggal', $request->tahun)
-                    ->with('masterPoin')
-                    ->get();
-
-                $s->jumlah_pelanggaran = $logPoin->count();
-                $s->total_poin = $logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
+            ->map(function($s) {
+                $s->jumlah_pelanggaran = $s->logPoin->count();
+                $s->total_poin = $s->logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
                 $s->status_poin = $s->total_poin >= 100 ? 'PERHATIAN'
                     : ($s->total_poin >= 50 ? 'WASPADA' : 'AMAN');
                 return $s;
@@ -217,16 +231,16 @@ class LaporanController extends Controller
                     $q->where('kelas_id', $request->kelas_id)
                 )
             )
+            ->with(['logPoin' => fn($q) => $q
+                ->whereMonth('tanggal', $request->bulan)
+                ->whereYear('tanggal', $request->tahun),
+                'logPoin.masterPoin',
+            ])
             ->orderBy('nama_siswa')
             ->get()
-            ->map(function($s) use ($request) {
-                $logPoin = LogPoinSiswa::where('siswa_id', $s->id_siswa)
-                    ->whereMonth('tanggal', $request->bulan)
-                    ->whereYear('tanggal', $request->tahun)
-                    ->with('masterPoin')
-                    ->get();
-                $s->jumlah_pelanggaran = $logPoin->count();
-                $s->total_poin = $logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
+            ->map(function($s) {
+                $s->jumlah_pelanggaran = $s->logPoin->count();
+                $s->total_poin = $s->logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
                 $s->status_poin = $s->total_poin >= 100 ? 'PERHATIAN'
                     : ($s->total_poin >= 50 ? 'WASPADA' : 'AMAN');
                 return $s;

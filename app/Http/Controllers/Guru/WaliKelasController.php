@@ -51,26 +51,16 @@ class WaliKelasController extends Controller
             : 0;
 
         $siswaPoinTinggi = Siswa::whereIn('id_siswa', $siswaIds)
-            ->withSum(['logPoin as poin_bulan_ini' => function ($q) {
-                $q->whereMonth('tanggal', now()->month)
-                  ->whereYear('tanggal', now()->year);
-            }], 'poin_id')
+            ->addSelect(['poin_bulan_ini' => LogPoinSiswa::whereColumn('siswa_id', 'siswa.id_siswa')
+                ->whereMonth('tanggal', now()->month)
+                ->whereYear('tanggal', now()->year)
+                ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
+                ->selectRaw('COALESCE(SUM(master_poin.jumlah_poin), 0)')
+            ])
             ->orderByDesc('poin_bulan_ini')
-            ->take(5)
             ->get()
-            ->map(function ($siswa) {
-                $siswa->poin_bulan_ini = (int) $siswa->poin_bulan_ini;
-                if ($siswa->poin_bulan_ini > 0) {
-                    $totalPoin = LogPoinSiswa::where('siswa_id', $siswa->id_siswa)
-                        ->whereMonth('tanggal', now()->month)
-                        ->whereYear('tanggal', now()->year)
-                        ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
-                        ->sum('master_poin.jumlah_poin');
-                    $siswa->poin_bulan_ini = $totalPoin;
-                }
-                return $siswa;
-            })
             ->filter(fn($s) => $s->poin_bulan_ini > 0)
+            ->take(5)
             ->values();
 
         $hariMap = [

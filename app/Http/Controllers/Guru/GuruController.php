@@ -61,18 +61,15 @@ class GuruController extends Controller
                 $rataKehadiran = $totalAbsensi > 0 ? round(($totalHadir / $totalAbsensi) * 100) : 0;
 
                 $siswaPoinTinggi = Siswa::whereIn('id_siswa', $siswaIds)
+                    ->addSelect(['poin_bulan_ini' => LogPoinSiswa::whereColumn('siswa_id', 'siswa.id_siswa')
+                        ->whereMonth('tanggal', now()->month)
+                        ->whereYear('tanggal', now()->year)
+                        ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
+                        ->selectRaw('COALESCE(SUM(master_poin.jumlah_poin), 0)')
+                    ])
+                    ->orderBy('poin_bulan_ini', 'desc')
                     ->get()
-                    ->map(function ($siswa) {
-                        $totalPoin = LogPoinSiswa::where('siswa_id', $siswa->id_siswa)
-                            ->whereMonth('tanggal', now()->month)
-                            ->whereYear('tanggal', now()->year)
-                            ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
-                            ->sum('master_poin.jumlah_poin');
-                        $siswa->poin_bulan_ini = $totalPoin;
-                        return $siswa;
-                    })
                     ->filter(fn($s) => $s->poin_bulan_ini > 0)
-                    ->sortByDesc('poin_bulan_ini')
                     ->take(5)
                     ->values();
 
