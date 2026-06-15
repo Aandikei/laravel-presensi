@@ -11,11 +11,6 @@
                 {{ session('success') }}
             </div>
         @endif
-        @if(session('error'))
-            <div class="px-4 py-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
 
         <div class="grid gap-6 lg:grid-cols-2 mb-6">
 

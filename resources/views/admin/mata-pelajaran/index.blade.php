@@ -17,11 +17,6 @@
                 {{ session('success') }}
             </div>
         @endif
-        @if(session('error'))
-            <div class="px-4 py-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
 
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">

@@ -17,44 +17,51 @@ class KelasController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
 
+        $daftarTahun = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_tahun', 'desc')
+            ->orderByRaw("FIELD(semester, 'Ganjil', 'Genap')")
+            ->get();
+
+        $tahunDipilih = $request->tahun_id
+            ? TahunAjaran::where('instansi_id', $instansi->id_instansi)->find($request->tahun_id)
+            : TahunAjaran::where('instansi_id', $instansi->id_instansi)->where('is_aktif', true)->first();
+
+        $tingkatList = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->select('tingkat')
+            ->distinct()
+            ->orderBy('tingkat')
+            ->pluck('tingkat');
+
+        $jurusanList = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->selectRaw('DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(nama_kelas, " ", 2), " ", -1) as jurusan')
+            ->pluck('jurusan')
+            ->sort()
+            ->values();
+
         if ($request->ajax()) {
             $kelas = Kelas::with(['waliKelas'])
                 ->where('instansi_id', $instansi->id_instansi)
                 ->select('kelas.*');
 
+            if ($request->tingkat) {
+                $kelas->where('tingkat', $request->tingkat);
+            }
+
+            if ($request->jurusan) {
+                $kelas->where('nama_kelas', 'like', '% ' . $request->jurusan . ' %');
+            }
+
             return DataTables::of($kelas)
                 ->addIndexColumn()
                 ->addColumn('wali_kelas', fn ($row) => $row->waliKelas?->nama_guru ?? '<span class="text-gray-400">Belum ditentukan</span>')
-                // ->addColumn('jumlah_siswa', function ($row) {
-                //     // Hitung siswa di tahun ajaran aktif
-                //     $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
-
-                //     return $tahunAktif
-                //         ? $row->registrasiAkademik()->where('tahun_id', $tahunAktif->id_tahun)->count()
-                //         : 0;
-                // })
-                ->addColumn('jumlah_siswa', function ($row) {
-                    $instansi = Auth::user()->getInstansi();
-                    $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-                        ->where('is_aktif', true)
-                        ->first();
-
-                    return $tahunAktif
-                        ? $row->registrasiAkademik()->where('tahun_id', $tahunAktif->id_tahun)->count()
+                ->addColumn('jumlah_siswa', function ($row) use ($tahunDipilih) {
+                    return $tahunDipilih
+                        ? $row->registrasiAkademik()->aktif()->where('tahun_id', $tahunDipilih->id_tahun)->count()
                         : 0;
                 })
-                ->addColumn('tahun_ajaran', function ($row) {
-                    // Ambil tahun ajaran dari registrasi terbaru di kelas ini
-                    $reg = \App\Models\RegistrasiAkademik::where('kelas_id', $row->id_kelas)
-                        ->with('tahunAjaran')
-                        ->latest('id_registrasi')
-                        ->first();
-
-                    return $reg?->tahunAjaran
-                        ? $reg->tahunAjaran->nama_tahun.' - '.$reg->tahunAjaran->semester
-                        : '<span class="text-gray-400 text-xs">Belum ada siswa</span>';
-                })
-                // ->addColumn('jumlah_siswa', fn ($row) => $row->registrasiAkademik()->count())
+                ->addColumn('tahun_ajaran', fn () => $tahunDipilih
+                    ? $tahunDipilih->nama_tahun.' - '.$tahunDipilih->semester
+                    : '<span class="text-gray-400 text-xs">Pilih tahun ajaran</span>')
                 ->addColumn('aksi', function ($row) {
                     $detail = '<a href="'.route('admin.kelas.detail', $row->id_kelas).'" title="Detail" class="text-purple-600 hover:text-purple-800">
                         <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +90,7 @@ class KelasController extends Controller
                 ->make(true);
         }
 
-        return view('admin.kelas.index');
+        return view('admin.kelas.index', compact('daftarTahun', 'tahunDipilih', 'tingkatList', 'jurusanList'));
     }
 
     public function create()
@@ -91,6 +98,7 @@ class KelasController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         $guru = Guru::where('instansi_id', $instansi->id_instansi)
+            ->whereDoesntHave('kelasWali')
             ->orderBy('nama_guru')
             ->get();
 
@@ -127,6 +135,10 @@ class KelasController extends Controller
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $guru = Guru::where('instansi_id', $instansi->id_instansi)
+            ->where(function ($q) use ($kelas) {
+                $q->whereDoesntHave('kelasWali')
+                  ->orWhere('id_guru', $kelas->guru_wali_id);
+            })
             ->orderBy('nama_guru')
             ->get();
 
@@ -171,14 +183,20 @@ class KelasController extends Controller
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
     }
 
-    public function detail(Kelas $kelas)
+    public function detail(Request $request, Kelas $kelas)
     {
         $this->authorizeInstansi($kelas);
 
         $instansi = Auth::user()->getInstansi();
-        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->where('is_aktif', true)
-            ->first();
+
+        $daftarTahun = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_tahun', 'desc')
+            ->orderByRaw("FIELD(semester, 'Ganjil', 'Genap')")
+            ->get();
+
+        $tahunDipilih = $request->tahun_id
+            ? TahunAjaran::where('instansi_id', $instansi->id_instansi)->find($request->tahun_id)
+            : TahunAjaran::where('instansi_id', $instansi->id_instansi)->where('is_aktif', true)->first();
 
         $kelas->load([
             'waliKelas',
@@ -187,12 +205,12 @@ class KelasController extends Controller
             'kurikulum.jadwal',
         ]);
 
-        // Siswa hanya dari tahun ajaran aktif
         $registrasi = RegistrasiAkademik::where('kelas_id', $kelas->id_kelas)
-            ->when($tahunAktif, fn ($q) => $q->where('tahun_id', $tahunAktif->id_tahun))
+            ->when($tahunDipilih, fn ($q) => $q->where('tahun_id', $tahunDipilih->id_tahun))
+            ->aktif()
             ->with('siswa')
             ->get();
 
-        return view('admin.kelas.detail', compact('kelas', 'registrasi', 'tahunAktif'));
+        return view('admin.kelas.detail', compact('kelas', 'registrasi', 'tahunDipilih', 'daftarTahun'));
     }
 }

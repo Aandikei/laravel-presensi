@@ -63,6 +63,7 @@ class LaporanController extends Controller
                       )
                   );
             }])
+            ->aktif()
             ->where('kelas_id', $request->kelas_id)
             ->where('tahun_id', $tahunAktif->id_tahun)
             ->get()
@@ -136,6 +137,7 @@ class LaporanController extends Controller
                 $q->whereMonth('tanggal', $request->bulan)
                   ->whereYear('tanggal', $request->tahun);
             }])
+            ->aktif()
             ->where('kelas_id', $request->kelas_id)
             ->where('tahun_id', $tahunAktif->id_tahun)
             ->get()

@@ -64,19 +64,14 @@ class AbsensiController extends Controller
             $instansi->id_instansi
         );
 
-        // Cek apakah sudah dikunci
-        $sudahLocked = $jadwal->absensi()
+        $locked = $jadwal->absensi()
             ->where('tanggal', now()->toDateString())
             ->where('is_locked', true)
             ->exists();
 
-        if ($sudahLocked) {
-            return redirect()->route('guru.absensi.index')
-                ->with('error', 'Absensi ini sudah dikunci oleh admin! Hubungi admin untuk membuka kunci.');
-        }
-
-        // Ambil semua siswa di kelas ini (tahun ajaran aktif)
+        // Ambil semua siswa aktif di kelas ini (tahun ajaran aktif)
         $registrasi = RegistrasiAkademik::with('siswa')
+            ->aktif()
             ->where('kelas_id', $jadwal->kurikulum->kelas_id)
             ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
             ->orderBy('id_registrasi')
@@ -87,7 +82,7 @@ class AbsensiController extends Controller
             ->where('tanggal', now()->toDateString())
             ->pluck('status', 'reg_id');
 
-        return view('guru.absensi.input', compact('jadwal', 'registrasi', 'absensiHariIni', 'namaLibur'));
+        return view('guru.absensi.input', compact('jadwal', 'registrasi', 'absensiHariIni', 'namaLibur', 'locked'));
     }
 
     public function store(Request $request, Jadwal $jadwal)
@@ -100,6 +95,16 @@ class AbsensiController extends Controller
         if ($namaLibur) {
             return redirect()->route('guru.absensi.index')
                 ->with('error', "Hari ini adalah hari libur: {$namaLibur}. Absensi tidak bisa diinput.");
+        }
+
+        $locked = $jadwal->absensi()
+            ->where('tanggal', now()->toDateString())
+            ->where('is_locked', true)
+            ->exists();
+
+        if ($locked) {
+            return redirect()->route('guru.absensi.index')
+                ->with('error', 'Absensi sudah dikunci oleh admin! Hubungi admin untuk membuka kunci.');
         }
 
         $request->validate([

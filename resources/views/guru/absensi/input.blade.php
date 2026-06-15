@@ -40,6 +40,54 @@
                 </p>
                 <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Tidak dapat melakukan absensi pada hari libur.</p>
             </div>
+        @elseif(isset($locked) && $locked)
+        <div class="mb-4 px-4 py-3 text-sm text-yellow-700 bg-yellow-100 rounded-lg dark:bg-yellow-800 dark:text-yellow-200">
+            Absensi sudah dikunci oleh admin. Data hanya bisa dilihat, tidak bisa diedit.
+        </div>
+        {{-- Form Absensi (Read-only) --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
+                        <th class="px-5 py-3">No</th>
+                        <th class="px-5 py-3">Nama Siswa</th>
+                        <th class="px-5 py-3">NISN</th>
+                        <th class="px-5 py-3">Status</th>
+                        <th class="px-5 py-3">Durasi (mnt)</th>
+                        <th class="px-5 py-3">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y dark:divide-gray-700">
+                    @foreach($registrasi as $i => $reg)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
+                            <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
+                            <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">{{ $reg->siswa->nama_siswa }}</td>
+                            <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $reg->siswa->nisn }}</td>
+                            <td class="px-5 py-3">
+                                <span class="px-3 py-1 text-xs font-medium rounded-full
+                                    {{ ($absensiHariIni[$reg->id_registrasi] ?? '-') == 'Hadir' ? 'bg-green-100 text-green-700' : '' }}
+                                    {{ ($absensiHariIni[$reg->id_registrasi] ?? '-') == 'Sakit' ? 'bg-blue-100 text-blue-700' : '' }}
+                                    {{ ($absensiHariIni[$reg->id_registrasi] ?? '-') == 'Izin' ? 'bg-amber-100 text-amber-700' : '' }}
+                                    {{ ($absensiHariIni[$reg->id_registrasi] ?? '-') == 'Alpa' ? 'bg-red-100 text-red-700' : '' }}
+                                    {{ ($absensiHariIni[$reg->id_registrasi] ?? '-') == 'Terlambat' ? 'bg-orange-100 text-orange-700' : '' }}
+                                    {{ ($absensiHariIni[$reg->id_registrasi] ?? '-') == 'Bolos' ? 'bg-pink-100 text-pink-700' : '' }}
+                                    {{ !in_array(($absensiHariIni[$reg->id_registrasi] ?? '-'), ['Hadir','Sakit','Izin','Alpa','Terlambat','Bolos']) ? 'bg-gray-100 text-gray-500' : '' }}">
+                                    {{ $absensiHariIni[$reg->id_registrasi] ?? 'Belum diisi' }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400"></td>
+                            <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400"></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div class="px-5 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                <a href="{{ route('guru.absensi.index') }}"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200">
+                    Kembali
+                </a>
+            </div>
+        </div>
         @else
         {{-- Form Absensi --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">

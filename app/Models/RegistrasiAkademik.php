@@ -13,6 +13,14 @@ class RegistrasiAkademik extends Model
         'siswa_id',
         'kelas_id',
         'tahun_id',
+        'status',
+        'alasan_mutasi',
+        'tanggal_mutasi',
+    ];
+
+    protected $casts = [
+        'status' => 'string',
+        'tanggal_mutasi' => 'datetime',
     ];
 
     public function siswa()
@@ -38,5 +46,20 @@ class RegistrasiAkademik extends Model
     public function rekapBulanan()
     {
         return $this->hasMany(RekapBulanan::class, 'reg_id', 'id_registrasi');
+    }
+
+    public function scopeAktif($query)
+    {
+        return $query->where('status', 'Aktif');
+    }
+
+    public function scopePindah($query)
+    {
+        return $query->where('status', 'Pindah');
+    }
+
+    public function scopeAlumni($query)
+    {
+        return $query->where('status', 'Alumni');
     }
 }

@@ -45,6 +45,8 @@ class GuruController extends Controller
             $kelasSaya = $guru->kelasWali()->with(['instansi'])->first();
             if ($kelasSaya) {
                 $siswaIds = RegistrasiAkademik::where('kelas_id', $kelasSaya->id_kelas)
+                    ->aktif()
+                    ->whereRaw('tahun_id = (SELECT MAX(r2.tahun_id) FROM registrasi_akademik r2 WHERE r2.siswa_id = registrasi_akademik.siswa_id AND r2.status = ?)', ['Aktif'])
                     ->pluck('siswa_id');
                 $jumlahSiswa = $siswaIds->count();
 
@@ -52,7 +54,7 @@ class GuruController extends Controller
                 $totalAbsensi = 0;
                 $registrasi = RegistrasiAkademik::with(['absensi' => fn ($q) =>
                     $q->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year)
-                ])->where('kelas_id', $kelasSaya->id_kelas)->get();
+                ])->aktif()->where('kelas_id', $kelasSaya->id_kelas)->get();
                 foreach ($registrasi as $reg) {
                     $count = $reg->absensi->count();
                     $totalAbsensi += $count;

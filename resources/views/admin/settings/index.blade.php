@@ -62,7 +62,7 @@
                         <span class="text-gray-700 dark:text-gray-400">Jenjang</span>
                         <select name="jenjang"
                             class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
-                            @foreach(['SD','SMP','SMA','SMK'] as $j)
+                            @foreach(['SD','SMP','SMA'] as $j)
                                 <option value="{{ $j }}" {{ old('jenjang', $instansi->jenjang) == $j ? 'selected' : '' }}>
                                     {{ $j }}
                                 </option>

@@ -61,8 +61,10 @@ class NaikKelasController extends Controller
             ->get()
             ->groupBy('tingkat');
 
-        // Siswa yang sudah terdaftar di tahun tujuan
+        // Siswa yang sudah terdaftar di tahun tujuan (hanya dari instansi ini)
         $sudahTerdaftar = RegistrasiAkademik::where('tahun_id', '=', $tahunTujuan->id_tahun)
+            ->whereHas('kelas', fn($q) => $q->where('instansi_id', $instansi->id_instansi))
+            ->aktif()
             ->pluck('siswa_id')
             ->toArray();
 
@@ -103,6 +105,8 @@ class NaikKelasController extends Controller
                 // Skip kalau sudah terdaftar di tahun tujuan
                 $sudahAda = RegistrasiAkademik::where('siswa_id', '=', $siswaId)
                     ->where('tahun_id', '=', $tahunTujuanId)
+                    ->whereHas('kelas', fn($q) => $q->where('instansi_id', $instansi->id_instansi))
+                    ->aktif()
                     ->exists();
 
                 if ($sudahAda) {
@@ -145,6 +149,7 @@ class NaikKelasController extends Controller
                         'siswa_id' => $siswaId,
                         'kelas_id' => $kelasTujuanId,
                         'tahun_id' => $tahunTujuanId,
+                        'status' => 'Aktif',
                     ]);
 
                     $action === 'naik' ? $berhasilNaik++ : $berhasilTidak++;
@@ -181,6 +186,7 @@ class NaikKelasController extends Controller
         // Ambil registrasi unik per siswa di tahun asal
         // Kalau siswa punya multiple registrasi, ambil yang terbaru
         $registrasiAsal = RegistrasiAkademik::where('tahun_id', $tahunAsal->id_tahun)
+            ->aktif()
             ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $instansi->id_instansi))
             ->get()
             ->unique('siswa_id'); // ← ambil unik per siswa
@@ -192,6 +198,7 @@ class NaikKelasController extends Controller
             foreach ($registrasiAsal as $reg) {
                 $sudahAda = RegistrasiAkademik::where('siswa_id', $reg->siswa_id)
                     ->where('tahun_id', $tahunTujuan->id_tahun)
+                    ->aktif()
                     ->exists();
 
                 if ($sudahAda) {
@@ -204,6 +211,7 @@ class NaikKelasController extends Controller
                     'siswa_id' => $reg->siswa_id,
                     'kelas_id' => $reg->kelas_id,
                     'tahun_id' => $tahunTujuan->id_tahun,
+                    'status'   => 'Aktif',
                 ]);
 
                 $berhasil++;

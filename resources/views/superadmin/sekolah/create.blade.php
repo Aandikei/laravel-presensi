@@ -33,7 +33,7 @@
                         <select name="jenjang"
                             class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('jenjang') border-red-500 @enderror">
                             <option value="">-- Pilih --</option>
-                            @foreach (['SD', 'SMP', 'SMA', 'SMK'] as $j)
+                            @foreach (['SD', 'SMP', 'SMA'] as $j)
                                 <option value="{{ $j }}" {{ old('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
                             @endforeach
                         </select>

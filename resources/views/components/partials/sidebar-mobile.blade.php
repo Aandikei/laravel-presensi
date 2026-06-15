@@ -178,7 +178,7 @@
 
     {{-- Logo --}}
     <a class="ml-6 text-lg font-bold text-gray-800 dark:text-white" href="#">
-      Boilerplate
+      {{ optional(Auth::user()->getInstansi())->nama_instansi ?? 'Presensi' }}
     </a>
 
     {{-- Menu Utama --}}
@@ -323,7 +323,7 @@
 
       {{-- Siswa --}}
       <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
-        @php $isSiswa = request()->routeIs('admin.siswa.*'); @endphp
+        @php $isSiswa = request()->routeIs('admin.siswa.*') && !request()->routeIs('admin.siswa.pindah.*'); @endphp
         @if ($isSiswa)
           <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
         @endif

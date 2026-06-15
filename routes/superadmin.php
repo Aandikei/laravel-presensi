@@ -16,6 +16,9 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('superadmin'
     // Assign admin to sekolah
     Route::get('sekolah/{instansi}/assign-admin', [SekolahController::class, 'assignAdmin'])->name('sekolah.assign-admin');
     Route::post('sekolah/{instansi}/assign-admin', [SekolahController::class, 'storeAdmin'])->name('sekolah.store-admin');
+    Route::get('sekolah/{instansi}/edit-admin/{user}', [SekolahController::class, 'editAdmin'])->name('sekolah.edit-admin');
+    Route::put('sekolah/{instansi}/edit-admin/{user}', [SekolahController::class, 'updateAdmin'])->name('sekolah.update-admin');
+    Route::delete('sekolah/{instansi}/delete-admin/{user}', [SekolahController::class, 'destroyAdmin'])->name('sekolah.delete-admin');
 
     // Hari Libur Nasional
     Route::get('hari-libur', [HariLiburController::class, 'index'])->name('hari-libur.index');

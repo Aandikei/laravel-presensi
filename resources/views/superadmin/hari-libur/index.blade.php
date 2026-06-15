@@ -13,11 +13,6 @@
                 {{ session('success') }}
             </div>
         @endif
-        @if(session('error'))
-            <div class="px-4 py-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
 
         {{-- Form Tambah Libur Nasional (Range Tanggal) --}}
         <div class="p-6 mb-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">

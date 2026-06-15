@@ -18,6 +18,7 @@ class SiswaDashboardController extends Controller
     private function getRegistrasiAktif()
     {
         return RegistrasiAkademik::where('siswa_id', $this->getSiswa()->id_siswa)
+            ->aktif()
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
             ->with(['kelas', 'tahunAjaran'])
             ->first();

@@ -17,11 +17,6 @@
                 {{ session('success') }}
             </div>
         @endif
-        @if(session('error'))
-            <div class="px-4 py-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
 
         {{-- Filter --}}
         <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
@@ -59,6 +54,7 @@
                             <th class="px-4 py-3">Nama Siswa</th>
                             <th class="px-4 py-3">NISN</th>
                             <th class="px-4 py-3">Kelas</th>
+                            <th class="px-4 py-3">Status</th>
                             <th class="px-4 py-3">Tahun Ajaran</th>
                             <th class="px-4 py-3">Aksi</th>
                         </tr>
@@ -87,6 +83,7 @@
                     { data: 'nama_siswa' },
                     { data: 'nisn' },
                     { data: 'kelas' },
+                    { data: 'status', orderable: false },
                     { data: 'tahun_ajaran', orderable: false },
                     { data: 'aksi', orderable: false, searchable: false },
                 ],

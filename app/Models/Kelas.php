@@ -69,10 +69,17 @@ class Kelas extends Model
         );
     }
 
-    // Jumlah siswa di kelas ini
+    // Jumlah siswa aktif di kelas ini
     public function getJumlahSiswaAttribute(): int
     {
-        return $this->registrasiAkademik()->count();
+        $tahunAktif = TahunAjaran::where('instansi_id', $this->instansi_id)
+            ->where('is_aktif', true)
+            ->first();
+
+        return $this->registrasiAkademik()
+            ->aktif()
+            ->when($tahunAktif, fn($q) => $q->where('tahun_id', $tahunAktif->id_tahun))
+            ->count();
     }
 
     public function getRouteKeyName(): string

@@ -40,6 +40,7 @@
                         @error('nisn')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
+                        <span class="text-xs text-gray-400 mt-1 block">Jika siswa pindahan dari sekolah lain, gunakan menu <a href="{{ route('admin.siswa.pindah.form-masuk') }}" class="text-purple-600 hover:underline">Terima Pindahan</a>. Alumni dari sekolah lain akan otomatis terdeteksi.</span>
                     </label>
 
                     <label class="block text-sm mb-4">

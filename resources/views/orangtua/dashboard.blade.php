@@ -20,6 +20,9 @@
                                 ? 'bg-purple-600 text-white'
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200' }}">
                             {{ $a->nama_siswa }}
+                            @if($a->instansi)
+                                <span class="text-xs opacity-75">({{ $a->instansi->nama_instansi }})</span>
+                            @endif
                         </a>
                     @endforeach
                 </div>
@@ -37,6 +40,7 @@
                         <p class="font-semibold text-gray-700 dark:text-gray-200">{{ $anakDipilih->nama_siswa }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             NISN: {{ $anakDipilih->nisn }}
+                            @if($anakDipilih->instansi) • {{ $anakDipilih->instansi->nama_instansi }} @endif
                             @if($registrasi) • Kelas {{ $registrasi->kelas->nama_kelas }} @endif
                         </p>
                     </div>

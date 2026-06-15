@@ -2,12 +2,25 @@
     <x-slot:title>Detail Kelas</x-slot:title>
 
     <div class="container px-6 mx-auto">
-        <div class="my-6">
-            <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                Detail Kelas — {{ $kelas->nama_kelas }}
-            </h2>
-            <a href="{{ route('admin.kelas.index') }}"
-                class="text-sm text-purple-600 hover:underline dark:text-purple-400">← Kembali</a>
+        <div class="my-6 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                    Detail Kelas — {{ $kelas->nama_kelas }}
+                </h2>
+                <a href="{{ route('admin.kelas.index') }}"
+                    class="text-sm text-purple-600 hover:underline dark:text-purple-400">← Kembali</a>
+            </div>
+            <form method="GET" class="flex items-center gap-3">
+                <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Tahun Ajaran:</label>
+                <select name="tahun_id" onchange="this.form.submit()"
+                    class="text-sm dark:bg-gray-700 dark:text-gray-300">
+                    @foreach($daftarTahun as $tahun)
+                        <option value="{{ $tahun->id_tahun }}" {{ $tahun->id_tahun == $tahunDipilih?->id_tahun ? 'selected' : '' }}>
+                            {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
         </div>
 
         {{-- Info Kelas --}}
@@ -33,7 +46,7 @@
                     <div class="flex justify-between">
                         <span class="text-gray-500">Jumlah Siswa</span>
                         <span class="font-medium text-gray-700 dark:text-gray-200">
-                            {{ $kelas->registrasiAkademik->count() }}
+                            {{ $registrasi->count() }}
                         </span>
                     </div>
                 </div>
@@ -126,9 +139,9 @@
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         Daftar Siswa ({{ $registrasi->count() }})
                     </h3>
-                    @if($tahunAktif)
+                    @if($tahunDipilih)
                         <span class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ $tahunAktif->nama_tahun }} - {{ $tahunAktif->semester }}
+                            {{ $tahunDipilih->nama_tahun }} - {{ $tahunDipilih->semester }}
                         </span>
                     @endif
                 </div>

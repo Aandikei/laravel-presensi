@@ -21,10 +21,13 @@ class Siswa extends Model
         'jenis_kelamin',
         'tanggal_lahir',
         'foto',
+        'transfer_token',
+        'transfer_token_expires_at',
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'date',
+        'transfer_token_expires_at' => 'datetime',
     ];
 
     public function user()
@@ -57,6 +60,7 @@ class Siswa extends Model
     public function registrasiAktif()
     {
         return $this->hasOne(RegistrasiAkademik::class, 'siswa_id', 'id_siswa')
+            ->aktif()
             ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true));
     }
 
@@ -104,5 +108,29 @@ class Siswa extends Model
     public function getRouteKeyName(): string
     {
         return 'id_siswa';
+    }
+
+    public function generateTransferToken(int $expiresInDays = 7): string
+    {
+        $token = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 6));
+        $this->update([
+            'transfer_token' => $token,
+            'transfer_token_expires_at' => now()->addDays($expiresInDays),
+        ]);
+
+        return $token;
+    }
+
+    public function clearTransferToken(): void
+    {
+        $this->update([
+            'transfer_token' => null,
+            'transfer_token_expires_at' => null,
+        ]);
+    }
+
+    public function isTransferTokenExpired(): bool
+    {
+        return $this->transfer_token_expires_at && $this->transfer_token_expires_at->isPast();
     }
 }

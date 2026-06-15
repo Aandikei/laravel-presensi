@@ -17,7 +17,6 @@ Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('guru')-
 
 // Wali Kelas specific routes (separate group with separate prefix)
 Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('wali-kelas')->name('guru.wali-kelas.')->group(function () {
-    Route::get('/dashboard', [WaliKelasController::class, 'index'])->name('dashboard');
     Route::get('/siswa', [WaliKelasController::class, 'daftarSiswa'])->name('siswa-poin');
     Route::get('/siswa/{kelas}', [WaliKelasController::class, 'siswaByKelas'])->name('siswa-by-kelas');
     Route::post('/tambah-poin', [WaliKelasController::class, 'tambahPoin'])->name('tambah-poin');

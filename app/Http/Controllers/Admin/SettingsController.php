@@ -22,7 +22,7 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'nama_instansi' => 'required|string|max:255',
             'npsn'          => 'required|string|unique:instansi,npsn,' . $instansi->id_instansi . ',id_instansi',
-            'jenjang'       => 'required|in:SD,SMP,SMA,SMK',
+            'jenjang'       => 'required|in:SD,SMP,SMA',
             'alamat'        => 'nullable|string',
             'telepon'       => 'nullable|string|max:15',
             'email'         => 'nullable|email',

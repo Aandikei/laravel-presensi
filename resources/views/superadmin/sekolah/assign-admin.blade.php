@@ -32,6 +32,7 @@
                             <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700">
                                 <th class="pb-2 px-2">Nama</th>
                                 <th class="pb-2 px-2">Email</th>
+                                <th class="pb-2 px-2">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y dark:divide-gray-700">
@@ -39,6 +40,25 @@
                                 <tr>
                                     <td class="py-2 px-2 text-gray-700 dark:text-gray-200">{{ $admin->name }}</td>
                                     <td class="py-2 px-2 text-gray-500">{{ $admin->email }}</td>
+                                    <td class="py-2 px-2">
+                                        <a href="{{ route('superadmin.sekolah.edit-admin', [$instansi->id_instansi, $admin->id]) }}"
+                                            class="text-blue-600 hover:text-blue-800 mr-2" title="Edit">
+                                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </a>
+                                        <form method="POST" action="{{ route('superadmin.sekolah.delete-admin', [$instansi->id_instansi, $admin->id]) }}"
+                                            class="inline"
+                                            onsubmit="return confirm('Yakin hapus admin {{ $admin->name }}?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800" title="Hapus">
+                                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

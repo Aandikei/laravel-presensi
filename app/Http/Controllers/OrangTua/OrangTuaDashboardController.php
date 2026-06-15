@@ -42,6 +42,7 @@ class OrangTuaDashboardController extends Controller
 
         $registrasi = $anakDipilih
             ? RegistrasiAkademik::where('siswa_id', $anakDipilih->id_siswa)
+                ->aktif()
                 ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
                 ->with(['kelas', 'tahunAjaran'])
                 ->first()
@@ -99,6 +100,7 @@ class OrangTuaDashboardController extends Controller
 
         $registrasi = $anakDipilih
             ? RegistrasiAkademik::where('siswa_id', $anakDipilih->id_siswa)
+                ->aktif()
                 ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
                 ->first()
             : null;

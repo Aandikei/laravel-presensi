@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\OrangTuaObserver;
 use Illuminate\Database\Eloquent\Model;
 
 class OrangTua extends Model
@@ -14,6 +15,11 @@ class OrangTua extends Model
         'nama_ortu',
         'no_hp',
     ];
+
+    protected static function booted(): void
+    {
+        static::observe(OrangTuaObserver::class);
+    }
 
     public function user()
     {

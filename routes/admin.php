@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\NaikKelasController;
 use App\Http\Controllers\Admin\RegistrasiAkademikController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Admin\PindahSiswaController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
@@ -36,11 +37,22 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     ]);
 
     // Siswa
+    Route::get('siswa/daftar-ulang/{siswa}', [SiswaController::class, 'formDaftarUlang'])->name('siswa.daftar-ulang');
+    Route::post('siswa/daftar-ulang', [SiswaController::class, 'prosesDaftarUlang'])->name('siswa.proses-daftar-ulang');
     Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
     Route::get('siswa/template', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
     Route::resource('siswa', SiswaController::class)->parameters([
         'siswa' => 'siswa',
     ]);
+
+    // Pindah Siswa (Transfer)
+    Route::prefix('siswa/pindah')->name('siswa.pindah.')->group(function () {
+        Route::get('masuk', [PindahSiswaController::class, 'formMasuk'])->name('form-masuk');
+        Route::post('verifikasi', [PindahSiswaController::class, 'verifikasi'])->name('verifikasi');
+        Route::post('proses', [PindahSiswaController::class, 'prosesMasuk'])->name('proses');
+    });
+    Route::post('siswa/{siswa}/pindah', [PindahSiswaController::class, 'out'])->name('siswa.pindah');
+    Route::post('siswa/{siswa}/batal-pindah', [PindahSiswaController::class, 'batal'])->name('siswa.batal-pindah');
 
     // Kelas
     Route::get('kelas-list', function () {

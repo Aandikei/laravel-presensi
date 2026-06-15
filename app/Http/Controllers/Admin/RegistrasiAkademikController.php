@@ -34,6 +34,7 @@ class RegistrasiAkademikController extends Controller
                 ->addColumn('nama_siswa', fn($row) => $row->siswa->nama_siswa)
                 ->addColumn('nisn', fn($row) => $row->siswa->nisn)
                 ->addColumn('kelas', fn($row) => $row->kelas->nama_kelas)
+                ->addColumn('status', fn($row) => $row->status)
                 ->addColumn('tahun_ajaran', fn($row) => $row->tahunAjaran->nama_tahun . ' - ' . $row->tahunAjaran->semester)
                 ->addColumn('aksi', function ($row) {
                     $delete = '<form method="POST" action="' . route('admin.registrasi.destroy', $row->id_registrasi) . '" class="inline">
@@ -80,6 +81,7 @@ class RegistrasiAkademikController extends Controller
 
         $siswaTeregistrasi = $tahunAktif
             ? RegistrasiAkademik::where('tahun_id', $tahunAktif->id_tahun)
+                ->aktif()
                 ->pluck('siswa_id')->toArray()
             : [];
 
@@ -124,6 +126,7 @@ class RegistrasiAkademikController extends Controller
                 'siswa_id' => $siswaId,
                 'kelas_id' => $validated['kelas_id'],
                 'tahun_id' => $validated['tahun_id'],
+                'status'   => 'Aktif',
             ]);
             $berhasil++;
         }
