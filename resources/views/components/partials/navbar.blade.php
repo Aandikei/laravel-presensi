@@ -82,9 +82,7 @@
                 <button class="align-middle rounded-full focus:shadow-outline-purple focus:outline-none"
                     @click="profileOpen = !profileOpen" aria-label="Account"
                     aria-haspopup="true">
-                    <img class="object-cover w-8 h-8 rounded-full"
-                        src="https://i.etsystatic.com/31548528/r/il/ffde13/5804742914/il_fullxfull.5804742914_ap2d.jpg"
-                        alt="Profile Photo" aria-hidden="true" />
+                    <x-avatar-placeholder :name="auth()->user()->name" />
                 </button>
                 <template x-if="profileOpen">
                     <ul x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
