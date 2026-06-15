@@ -28,10 +28,10 @@ class SiswaController extends Controller
 
         if ($request->ajax()) {
             $siswa = Siswa::with([
-                    'user',
-                    'registrasiAktif.kelas',
-                    'registrasiAkademik' => fn ($q) => $q->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)),
-                ])
+                'user',
+                'registrasiAktif.kelas',
+                'registrasiAkademik' => fn ($q) => $q->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)),
+            ])
                 ->where('instansi_id', '=', $instansi->id_instansi)
                 ->select('siswa.*');
 
@@ -161,7 +161,7 @@ class SiswaController extends Controller
                     ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $existing->instansi_id))
                     ->exists();
 
-                if (!$hasActive) {
+                if (! $hasActive) {
                     return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
                         ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah lulus dari {$existing->instansi->nama_instansi}. Silakan lengkapi data untuk mendaftarkan ulang.");
                 }
@@ -267,7 +267,7 @@ class SiswaController extends Controller
                         'siswa_id' => $siswa->id_siswa,
                         'kelas_id' => $validated['kelas_id'],
                         'tahun_id' => $validated['tahun_id'],
-                        'status'   => 'Aktif',
+                        'status' => 'Aktif',
                     ]);
                 }
             }
@@ -330,8 +330,7 @@ class SiswaController extends Controller
         $this->authorizeInstansi($siswa);
 
         DB::transaction(function () use ($siswa) {
-            $orangTuaList = $siswa->orangTua()->withCount(['siswa as other_children_count' =>
-                fn($q) => $q->where('siswa.id_siswa', '!=', $siswa->id_siswa)
+            $orangTuaList = $siswa->orangTua()->withCount(['siswa as other_children_count' => fn ($q) => $q->where('siswa.id_siswa', '!=', $siswa->id_siswa),
             ])->get();
 
             optional($siswa->user)->delete();
@@ -419,7 +418,7 @@ class SiswaController extends Controller
         DB::transaction(function () use ($validated, $siswa, $instansi, $oldUser) {
             if ($validated['email'] === $oldUser->email) {
                 $data = ['name' => $siswa->nama_siswa];
-                if (!empty($validated['password'])) {
+                if (! empty($validated['password'])) {
                     $data['password'] = Hash::make($validated['password']);
                 }
                 $oldUser->update($data);
@@ -431,6 +430,9 @@ class SiswaController extends Controller
                     'password' => Hash::make($validated['password']),
                 ]);
                 $userSiswa->assignRole('siswa');
+
+                // Hapus user lama yang jadi orphan (tidak link ke Siswa/Guru/OrangTua manapun)
+                $oldUser->delete();
             }
 
             $siswa->update([
@@ -441,7 +443,7 @@ class SiswaController extends Controller
             if ($validated['pilihan_ortu'] === 'baru') {
                 $userOrtu = User::where('email', $validated['email_ortu'])->first();
 
-                if (!$userOrtu) {
+                if (! $userOrtu) {
                     $userOrtu = User::create([
                         'name' => $validated['nama_ortu'],
                         'email' => $validated['email_ortu'],
@@ -458,7 +460,7 @@ class SiswaController extends Controller
                     ]
                 );
 
-                if (!$userOrtu->hasRole('orang_tua')) {
+                if (! $userOrtu->hasRole('orang_tua')) {
                     $userOrtu->assignRole('orang_tua');
                 }
 
@@ -468,12 +470,12 @@ class SiswaController extends Controller
                 );
             }
 
-            if (!empty($validated['kelas_id']) && !empty($validated['tahun_id'])) {
+            if (! empty($validated['kelas_id']) && ! empty($validated['tahun_id'])) {
                 $sudahTerdaftar = RegistrasiAkademik::where('siswa_id', $siswa->id_siswa)
                     ->where('tahun_id', $validated['tahun_id'])
                     ->exists();
 
-                if (!$sudahTerdaftar) {
+                if (! $sudahTerdaftar) {
                     RegistrasiAkademik::create([
                         'siswa_id' => $siswa->id_siswa,
                         'kelas_id' => $validated['kelas_id'],

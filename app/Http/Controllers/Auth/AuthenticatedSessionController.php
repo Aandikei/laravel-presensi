@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -33,17 +34,46 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('superadmin.dashboard');
         } elseif ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->hasRole('guru')) {
-            return redirect()->route('guru.dashboard');
-        } elseif ($user->hasRole('wali_kelas')) {
+        } elseif ($user->hasRole('guru') || $user->hasRole('wali_kelas')) {
+            // Validasi guru/wali_kelas harus punya data di sekolah ini
+            if (! $user->guru || ! $user->getInstansi()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                throw ValidationException::withMessages([
+                    'email' => 'Akun guru tidak terdaftar di sekolah ini.',
+                ]);
+            }
+
             return redirect()->route('guru.dashboard');
         } elseif ($user->hasRole('siswa')) {
+            // Validasi siswa harus punya registrasi aktif di sekolah ini
+            $instansi = $user->getInstansi();
+            $hasActiveReg = $user->siswa?->registrasiAktif()
+                ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $instansi?->id_instansi))
+                ->exists();
+
+            if (! $hasActiveReg) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                throw ValidationException::withMessages([
+                    'email' => 'Siswa tidak terdaftar aktif di sekolah ini.',
+                ]);
+            }
+
             return redirect()->route('siswa.dashboard');
         } elseif ($user->hasRole('orang_tua')) {
             return redirect()->route('orangtua.dashboard');
         }
 
-        return redirect()->route('/');
+        // User tanpa role valid
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        throw ValidationException::withMessages([
+            'email' => 'Akun tidak memiliki akses ke sistem ini.',
+        ]);
     }
 
     /**
