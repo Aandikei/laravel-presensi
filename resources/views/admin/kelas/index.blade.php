@@ -6,10 +6,12 @@
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Data Kelas
             </h2>
-            <a href="{{ route('admin.kelas.create') }}"
-                class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
-                + Tambah Kelas
-            </a>
+            @can('manage-kelas')
+                <a href="{{ route('admin.kelas.create') }}"
+                    class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                    + Tambah Kelas
+                </a>
+            @endcan
         </div>
 
         @if(session('success'))
@@ -37,13 +39,15 @@
                 @endforeach
             </select>
 
-            <label class="text-sm text-gray-700 dark:text-gray-400">Jurusan:</label>
-            <select id="filter-jurusan" class="text-sm dark:bg-gray-700 dark:text-gray-300">
-                <option value="">Semua Jurusan</option>
-                @foreach($jurusanList as $j)
-                    <option value="{{ $j }}">{{ $j }}</option>
-                @endforeach
-            </select>
+            @if($jurusanList->isNotEmpty())
+                <label class="text-sm text-gray-700 dark:text-gray-400">Jurusan:</label>
+                <select id="filter-jurusan" class="text-sm dark:bg-gray-700 dark:text-gray-300">
+                    <option value="">Semua Jurusan</option>
+                    @foreach($jurusanList as $j)
+                        <option value="{{ $j }}">{{ $j }}</option>
+                    @endforeach
+                </select>
+            @endif
         </div>
 
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
@@ -78,7 +82,9 @@
                     data: function(d) {
                         d.tahun_id = $('#filter-tahun').val();
                         d.tingkat = $('#filter-tingkat').val();
+                        @if($jurusanList->isNotEmpty())
                         d.jurusan = $('#filter-jurusan').val();
+                        @endif
                     }
                 },
                 columns: [
@@ -95,7 +101,12 @@
                 }
             });
 
-            $('#filter-tahun, #filter-tingkat, #filter-jurusan').on('change', function() {
+            @if($jurusanList->isNotEmpty())
+            var filterSelectors = '#filter-tahun, #filter-tingkat, #filter-jurusan';
+            @else
+            var filterSelectors = '#filter-tahun, #filter-tingkat';
+            @endif
+            $(filterSelectors).on('change', function() {
                 table.ajax.reload();
             });
         });

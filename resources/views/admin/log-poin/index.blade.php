@@ -12,6 +12,7 @@
             </div>
         @endif
 
+        @can('manage-settings')
         {{-- Form Tambah Poin --}}
         <div class="p-6 mb-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
@@ -77,6 +78,7 @@
                 </button>
             </form>
         </div>
+        @endcan
 
         {{-- Tabel Log --}}
         <div class="bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 p-4">

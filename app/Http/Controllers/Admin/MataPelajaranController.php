@@ -34,6 +34,9 @@ class MataPelajaranController extends Controller
                     return $row->kurikulum()->count();
                 })
                 ->addColumn('aksi', function ($row) {
+                    if (!Auth::user()->can('manage-settings')) {
+                        return '';
+                    }
                     $edit = '<a href="' . route('admin.mata-pelajaran.edit', $row->id_mapel) . '" title="Edit" class="text-blue-600 hover:text-blue-800">
                         <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -66,10 +69,14 @@ class MataPelajaranController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
 
+        $kelompokRule = $instansi->jenjang === 'SMA'
+            ? 'required|in:Umum,Jurusan,Muatan Lokal'
+            : 'required|in:Umum,Muatan Lokal';
+
         $validated = $request->validate([
             'nama_mapel'  => 'required|string|max:255',
             'kode_mapel'  => 'nullable|string|max:20',
-            'kelompok'    => 'required|in:Umum,Jurusan,Muatan Lokal',
+            'kelompok'    => $kelompokRule,
         ]);
 
         MataPelajaran::create([
@@ -91,10 +98,15 @@ class MataPelajaranController extends Controller
     {
         $this->authorizeInstansi($mataPelajaran);
 
+        $instansi = Auth::user()->getInstansi();
+        $kelompokRule = $instansi->jenjang === 'SMA'
+            ? 'required|in:Umum,Jurusan,Muatan Lokal'
+            : 'required|in:Umum,Muatan Lokal';
+
         $validated = $request->validate([
             'nama_mapel' => 'required|string|max:255',
             'kode_mapel' => 'nullable|string|max:20',
-            'kelompok'   => 'required|in:Umum,Jurusan,Muatan Lokal',
+            'kelompok'   => $kelompokRule,
         ]);
 
         $mataPelajaran->update($validated);

@@ -48,7 +48,7 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
         foreach ($absensi as $a) {
             $rows->push([
                 $no++,
-                $a->tanggal,
+                \Carbon\Carbon::parse($a->tanggal)->format('d M Y'),
                 $a->jadwal->kurikulum->kelas->nama_kelas ?? '-',
                 $a->jadwal->kurikulum->mataPelajaran->nama_mapel ?? '-',
                 $a->jadwal->jam_mulai . ' - ' . $a->jadwal->jam_selesai,

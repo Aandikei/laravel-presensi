@@ -45,8 +45,9 @@
         </div>
 
         {{-- Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">
-            <table class="w-full">
+        <div class="w-full overflow-hidden rounded-lg shadow-xs">
+            <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
+            <table id="tabel-poin" class="w-full whitespace-nowrap">
                 <thead>
                     <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                         <th class="px-5 py-3">Tanggal</th>
@@ -56,7 +57,7 @@
                         <th class="px-5 py-3">Dicatat Oleh</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y dark:divide-gray-700">
+                <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
                     @forelse($logPoin as $log)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                             <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
@@ -82,6 +83,21 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#tabel-poin').DataTable({
+                paging: false,
+                info: false,
+                ordering: true,
+                searching: true,
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
+            });
+        });
+    </script>
+    @endpush
 </x-layouts.admin>

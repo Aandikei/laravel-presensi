@@ -193,6 +193,8 @@
         <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isDashboard ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
           href="@if (auth()->user()->hasRole('super_admin')) {{ route('superadmin.dashboard') }}
             @elseif(auth()->user()->hasRole('admin')) {{ route('admin.dashboard') }}
+            @elseif(auth()->user()->hasRole('kepala_sekolah')) {{ route('kepala-sekolah.dashboard') }}
+            @elseif(auth()->user()->hasRole('wakil_kepala_sekolah')) {{ route('wakil-kepala-sekolah.dashboard') }}
             @elseif(auth()->user()->hasRole('wali_kelas')) {{ route('guru.dashboard') }}
             @elseif(auth()->user()->hasRole('guru')) {{ route('guru.dashboard') }}
             @elseif(auth()->user()->hasRole('siswa')) {{ route('siswa.dashboard') }}
@@ -641,12 +643,152 @@
             <span class="ml-4">Log Poin</span>
           </a>
         </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isRekapAbsensi = request()->routeIs('guru.wali-kelas.rekap-absensi'); @endphp
+          @if ($isRekapAbsensi)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isRekapAbsensi ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('guru.wali-kelas.rekap-absensi') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="ml-4">Rekap Absensi</span>
+          </a>
+        </li>
         </ul>
       </div>
     @endif
 
-    {{-- Guru & Wali Kelas --}}
-    @role('guru|wali_kelas')
+    {{-- Kepala Sekolah --}}
+    @role('kepala_sekolah')
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-kasek') || 'true') === 'true' }">
+        <button @click="open = !open; localStorage.setItem('sidebar-kasek', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300">
+          <span>Manajemen</span>
+          <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <ul x-show="open" x-transition:enter="transition-all ease-in-out duration-300" x-transition:enter-start="opacity-25 max-h-0" x-transition:enter-end="opacity-100 max-h-xl" x-transition:leave="transition-all ease-in-out duration-300" x-transition:leave-start="opacity-100 max-h-xl" x-transition:leave-end="opacity-0 max-h-0" class="overflow-hidden">
+
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isGuru = request()->routeIs('admin.guru.*') && !request()->routeIs('admin.guru.mutasi.terima*'); @endphp
+          @if ($isGuru)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isGuru ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.guru.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="ml-4">Guru</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isSiswa = request()->routeIs('admin.siswa.*') && !request()->routeIs('admin.siswa.pindah.*'); @endphp
+          @if ($isSiswa)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isSiswa ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.siswa.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <span class="ml-4">Siswa</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isKelas = request()->routeIs('admin.kelas.*'); @endphp
+          @if ($isKelas)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isKelas ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.kelas.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            <span class="ml-4">Kelas</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isLaporan = request()->routeIs('admin.laporan.*'); @endphp
+          @if ($isLaporan)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isLaporan ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.laporan.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="ml-4">Laporan</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isTerimaMutasi = request()->routeIs('admin.guru.mutasi.terima*'); @endphp
+          @if ($isTerimaMutasi)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isTerimaMutasi ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.guru.mutasi.terima') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+            <span class="ml-4">Terima Mutasi Guru</span>
+          </a>
+        </li>
+        </ul>
+      </div>
+    @endrole
+
+    {{-- Wakil Kepala Sekolah --}}
+    @role('wakil_kepala_sekolah')
+      <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-wakasek') || 'true') === 'true' }">
+        <button @click="open = !open; localStorage.setItem('sidebar-wakasek', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300">
+          <span>Data Sekolah</span>
+          <svg class="w-3 h-3 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <ul x-show="open" x-transition:enter="transition-all ease-in-out duration-300" x-transition:enter-start="opacity-25 max-h-0" x-transition:enter-end="opacity-100 max-h-xl" x-transition:leave="transition-all ease-in-out duration-300" x-transition:leave-start="opacity-100 max-h-xl" x-transition:leave-end="opacity-0 max-h-0" class="overflow-hidden">
+
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isGuru = request()->routeIs('admin.guru.*') && !request()->routeIs('admin.guru.mutasi.terima*'); @endphp
+          @if ($isGuru)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isGuru ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.guru.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="ml-4">Guru</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isSiswa = request()->routeIs('admin.siswa.*') && !request()->routeIs('admin.siswa.pindah.*'); @endphp
+          @if ($isSiswa)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isSiswa ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.siswa.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <span class="ml-4">Siswa</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isKelas = request()->routeIs('admin.kelas.*'); @endphp
+          @if ($isKelas)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isKelas ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.kelas.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            <span class="ml-4">Kelas</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isLaporan = request()->routeIs('admin.laporan.*'); @endphp
+          @if ($isLaporan)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isLaporan ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.laporan.index') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="ml-4">Laporan</span>
+          </a>
+        </li>
+        </ul>
+      </div>
+    @endrole
+
+    {{-- Guru, Wali Kelas, Kepala/Wakil Sekolah --}}
+    @role('guru|wali_kelas|kepala_sekolah|wakil_kepala_sekolah')
       <div class="mt-4" x-data="{ open: (localStorage.getItem('sidebar-mengajar') || 'true') === 'true' }">
         <button @click="open = !open; localStorage.setItem('sidebar-mengajar', open)" class="flex items-center justify-between w-full px-6 py-2 text-xs font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300">
           <span>Mengajar</span>

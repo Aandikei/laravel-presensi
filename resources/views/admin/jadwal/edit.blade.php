@@ -17,7 +17,7 @@
                 <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300">
                     <p><span class="font-medium">Kelas:</span> {{ $jadwal->kurikulum->kelas->nama_kelas }}</p>
                     <p><span class="font-medium">Mapel:</span> {{ $jadwal->kurikulum->mataPelajaran->nama_mapel }}</p>
-                    <p><span class="font-medium">Guru:</span> {{ $jadwal->kurikulum->guru->nama_guru }}</p>
+                    <p><span class="font-medium">Guru:</span> {{ $jadwal->kurikulum?->guru?->nama_guru ?? '-' }}</p>
                 </div>
 
                 <input type="hidden" name="kurikulum_id" value="{{ $jadwal->kurikulum_id }}">

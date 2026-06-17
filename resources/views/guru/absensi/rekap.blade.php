@@ -52,72 +52,60 @@
                 <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
                     Filter
                 </button>
-                                <a href="{{ route('guru.absensi.rekap.export', request()->only(['bulan', 'tahun', 'mapel_id'])) }}"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    Export Excel
-                                </a>
+                <a href="{{ route('guru.absensi.rekap.export', request()->only(['bulan', 'tahun', 'mapel_id'])) }}"
+                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Export Excel
+                </a>
             </form>
         </div>
 
-        {{-- Tabel --}}
+        {{-- Tabel Grouped --}}
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
-            <div class="w-full overflow-x-auto">
-                <table class="w-full whitespace-nowrap">
+            <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
+                <table id="tabel-rekap" class="w-full whitespace-nowrap">
                     <thead>
                         <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                             <th class="px-4 py-3">Tanggal</th>
                             <th class="px-4 py-3">Kelas</th>
                             <th class="px-4 py-3">Mapel</th>
                             <th class="px-4 py-3">Jam</th>
-                            <th class="px-4 py-3">Nama Siswa</th>
-                            <th class="px-4 py-3">Status</th>
-                            <th class="px-4 py-3">Waktu Input</th>
-                            <th class="px-4 py-3">Durasi</th>
-                            <th class="px-4 py-3">Ket.</th>
+                            <th class="px-4 py-3 text-center">Siswa</th>
+                            <th class="px-4 py-3 text-center text-green-600">H</th>
+                            <th class="px-4 py-3 text-center text-blue-600">S</th>
+                            <th class="px-4 py-3 text-center text-yellow-600">I</th>
+                            <th class="px-4 py-3 text-center text-red-600">A</th>
+                            <th class="px-4 py-3 text-center text-orange-600">T</th>
+                            <th class="px-4 py-3 text-center text-pink-600">B</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-                        @forelse($riwayat as $a)
-                            <tr class="text-gray-700 dark:text-gray-400">
-                                <td class="px-4 py-3 text-sm">{{ \Carbon\Carbon::parse($a->tanggal)->locale('id')->isoFormat('D MMM YYYY') }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $a->jadwal->kurikulum->kelas->nama_kelas ?? '-' }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $a->jadwal->kurikulum->mataPelajaran->nama_mapel ?? '-' }}</td>
-                                <td class="px-4 py-3 text-sm">{{ substr($a->jadwal->jam_mulai, 0, 5) }} - {{ substr($a->jadwal->jam_selesai, 0, 5) }}</td>
-                                <td class="px-4 py-3 text-sm font-medium">{{ $a->registrasi->siswa->nama_siswa ?? '-' }}</td>
-                                <td class="px-4 py-3 text-sm">
-                                    @switch($a->status)
-                                        @case('Hadir')
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">Hadir</span>
-                                            @break
-                                        @case('Sakit')
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700">Sakit</span>
-                                            @break
-                                        @case('Izin')
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">Izin</span>
-                                            @break
-                                        @case('Alpa')
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">Alpa</span>
-                                            @break
-                                        @case('Terlambat')
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">Terlambat</span>
-                                            @break
-                                        @case('Bolos')
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-pink-100 text-pink-700">Bolos</span>
-                                            @break
-                                        @default
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">{{ $a->status }}</span>
-                                    @endswitch
+                        @forelse($riwayat as $r)
+                            <tr class="text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
+                                <td class="px-4 py-3 text-sm">{{ \Carbon\Carbon::parse($r->tanggal)->locale('id')->isoFormat('D MMM YYYY') }}</td>
+                                <td class="px-4 py-3 text-sm font-medium">{{ $r->kelas_nama }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->mapel_nama }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
+                                <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-green-600">{{ $r->hadir }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">{{ $r->sakit }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-yellow-600">{{ $r->izin }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-red-600">{{ $r->alpa }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-orange-600">{{ $r->terlambat }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-pink-600">{{ $r->bolos }}</td>
+                                <td class="px-4 py-3 text-sm text-center">
+                                    <a href="{{ route('guru.absensi.rekap.detail', ['jadwal_id' => $r->jadwal_id, 'tanggal' => \Carbon\Carbon::parse($r->tanggal)->format('Y-m-d')]) }}"
+                                        class="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300">
+                                        Detail
+                                    </a>
                                 </td>
-                                <td class="px-4 py-3 text-sm">{{ $a->waktu_input ? \Carbon\Carbon::parse($a->waktu_input)->format('H:i') : '-' }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $a->durasi_terlambat ? $a->durasi_terlambat . ' mnt' : '-' }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $a->keterangan ?? '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="12" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
                                     Tidak ada data absensi untuk periode ini.
                                 </td>
                             </tr>
@@ -125,9 +113,24 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-4 py-3 border-t dark:border-gray-700">
+            </div>
+            <div class="px-4 py-3 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
                 {{ $riwayat->links() }}
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#tabel-rekap').DataTable({
+                paging: false,
+                info: false,
+                ordering: true,
+                searching: true,
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
+            });
+        });
+    </script>
+    @endpush
 </x-layouts.admin>

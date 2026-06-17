@@ -25,8 +25,9 @@
             </div>
         </div>
 
-        <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
-            <table class="w-full">
+        <div class="w-full overflow-hidden rounded-lg shadow-xs">
+            <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
+            <table id="tabel-rekap-poin" class="w-full whitespace-nowrap">
                 <thead>
                     <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
                         <th class="px-4 py-3">No</th>
@@ -65,6 +66,21 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#tabel-rekap-poin').DataTable({
+                paging: false,
+                info: false,
+                ordering: true,
+                searching: true,
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
+            });
+        });
+    </script>
+    @endpush
 </x-layouts.admin>

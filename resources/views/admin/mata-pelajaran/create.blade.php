@@ -39,7 +39,9 @@
                         class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('kelompok') border-red-500 @enderror">
                         <option value="">-- Pilih Kelompok --</option>
                         <option value="Umum" {{ old('kelompok') == 'Umum' ? 'selected' : '' }}>Umum</option>
+                        @if(optional(Auth::user()->getInstansi())->jenjang === 'SMA')
                         <option value="Jurusan" {{ old('kelompok') == 'Jurusan' ? 'selected' : '' }}>Jurusan</option>
+                        @endif
                         <option value="Muatan Lokal" {{ old('kelompok') == 'Muatan Lokal' ? 'selected' : '' }}>Muatan Lokal</option>
                     </select>
                     @error('kelompok')

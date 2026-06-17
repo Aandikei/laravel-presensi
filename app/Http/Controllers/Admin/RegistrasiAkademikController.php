@@ -37,6 +37,9 @@ class RegistrasiAkademikController extends Controller
                 ->addColumn('status', fn($row) => $row->status)
                 ->addColumn('tahun_ajaran', fn($row) => $row->tahunAjaran->nama_tahun . ' - ' . $row->tahunAjaran->semester)
                 ->addColumn('aksi', function ($row) {
+                    if (!Auth::user()->can('manage-siswa')) {
+                        return '';
+                    }
                     $delete = '<form method="POST" action="' . route('admin.registrasi.destroy', $row->id_registrasi) . '" class="inline">
                         <input type="hidden" name="_token" value="' . csrf_token() . '">
                         <input type="hidden" name="_method" value="DELETE">
@@ -85,8 +88,10 @@ class RegistrasiAkademikController extends Controller
                 ->pluck('siswa_id')->toArray()
             : [];
 
+        $siswaAlumni = RegistrasiAkademik::alumni()->pluck('siswa_id')->toArray();
+
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
-            ->whereNotIn('id_siswa', $siswaTeregistrasi)
+            ->whereNotIn('id_siswa', array_merge($siswaTeregistrasi, $siswaAlumni))
             ->orderBy('nama_siswa')
             ->get();
 
@@ -108,16 +113,20 @@ class RegistrasiAkademikController extends Controller
         $kelas = Kelas::findOrFail($validated['kelas_id']);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
+        // Ambil data terkait sekali aja biar gak N+1
+        $existingIds = RegistrasiAkademik::where('tahun_id', $validated['tahun_id'])
+            ->whereIn('siswa_id', $validated['siswa_id'])
+            ->pluck('siswa_id')->toArray();
+
+        $alumniIds = RegistrasiAkademik::alumni()
+            ->whereIn('siswa_id', $validated['siswa_id'])
+            ->pluck('siswa_id')->toArray();
+
         $berhasil = 0;
         $gagal    = 0;
 
         foreach ($validated['siswa_id'] as $siswaId) {
-            // Cek apakah siswa sudah terdaftar di tahun ajaran ini
-            $exists = RegistrasiAkademik::where('siswa_id', $siswaId)
-                ->where('tahun_id', $validated['tahun_id'])
-                ->exists();
-
-            if ($exists) {
+            if (in_array($siswaId, $existingIds) || in_array($siswaId, $alumniIds)) {
                 $gagal++;
                 continue;
             }
@@ -133,7 +142,7 @@ class RegistrasiAkademikController extends Controller
 
         $message = "Berhasil mendaftarkan {$berhasil} siswa.";
         if ($gagal > 0) {
-            $message .= " {$gagal} siswa dilewati karena sudah terdaftar di tahun ajaran ini.";
+            $message .= " {$gagal} siswa dilewati (sudah terdaftar atau alumni).";
         }
 
         return redirect()->route('admin.registrasi.index')->with('success', $message);

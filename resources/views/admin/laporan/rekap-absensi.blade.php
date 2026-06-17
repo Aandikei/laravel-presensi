@@ -33,52 +33,76 @@
             </div>
         </div>
 
-        <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
-            <table class="w-full">
-                <thead>
-                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
-                        <th class="px-4 py-3">No</th>
-                        <th class="px-4 py-3">Nama Siswa</th>
-                        <th class="px-4 py-3">NISN</th>
-                        <th class="px-4 py-3 text-center text-green-600">Hadir</th>
-                        <th class="px-4 py-3 text-center text-blue-600">Sakit</th>
-                        <th class="px-4 py-3 text-center text-yellow-600">Izin</th>
-                        <th class="px-4 py-3 text-center text-red-600">Alpa</th>
-                        <th class="px-4 py-3 text-center text-orange-600">Terlambat</th>
-                        <th class="px-4 py-3 text-center text-pink-600">Bolos</th>
-                        <th class="px-4 py-3 text-center">Total</th>
-                        <th class="px-4 py-3 text-center">% Hadir</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y dark:divide-gray-700">
-                    @forelse($registrasi as $i => $reg)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
-                            <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
-                            <td class="px-4 py-3 font-medium text-gray-700 dark:text-gray-200">{{ $reg->siswa->nama_siswa }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500">{{ $reg->siswa->nisn }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-green-600">{{ $reg->hadir }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-blue-600">{{ $reg->sakit }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-yellow-600">{{ $reg->izin }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-red-600">{{ $reg->alpa }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-orange-600">{{ $reg->terlambat }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-pink-600">{{ $reg->bolos }}</td>
-                            <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-200">{{ $reg->total }}</td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full
-                                    {{ $reg->persen >= 75 ? 'text-green-700 bg-green-100' : ($reg->persen >= 50 ? 'text-yellow-700 bg-yellow-100' : 'text-red-700 bg-red-100') }}">
-                                    {{ $reg->persen }}%
-                                </span>
-                            </td>
+        <div class="w-full overflow-hidden rounded-lg shadow-xs">
+            <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
+                <table id="tabel-rekap" class="w-full whitespace-nowrap">
+                    <thead>
+                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
+                            <th class="px-4 py-3">Tanggal</th>
+                            <th class="px-4 py-3">Kelas</th>
+                            <th class="px-4 py-3">Mapel</th>
+                            <th class="px-4 py-3">Jam</th>
+                            <th class="px-4 py-3">Guru</th>
+                            <th class="px-4 py-3 text-center">Siswa</th>
+                            <th class="px-4 py-3 text-center text-green-600">H</th>
+                            <th class="px-4 py-3 text-center text-blue-600">S</th>
+                            <th class="px-4 py-3 text-center text-yellow-600">I</th>
+                            <th class="px-4 py-3 text-center text-red-600">A</th>
+                            <th class="px-4 py-3 text-center text-orange-600">T</th>
+                            <th class="px-4 py-3 text-center text-pink-600">B</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="11" class="px-4 py-8 text-center text-gray-500">
-                                Tidak ada data absensi untuk periode ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                        @forelse($riwayat as $r)
+                            <tr class="text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
+                                <td class="px-4 py-3 text-sm">{{ \Carbon\Carbon::parse($r->tanggal)->locale('id')->isoFormat('D MMM YYYY') }}</td>
+                                <td class="px-4 py-3 text-sm font-medium">{{ $r->kelas_nama }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->mapel_nama }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->guru_nama }}</td>
+                                <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-green-600">{{ $r->hadir }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">{{ $r->sakit }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-yellow-600">{{ $r->izin }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-red-600">{{ $r->alpa }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-orange-600">{{ $r->terlambat }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-pink-600">{{ $r->bolos }}</td>
+                                <td class="px-4 py-3 text-sm text-center">
+                                    <a href="{{ route('admin.laporan.rekap-absensi.detail', ['jadwal_id' => $r->jadwal_id, 'tanggal' => \Carbon\Carbon::parse($r->tanggal)->format('Y-m-d')]) }}"
+                                        class="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300">
+                                        Detail
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="13" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
+                                    Tidak ada data absensi untuk periode ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            </div>
+            <div class="px-4 py-3 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
+                {{ $riwayat->links() }}
+            </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#tabel-rekap').DataTable({
+                paging: false,
+                info: false,
+                ordering: true,
+                searching: true,
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
+            });
+        });
+    </script>
+    @endpush
 </x-layouts.admin>

@@ -33,7 +33,7 @@
                 <div>
                     <p class="text-gray-500 dark:text-gray-400">Guru</p>
                     <p class="font-semibold text-gray-700 dark:text-gray-200">
-                        {{ $jadwal->kurikulum->guru->nama_guru }}
+                        {{ $jadwal->kurikulum?->guru?->nama_guru ?? '-' }}
                     </p>
                 </div>
                 <div>
@@ -46,6 +46,7 @@
             </div>
 
             {{-- Tombol Kunci --}}
+            @can('manage-settings')
             <div class="mt-4 flex justify-end">
                 @if($terkunci)
                     <form method="POST" action="{{ route('admin.absensi.unlock', $jadwal->id_jadwal) }}">
@@ -69,6 +70,7 @@
                     </form>
                 @endif
             </div>
+            @endcan
         </div>
 
         {{-- Rekap Status --}}

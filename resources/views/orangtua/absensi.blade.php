@@ -108,7 +108,7 @@
                                 {{ $absen->jadwal->kurikulum->mataPelajaran->nama_mapel }}
                             </td>
                             <td class="px-5 py-3 text-sm text-gray-500">
-                                {{ $absen->jadwal->kurikulum->guru->nama_guru }}
+                                {{ $absen->jadwal->kurikulum?->guru?->nama_guru ?? '-' }}
                             </td>
                             <td class="px-5 py-3 text-sm text-gray-500">
                                 {{ substr($absen->jadwal->jam_mulai, 0, 5) }}

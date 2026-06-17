@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Guru\AbsensiController;
 use App\Http\Controllers\Guru\WaliKelasController;
 
-Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('guru')->name('guru.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:guru|wali_kelas|kepala_sekolah|wakil_kepala_sekolah'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Guru\GuruController::class, 'index'])->name('dashboard');
 
     // Absensi
@@ -12,6 +12,7 @@ Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('guru')-
     Route::get('/absensi/input/{jadwal}', [AbsensiController::class, 'input'])->name('absensi.input');
     Route::post('/absensi/input/{jadwal}', [AbsensiController::class, 'store'])->name('absensi.store');
     Route::get('/absensi/rekap', [AbsensiController::class, 'rekap'])->name('absensi.rekap');
+    Route::get('/absensi/rekap/detail', [AbsensiController::class, 'detailRekap'])->name('absensi.rekap.detail');
     Route::get('/absensi/rekap/export', [AbsensiController::class, 'exportRekap'])->name('absensi.rekap.export');
 });
 
@@ -22,4 +23,6 @@ Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('wali-ke
     Route::post('/tambah-poin', [WaliKelasController::class, 'tambahPoin'])->name('tambah-poin');
     Route::get('/log-poin', [WaliKelasController::class, 'logPoin'])->name('log-poin');
     Route::delete('/hapus-poin/{id}', [WaliKelasController::class, 'hapusPoin'])->name('hapus-poin');
+    Route::get('/rekap-absensi', [WaliKelasController::class, 'rekapAbsensi'])->name('rekap-absensi');
+    Route::get('/rekap-absensi/detail', [WaliKelasController::class, 'detailAbsensi'])->name('rekap-absensi.detail');
 });

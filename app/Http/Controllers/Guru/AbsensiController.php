@@ -151,31 +151,67 @@ class AbsensiController extends Controller
         $mapelId = $request->input('mapel_id');
         $bulan = $request->input('bulan', now()->month);
         $tahun = $request->input('tahun', now()->year);
-        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)
-            ->where('instansi_id', $guru->instansi_id)
-            ->first();
 
-        $riwayat = Absensi::with([
-                'jadwal.kurikulum.mataPelajaran',
-                'jadwal.kurikulum.kelas',
-                'registrasi.siswa'
-            ])
+        $riwayat = Absensi::selectRaw('
+                jadwal_id,
+                tanggal,
+                COUNT(*) as total_siswa,
+                SUM(status = "Hadir") as hadir,
+                SUM(status = "Sakit") as sakit,
+                SUM(status = "Izin") as izin,
+                SUM(status = "Alpa") as alpa,
+                SUM(status = "Terlambat") as terlambat,
+                SUM(status = "Bolos") as bolos
+            ')
             ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
+            ->groupBy('jadwal_id', 'tanggal')
             ->orderBy('tanggal', 'desc')
             ->orderBy('jadwal_id')
             ->paginate(50)->withQueryString();
 
-        $kelas = Kelas::whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
-            ->get();
+        $jadwalIds = $riwayat->pluck('jadwal_id')->unique();
+        $jadwals = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
+            ->whereIn('id_jadwal', $jadwalIds)
+            ->get()
+            ->keyBy('id_jadwal');
+
+        $riwayat->getCollection()->transform(function ($item) use ($jadwals) {
+            $j = $jadwals->get($item->jadwal_id);
+            $item->kelas_nama  = $j?->kurikulum?->kelas?->nama_kelas ?? '-';
+            $item->mapel_nama  = $j?->kurikulum?->mataPelajaran?->nama_mapel ?? '-';
+            $item->jam         = $j ? (substr($j->jam_mulai, 0, 5) . ' - ' . substr($j->jam_selesai, 0, 5)) : '-';
+            $item->guru_nama   = $j?->kurikulum?->guru?->nama_guru ?? '-';
+            return $item;
+        });
 
         $mapels = MataPelajaran::where('instansi_id', $guru->instansi_id)
             ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
             ->get();
 
-        return view('guru.absensi.rekap', compact('riwayat', 'kelas', 'guru', 'mapels', 'mapelId', 'bulan', 'tahun', 'tahunAjaranAktif'));
+        return view('guru.absensi.rekap', compact('riwayat', 'guru', 'mapels', 'mapelId', 'bulan', 'tahun'));
+    }
+
+    public function detailRekap(Request $request)
+    {
+        $request->validate([
+            'jadwal_id' => 'required|exists:jadwal,id_jadwal',
+            'tanggal'   => 'required|date',
+        ]);
+
+        $guru = Auth::user()->guru;
+        $jadwal = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
+            ->findOrFail($request->jadwal_id);
+
+        $absensi = Absensi::with('registrasi.siswa')
+            ->where('jadwal_id', $request->jadwal_id)
+            ->whereDate('tanggal', $request->tanggal)
+            ->orderBy('status')
+            ->get();
+
+        return view('guru.absensi.rekap-detail', compact('jadwal', 'absensi', 'guru'));
     }
 
     public function exportRekap(Request $request)

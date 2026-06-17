@@ -74,6 +74,22 @@
                         class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
                 </label>
 
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">Jabatan <span class="text-gray-400">(opsional)</span></span>
+                    <select name="jabatan"
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('jabatan') border-red-500 @enderror">
+                        @php
+                            $currentJabatan = old('jabatan', $guru->user->hasRole('kepala_sekolah') ? 'kepala_sekolah' : ($guru->user->hasRole('wakil_kepala_sekolah') ? 'wakil_kepala_sekolah' : ''));
+                        @endphp
+                        <option value="">-- Tidak Ada --</option>
+                        <option value="kepala_sekolah" {{ $currentJabatan == 'kepala_sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
+                        <option value="wakil_kepala_sekolah" {{ $currentJabatan == 'wakil_kepala_sekolah' ? 'selected' : '' }}>Wakil Kepala Sekolah</option>
+                    </select>
+                    @error('jabatan')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
+                </label>
+
                 <button type="submit"
                     class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
                     Update

@@ -1,0 +1,126 @@
+<x-layouts.admin>
+    <x-slot:title>Rekap Absensi - {{ $kelasSaya->nama_kelas }}</x-slot:title>
+
+    <div class="container px-6 mx-auto">
+        <div class="flex items-center justify-between my-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                    Rekap Absensi
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Kelas {{ $kelasSaya->nama_kelas }} — {{ ucfirst($bulanNama) }} {{ $tahun }}
+                </p>
+            </div>
+            <a href="{{ route('guru.wali-kelas.log-poin') }}"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
+                ← Kembali
+            </a>
+        </div>
+
+        @if(session('success'))
+            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Filter --}}
+        <div class="p-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
+            <form method="GET" class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bulan</label>
+                    <select name="bulan" class="w-40 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ $m }}" {{ (int)$bulan === $m ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tahun</label>
+                    <select name="tahun" class="w-24 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        @for($y = now()->year; $y >= now()->year - 2; $y--)
+                            <option value="{{ $y }}" {{ (int)$tahun === $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                    Filter
+                </button>
+            </form>
+        </div>
+
+        {{-- Tabel Grouped --}}
+        <div class="w-full overflow-hidden rounded-lg shadow-xs">
+            <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
+                <table id="tabel-rekap" class="w-full whitespace-nowrap">
+                    <thead>
+                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
+                            <th class="px-4 py-3">Tanggal</th>
+                            <th class="px-4 py-3">Kelas</th>
+                            <th class="px-4 py-3">Mapel</th>
+                            <th class="px-4 py-3">Jam</th>
+                            <th class="px-4 py-3">Guru</th>
+                            <th class="px-4 py-3 text-center">Siswa</th>
+                            <th class="px-4 py-3 text-center text-green-600">H</th>
+                            <th class="px-4 py-3 text-center text-blue-600">S</th>
+                            <th class="px-4 py-3 text-center text-yellow-600">I</th>
+                            <th class="px-4 py-3 text-center text-red-600">A</th>
+                            <th class="px-4 py-3 text-center text-orange-600">T</th>
+                            <th class="px-4 py-3 text-center text-pink-600">B</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                        @forelse($riwayat as $r)
+                            <tr class="text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
+                                <td class="px-4 py-3 text-sm">{{ \Carbon\Carbon::parse($r->tanggal)->locale('id')->isoFormat('D MMM YYYY') }}</td>
+                                <td class="px-4 py-3 text-sm font-medium">{{ $r->kelas_nama }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->mapel_nama }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $r->guru_nama }}</td>
+                                <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-green-600">{{ $r->hadir }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">{{ $r->sakit }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-yellow-600">{{ $r->izin }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-red-600">{{ $r->alpa }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-orange-600">{{ $r->terlambat }}</td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-pink-600">{{ $r->bolos }}</td>
+                                <td class="px-4 py-3 text-sm text-center">
+                                    <a href="{{ route('guru.wali-kelas.rekap-absensi.detail', ['jadwal_id' => $r->jadwal_id, 'tanggal' => \Carbon\Carbon::parse($r->tanggal)->format('Y-m-d')]) }}"
+                                        class="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300">
+                                        Detail
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="13" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
+                                    Tidak ada data absensi untuk periode ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            </div>
+            <div class="px-4 py-3 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
+                {{ $riwayat->links() }}
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#tabel-rekap').DataTable({
+                paging: false,
+                info: false,
+                ordering: true,
+                searching: true,
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
+            });
+        });
+    </script>
+    @endpush
+</x-layouts.admin>

@@ -47,6 +47,9 @@ class LogPoinController extends Controller
                     );
                 })
                 ->addColumn('aksi', function($row) {
+                    if (!Auth::user()->can('manage-settings')) {
+                        return '';
+                    }
                     return '<form method="POST" action="' . route('admin.log-poin.destroy', $row->id_log_poin) . '" class="inline">
                         <input type="hidden" name="_token" value="' . csrf_token() . '">
                         <input type="hidden" name="_method" value="DELETE">

@@ -34,15 +34,39 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('superadmin.dashboard');
         } elseif ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->hasRole('guru') || $user->hasRole('wali_kelas')) {
-            // Validasi guru/wali_kelas harus punya data di sekolah ini
-            if (! $user->guru || ! $user->getInstansi()) {
+        } elseif ($user->hasRole('kepala_sekolah')) {
+            if (! $user->guru || ! $user->getInstansi() || ! $user->guru->isAktif()) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                throw ValidationException::withMessages([
-                    'email' => 'Akun guru tidak terdaftar di sekolah ini.',
-                ]);
+                $msg = ! $user->guru?->isAktif()
+                    ? 'Akun kepala sekolah sudah tidak aktif.'
+                    : 'Akun kepala sekolah tidak terdaftar di sekolah ini.';
+                throw ValidationException::withMessages(['email' => $msg]);
+            }
+
+            return redirect()->route('kepala-sekolah.dashboard');
+        } elseif ($user->hasRole('wakil_kepala_sekolah')) {
+            if (! $user->guru || ! $user->getInstansi() || ! $user->guru->isAktif()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                $msg = ! $user->guru?->isAktif()
+                    ? 'Akun wakil kepala sekolah sudah tidak aktif.'
+                    : 'Akun wakil kepala sekolah tidak terdaftar di sekolah ini.';
+                throw ValidationException::withMessages(['email' => $msg]);
+            }
+
+            return redirect()->route('wakil-kepala-sekolah.dashboard');
+        } elseif ($user->hasRole('guru') || $user->hasRole('wali_kelas')) {
+            if (! $user->guru || ! $user->getInstansi() || ! $user->guru->isAktif()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                $msg = ! $user->guru?->isAktif()
+                    ? 'Akun guru sudah tidak aktif.'
+                    : 'Akun guru tidak terdaftar di sekolah ini.';
+                throw ValidationException::withMessages(['email' => $msg]);
             }
 
             return redirect()->route('guru.dashboard');

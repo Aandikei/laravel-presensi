@@ -14,6 +14,7 @@
 
         <div class="grid gap-6 lg:grid-cols-2 mb-6">
 
+            @can('manage-settings')
             {{-- Form Tambah Libur Sekolah (Range Tanggal) --}}
             <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-200">
@@ -61,6 +62,7 @@
                     </button>
                 </form>
             </div>
+            @endcan
 
             {{-- Libur Nasional Referensi --}}
             <div class="p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
@@ -73,7 +75,7 @@
                             Klik "Ikut Libur" untuk menambahkan ke sekolah Anda.
                         </p>
                     </div>
-                    @if($liburNasional->isNotEmpty())
+                    @if($liburNasional->isNotEmpty() && Auth::user()->can('manage-settings'))
                         <form method="POST" action="{{ route('admin.hari-libur.adopt-all') }}">
                             @csrf
                             <button type="submit"
@@ -108,7 +110,7 @@
                                     <span class="px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:bg-green-800 dark:text-green-200">
                                         ✓ Sudah Ikut
                                     </span>
-                                @else
+                                @elseif(Auth::user()->can('manage-settings'))
                                     <form method="POST" action="{{ route('admin.hari-libur.adopt') }}">
                                         @csrf
                                         <input type="hidden" name="tanggal" value="{{ $libur->tanggal }}">
@@ -118,6 +120,10 @@
                                             Ikut Libur
                                         </button>
                                     </form>
+                                @else
+                                    <span class="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-400">
+                                        Belum Ikut
+                                    </span>
                                 @endif
                             </div>
                         @endforeach

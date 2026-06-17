@@ -39,7 +39,9 @@
                     <select name="kelompok"
                         class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                         <option value="Umum" {{ old('kelompok', $mataPelajaran->kelompok) == 'Umum' ? 'selected' : '' }}>Umum</option>
+                        @if(optional(Auth::user()->getInstansi())->jenjang === 'SMA')
                         <option value="Jurusan" {{ old('kelompok', $mataPelajaran->kelompok) == 'Jurusan' ? 'selected' : '' }}>Jurusan</option>
+                        @endif
                         <option value="Muatan Lokal" {{ old('kelompok', $mataPelajaran->kelompok) == 'Muatan Lokal' ? 'selected' : '' }}>Muatan Lokal</option>
                     </select>
                 </label>

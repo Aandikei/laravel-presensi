@@ -29,6 +29,8 @@
                     $user = auth()->user();
                     if ($user->hasRole('super_admin')) $dashRoute = route('superadmin.dashboard');
                     elseif ($user->hasRole('admin')) $dashRoute = route('admin.dashboard');
+                    elseif ($user->hasRole('kepala_sekolah')) $dashRoute = route('kepala-sekolah.dashboard');
+                    elseif ($user->hasRole('wakil_kepala_sekolah')) $dashRoute = route('wakil-kepala-sekolah.dashboard');
                     elseif ($user->hasRole('guru') || $user->hasRole('wali_kelas')) $dashRoute = route('guru.dashboard');
                     elseif ($user->hasRole('siswa')) $dashRoute = route('siswa.dashboard');
                     elseif ($user->hasRole('orang_tua')) $dashRoute = route('orangtua.dashboard');

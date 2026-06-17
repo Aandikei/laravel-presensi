@@ -116,12 +116,15 @@ class NaikKelasController extends Controller
                 }
 
                 if ($action === 'lulus') {
-                    // Nonaktifkan user siswa
                     $siswa = Siswa::find($siswaId);
                     if ($siswa) {
                         User::where('id', '=', $siswa->user_id)->update(['email_verified_at' => null]);
-                        // Soft approach: hapus role siswa
                         $siswa->user->removeRole('siswa');
+
+                        // Update registrasi aktif jadi Alumni
+                        RegistrasiAkademik::where('siswa_id', $siswaId)
+                            ->where('status', 'Aktif')
+                            ->update(['status' => 'Alumni']);
                     }
                     $berhasilLulus++;
 

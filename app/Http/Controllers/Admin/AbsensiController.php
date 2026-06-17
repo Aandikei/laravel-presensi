@@ -39,7 +39,7 @@ class AbsensiController extends Controller
                 ->addIndexColumn()
                 ->addColumn('kelas', fn ($row) => $row->kurikulum->kelas->nama_kelas)
                 ->addColumn('mata_pelajaran', fn ($row) => $row->kurikulum->mataPelajaran->nama_mapel)
-                ->addColumn('guru', fn ($row) => $row->kurikulum->guru->nama_guru)
+                ->addColumn('guru', fn ($row) => $row->kurikulum?->guru?->nama_guru ?? '-')
                 ->addColumn('jam', fn ($row) => substr($row->jam_mulai, 0, 5).' - '.substr($row->jam_selesai, 0, 5)
                 )
                 ->addColumn('jumlah_siswa', function ($row) use ($request) {

@@ -32,6 +32,11 @@ class RoleSeeder extends Seeder
             'manage-kurikulum',
             'manage-registrasi',
 
+            // View only (untuk kepala sekolah & wakil)
+            'view-guru',
+            'view-siswa',
+            'view-kelas',
+
             // Absensi
             'input-absensi',
             'edit-absensi',
@@ -114,6 +119,38 @@ class RoleSeeder extends Seeder
         $orangTua->givePermissionTo([
             'view-absensi',
             'view-poin',
+        ]);
+
+        // Kepala Sekolah (guru + manajemen sekolah)
+        $kepalaSekolah = Role::firstOrCreate(['name' => 'kepala_sekolah']);
+        $kepalaSekolah->givePermissionTo([
+            'input-absensi',
+            'edit-absensi',
+            'view-absensi',
+            'view-poin',
+            'view-laporan',
+            'export-laporan',
+            'view-guru',
+            'view-siswa',
+            'view-kelas',
+            'manage-guru',
+            'manage-siswa',
+            'manage-kelas',
+            'manage-settings',
+        ]);
+
+        // Wakil Kepala Sekolah (guru + view data)
+        $wakilKepalaSekolah = Role::firstOrCreate(['name' => 'wakil_kepala_sekolah']);
+        $wakilKepalaSekolah->givePermissionTo([
+            'input-absensi',
+            'edit-absensi',
+            'view-absensi',
+            'view-poin',
+            'view-laporan',
+            'export-laporan',
+            'view-guru',
+            'view-siswa',
+            'view-kelas',
         ]);
 
         // User biasa (default dari boilerplate)

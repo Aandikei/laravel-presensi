@@ -118,7 +118,7 @@
                                         {{ $jadwal->kurikulum->mataPelajaran->nama_mapel }}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $jadwal->kurikulum->guru->nama_guru }}
+                                        {{ $jadwal->kurikulum?->guru?->nama_guru ?? '-' }}
                                     </td>
                                 </tr>
                             @empty

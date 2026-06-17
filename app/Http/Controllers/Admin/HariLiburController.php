@@ -28,6 +28,9 @@ class HariLiburController extends Controller
                         : '<span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">Sekolah</span>';
                 })
                 ->addColumn('aksi', function($row) {
+                    if (!Auth::user()->can('manage-settings')) {
+                        return '';
+                    }
                     return '<form method="POST" action="' . route('admin.hari-libur.destroy', $row->id_libur) . '" class="inline">
                         <input type="hidden" name="_token" value="' . csrf_token() . '">
                         <input type="hidden" name="_method" value="DELETE">

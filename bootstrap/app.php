@@ -36,6 +36,8 @@ return Application::configure(basePath: dirname(__DIR__))
             $user = auth()->user();
             if ($user->hasRole('super_admin')) return redirect()->route('superadmin.dashboard');
             if ($user->hasRole('admin')) return redirect()->route('admin.dashboard');
+            if ($user->hasRole('kepala_sekolah')) return redirect()->route('kepala-sekolah.dashboard');
+            if ($user->hasRole('wakil_kepala_sekolah')) return redirect()->route('wakil-kepala-sekolah.dashboard');
             if ($user->hasRole('guru') || $user->hasRole('wali_kelas')) return redirect()->route('guru.dashboard');
             if ($user->hasRole('siswa')) return redirect()->route('siswa.dashboard');
             if ($user->hasRole('orang_tua')) return redirect()->route('orangtua.dashboard');
