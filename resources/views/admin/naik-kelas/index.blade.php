@@ -53,8 +53,8 @@
                         </select>
                     </label>
 
-                    <button type="submit"
-                        class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                    <button type="submit" id="btn-naik"
+                        class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         Lihat Preview →
                     </button>
                 </form>
@@ -90,9 +90,9 @@
                         </select>
                     </label>
 
-                    <button type="submit"
+                    <button type="submit" id="btn-semester"
                         onclick="return confirm('Salin semua siswa ke semester baru dengan kelas yang sama?')"
-                        class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         Salin ke Semester Baru
                     </button>
                 </form>
@@ -107,19 +107,22 @@
             function updateTujuan(prefix) {
                 const asalSelect = document.getElementById(`${prefix}-asal`);
                 const tujuanSelect = document.getElementById(`${prefix}-tujuan`);
+                const btn = document.getElementById(`btn-${prefix}`);
                 const asalId = parseInt(asalSelect.value);
 
                 tujuanSelect.innerHTML = '<option value="">-- Pilih --</option>';
 
-                if (!asalId) return;
+                const enableBtn = () => btn.disabled = !(asalSelect.value && tujuanSelect.value);
+
+                if (!asalId) { enableBtn(); return; }
 
                 const asalData = tahunAjaranData.find(t => t.id === asalId);
-                if (!asalData) return;
+                if (!asalData) { enableBtn(); return; }
 
                 if (prefix === 'naik') {
                     if (asalData.semester !== 'Genap') {
                         tujuanSelect.innerHTML = '<option value="">Naik kelas hanya dari semester Genap</option>';
-                        return;
+                        enableBtn(); return;
                     }
                     const tahunParts = asalData.nama_tahun.split('/');
                     const nextTahun = `${parseInt(tahunParts[0]) + 1}/${parseInt(tahunParts[1]) + 1}`;
@@ -140,7 +143,7 @@
                 } else if (prefix === 'semester') {
                     if (asalData.semester !== 'Ganjil') {
                         tujuanSelect.innerHTML = '<option value="">Ganti semester hanya dari semester Ganjil</option>';
-                        return;
+                        enableBtn(); return;
                     }
 
                     const tujuan = tahunAjaranData.find(t =>
@@ -157,6 +160,7 @@
                         tujuanSelect.innerHTML = '<option value="">Tidak ada semester Genap untuk tahun ini</option>';
                     }
                 }
+                enableBtn();
             }
 
             document.addEventListener('DOMContentLoaded', function() {

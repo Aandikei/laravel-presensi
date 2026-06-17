@@ -366,7 +366,11 @@ class SiswaController extends Controller
             ->exists();
         abort_if($hasActive, 403, 'Siswa masih aktif dan harus menggunakan Pindah Masuk.');
 
-        $siswa->load(['user', 'orangTua.user']);
+        // Cegah daftar ulang ke jenjang yang lebih rendah
+        $siswaInstansi = $siswa->instansi;
+        abort_if($instansi->tingkat_min < $siswaInstansi->tingkat_min, 403, 'Tidak bisa mendaftarkan alumni ke jenjang yang lebih rendah.');
+
+        $siswa->load(['user', 'orangTua.user', 'instansi']);
 
         $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
             ->where('is_aktif', true)->first();
@@ -405,9 +409,12 @@ class SiswaController extends Controller
             ]);
         }
 
-        $siswa = Siswa::with(['user', 'orangTua.user'])->findOrFail($validated['siswa_id']);
+        $siswa = Siswa::with(['user', 'orangTua.user', 'instansi'])->findOrFail($validated['siswa_id']);
 
         abort_if($siswa->instansi_id === $instansi->id_instansi, 403);
+
+        // Cegah daftar ulang ke jenjang yang lebih rendah
+        abort_if($instansi->tingkat_min < $siswa->instansi->tingkat_min, 403, 'Tidak bisa mendaftarkan alumni ke jenjang yang lebih rendah.');
 
         $oldUser = $siswa->user;
 
@@ -446,6 +453,18 @@ class SiswaController extends Controller
             ]);
 
             if ($validated['pilihan_ortu'] === 'baru') {
+                // Hapus link orang tua lama
+                $oldOrtuSiswa = OrtuSiswa::where('siswa_id', $siswa->id_siswa)->get();
+                foreach ($oldOrtuSiswa as $link) {
+                    $ortu = $link->orangTua;
+                    $link->delete();
+
+                    // Hapus orang tua jika sudah tidak punya anak lain
+                    if ($ortu && $ortu->siswa()->count() === 0) {
+                        $ortu->delete(); // Observer akan hapus User otomatis
+                    }
+                }
+
                 $userOrtu = User::where('email', $validated['email_ortu'])->first();
 
                 if (! $userOrtu) {
