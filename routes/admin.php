@@ -76,6 +76,7 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
         Route::post('siswa/daftar-ulang', [SiswaController::class, 'prosesDaftarUlang'])->name('siswa.proses-daftar-ulang');
         Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
         Route::get('siswa/template', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
+        Route::get('siswa/{siswa}/pindah', [PindahSiswaController::class, 'formPindah'])->name('siswa.pindah.form');
         Route::post('siswa/{siswa}/pindah', [PindahSiswaController::class, 'out'])->name('siswa.pindah');
         Route::post('siswa/{siswa}/batal-pindah', [PindahSiswaController::class, 'batal'])->name('siswa.batal-pindah');
     });

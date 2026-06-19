@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\DB;
 
 class PindahSiswaController extends Controller
 {
+    public function formPindah($id)
+    {
+        $instansi = Auth::user()->getInstansi();
+        $siswa = Siswa::with('registrasiAktif.kelas')->findOrFail($id);
+
+        abort_if($siswa->instansi_id !== $instansi->id_instansi, 403);
+        abort_if(!$siswa->registrasiAktif, 403, 'Siswa ini tidak memiliki registrasi aktif.');
+
+        return view('admin.siswa.pindah-form', compact('siswa'));
+    }
+
     public function formMasuk(Request $request)
     {
         $instansi = Auth::user()->getInstansi();
@@ -36,9 +47,12 @@ class PindahSiswaController extends Controller
 
         $instansi = Auth::user()->getInstansi();
 
-        $siswa = Siswa::with(['instansi', 'registrasiAktif.kelas'])
-            ->where('nisn', $request->nisn)
+        $siswa = Siswa::with(['instansi', 'registrasiAktif.kelas', 'registrasiAkademik' => function ($q) {
+            $q->where('status', 'Pindah')->latest()->limit(1);
+        }])->where('nisn', $request->nisn)
             ->firstOrFail();
+
+        $alasanMutasi = $siswa->registrasiAkademik->first()?->alasan_mutasi;
 
         if ($siswa->instansi_id === $instansi->id_instansi) {
             return back()
@@ -72,7 +86,7 @@ class PindahSiswaController extends Controller
             ->orderBy('nama_kelas')
             ->get();
 
-        return view('admin.siswa.pindah-konfirmasi', compact('siswa', 'instansi', 'tahunAktif', 'kelas'));
+        return view('admin.siswa.pindah-konfirmasi', compact('siswa', 'instansi', 'tahunAktif', 'kelas', 'alasanMutasi'));
     }
 
     public function prosesMasuk(Request $request)
@@ -106,7 +120,7 @@ class PindahSiswaController extends Controller
             }
 
             $registrasiLama = RegistrasiAkademik::where('siswa_id', $siswa->id_siswa)
-                ->aktif()
+                ->where('status', 'Pindah')
                 ->whereHas('tahunAjaran', fn($q) => $q
                     ->where('is_aktif', true)
                     ->where('instansi_id', $siswa->instansi_id))
@@ -116,7 +130,6 @@ class PindahSiswaController extends Controller
                 $registrasiLama->update([
                     'status' => 'Pindah',
                     'tanggal_mutasi' => now(),
-                    'alasan_mutasi' => 'Pindah ke ' . $instansi->nama_instansi,
                 ]);
             }
 
@@ -152,8 +165,12 @@ class PindahSiswaController extends Controller
             ->with('success', 'Siswa berhasil dipindahkan ke sekolah ini.');
     }
 
-    public function out($id)
+    public function out(Request $request, $id)
     {
+        $request->validate([
+            'alasan' => 'required|string|max:255',
+        ]);
+
         $instansi = Auth::user()->getInstansi();
         $siswa = Siswa::with(['registrasiAktif'])->findOrFail($id);
 
@@ -165,18 +182,18 @@ class PindahSiswaController extends Controller
             return back()->with('error', 'Siswa ini tidak memiliki registrasi aktif.');
         }
 
-        DB::transaction(function () use ($registrasiAktif, $siswa) {
+        DB::transaction(function () use ($registrasiAktif, $siswa, $request) {
             $registrasiAktif->update([
                 'status' => 'Pindah',
                 'tanggal_mutasi' => now(),
-                'alasan_mutasi' => 'Pindah ke sekolah lain',
+                'alasan_mutasi' => $request->alasan,
             ]);
 
             $siswa->generateTransferToken();
         });
 
         $siswaSegar = $siswa->fresh();
-        return back()->with([
+        return redirect()->route('admin.siswa.index')->with([
             'success' => 'Siswa berhasil ditandai pindah. Kode transfer: ' . $siswaSegar->transfer_token
                 . ' (berlaku sampai ' . $siswaSegar->transfer_token_expires_at->format('j M Y H:i') . ')',
             'transfer_token' => $siswaSegar->transfer_token,

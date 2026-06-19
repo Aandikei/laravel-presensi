@@ -48,8 +48,15 @@ class NaikKelasController extends Controller
 
         // Ambil semua kelas instansi yang punya siswa terdaftar di tahun asal
         $kelasAsal = Kelas::where('instansi_id', '=', $instansi->id_instansi)
-            ->whereHas('registrasiAkademik', fn ($q) => $q->where('tahun_id', '=', $tahunAsal->id_tahun))
-            ->with(['registrasiAkademik' => fn ($q) => $q->where('tahun_id', '=', $tahunAsal->id_tahun)->with('siswa')])
+            ->whereHas('registrasiAkademik', fn ($q) => $q
+                ->where('tahun_id', '=', $tahunAsal->id_tahun)
+                ->where('status', '!=', 'Alumni')
+                ->whereHas('siswa', fn ($sq) => $sq->where('instansi_id', $instansi->id_instansi)))
+            ->with(['registrasiAkademik' => fn ($q) => $q
+                ->where('tahun_id', '=', $tahunAsal->id_tahun)
+                ->where('status', '!=', 'Alumni')
+                ->whereHas('siswa', fn ($sq) => $sq->where('instansi_id', $instansi->id_instansi))
+                ->with('siswa')])
             ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();

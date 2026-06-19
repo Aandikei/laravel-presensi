@@ -28,6 +28,11 @@
                         Status: <span class="text-blue-600 dark:text-blue-400">Menunggu diterima</span>
                     @endif
                 </h4>
+                @if($statusPindah?->alasan_mutasi)
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        Alasan pindah: <strong>{{ $statusPindah->alasan_mutasi }}</strong>
+                    </p>
+                @endif
                 @if($siswa->transfer_token)
                     <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
                         Kode transfer: <strong class="text-sm text-yellow-700 dark:text-yellow-300">{{ $siswa->transfer_token }}</strong>

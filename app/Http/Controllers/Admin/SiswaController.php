@@ -94,14 +94,11 @@ class SiswaController extends Controller
                             </svg>
                         </a>';
                         $pindah = $row->registrasiAktif
-                            ? '<a href="#" onclick="event.preventDefault(); if(confirm(\'Yakin tandai siswa ini pindah?\')) document.getElementById(\'pindah-'.$row->id_siswa.'\').submit();" title="Pindahkan" class="text-yellow-600 hover:text-yellow-800">
+                            ? '<a href="'.route('admin.siswa.pindah.form', $row->id_siswa).'" title="Pindahkan" class="text-yellow-600 hover:text-yellow-800">
                                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                 </svg>
-                            </a>
-                            <form id="pindah-'.$row->id_siswa.'" method="POST" action="'.route('admin.siswa.pindah', $row->id_siswa).'" class="hidden">
-                                <input type="hidden" name="_token" value="'.csrf_token().'">
-                            </form>'
+                            </a>'
                             : '';
                         $delete = '<form method="POST" action="'.route('admin.siswa.destroy', $row->id_siswa).'" class="inline">
                             <input type="hidden" name="_token" value="'.csrf_token().'">
@@ -170,9 +167,16 @@ class SiswaController extends Controller
                     ->where('status', 'Pindah')
                     ->exists();
 
+                $hasAnyReg = $existing->registrasiAkademik()->exists();
+
                 if ($hasActive || $hasPindah) {
                     return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
                         ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah terdaftar di {$existing->instansi->nama_instansi}. Gunakan form Pindah Masuk di bawah untuk memindahkan siswa ini ke sekolah Anda.");
+                }
+
+                if (! $hasAnyReg) {
+                    return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
+                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) terdaftar di {$existing->instansi->nama_instansi} namun belum memiliki data kelas. Minta sekolah asal untuk mendaftarkan ke kelas dan membuat kode transfer.");
                 }
 
                 return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)

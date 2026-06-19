@@ -39,6 +39,12 @@
                             <span class="font-medium text-gray-700 dark:text-gray-200">{{ $siswa->registrasiAktif->kelas->nama_kelas }}</span>
                         </div>
                     @endif
+                    @if($alasanMutasi)
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Alasan Pindah</span>
+                            <span class="font-medium text-gray-700 dark:text-gray-200 text-right max-w-[200px]">{{ $alasanMutasi }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -84,7 +90,7 @@
                     </label>
 
                     <div class="mb-4 px-3 py-2 text-xs text-yellow-700 bg-yellow-50 rounded-lg dark:bg-yellow-900/30 dark:text-yellow-300">
-                        Data absensi dan poin dari sekolah asal tetap tersimpan di sekolah lama sebagai riwayat.
+                        Data absensi dari sekolah asal tetap tersimpan di sekolah lama sebagai riwayat.
                     </div>
 
                     <button type="submit"
