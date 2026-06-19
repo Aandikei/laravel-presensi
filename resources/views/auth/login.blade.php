@@ -57,11 +57,11 @@
                                 @enderror
                             </label>
 
-                            {{-- Remember Me --}}
+                            {{-- Remember Me
                             <label class="flex items-center mt-4 text-sm">
                                 <input type="checkbox" name="remember" class="mr-2" />
                                 <span class="text-gray-700 dark:text-gray-400">Remember me</span>
-                            </label>
+                            </label> --}}
 
                             {{-- Submit --}}
                             <button type="submit"

@@ -24,8 +24,11 @@
 
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Deskripsi <span class="text-gray-400">(opsional)</span></span>
-                    <textarea name="deskripsi" rows="3"
-                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300">{{ old('deskripsi') }}</textarea>
+                    <textarea name="deskripsi" rows="3" placeholder="contoh: Tidak membawa buku pelajaran"
+                        class="block w-full mt-1 text-sm form-textarea dark:bg-gray-700 dark:text-gray-300 @error('deskripsi') border-red-500 @enderror">{{ old('deskripsi') }}</textarea>
+                    @error('deskripsi')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
                 </label>
 
                 <label class="block text-sm mb-4">

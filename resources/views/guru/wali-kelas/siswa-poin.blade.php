@@ -55,48 +55,49 @@
         </div>
 
         {{-- Tabel Siswa --}}
-        <div class="w-full overflow-hidden rounded-lg shadow-xs">
-            <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
-                <table id="tabel-poin" class="w-full whitespace-nowrap">
-                    <thead>
-                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
-                            <th class="px-4 py-3">No</th>
-                            <th class="px-4 py-3">NISN</th>
-                            <th class="px-4 py-3">Nama Siswa</th>
-                            <th class="px-4 py-3 text-center">Total Poin</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-                        @forelse($siswa as $i => $s)
-                            <tr class="text-gray-700 dark:text-gray-400">
-                                <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $s->nisn }}</td>
-                                <td class="px-4 py-3 text-sm font-medium">{{ $s->nama_siswa }}</td>
-                                <td class="px-4 py-3 text-sm text-center">
-                                    @if($s->total_poin > 0)
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                            {{ $s->total_poin >= 20 ? 'bg-red-100 text-red-700' : ($s->total_poin >= 10 ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700') }}">
-                                            {{ $s->total_poin }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400">0</span>
-                                    @endif
-                                </td>
+        @if($siswa->isNotEmpty())
+            <div class="w-full overflow-hidden rounded-lg shadow-xs">
+                <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
+                    <table id="tabel-poin" class="w-full whitespace-nowrap">
+                        <thead>
+                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
+                                <th class="px-4 py-3">No</th>
+                                <th class="px-4 py-3">NISN</th>
+                                <th class="px-4 py-3">Nama Siswa</th>
+                                <th class="px-4 py-3 text-center">Total Poin</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
-                                    Belum ada siswa di kelas ini.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                            @foreach($siswa as $i => $s)
+                                <tr class="text-gray-700 dark:text-gray-400">
+                                    <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ $s->nisn }}</td>
+                                    <td class="px-4 py-3 text-sm font-medium">{{ $s->nama_siswa }}</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        @if($s->total_poin > 0)
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                                {{ $s->total_poin >= 20 ? 'bg-red-100 text-red-700' : ($s->total_poin >= 10 ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700') }}">
+                                                {{ $s->total_poin }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-400">0</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        @else
+            <div class="w-full p-8 text-sm text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+                Belum ada siswa di kelas ini.
+            </div>
+        @endif
     </div>
 
     @push('scripts')
+    @if($siswa->isNotEmpty())
     <script>
         $(document).ready(function() {
             $('#tabel-poin').DataTable({
@@ -108,5 +109,6 @@
             });
         });
     </script>
+    @endif
     @endpush
 </x-layouts.admin>

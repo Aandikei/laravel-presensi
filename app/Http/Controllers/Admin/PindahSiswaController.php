@@ -125,6 +125,8 @@ class PindahSiswaController extends Controller
             ]);
             $siswa->clearTransferToken();
 
+            $siswa->logPoin()->delete();
+
             if (!empty($request->kelas_id) && !empty($request->tahun_id)) {
                 $sudahAda = RegistrasiAkademik::where('siswa_id', $siswa->id_siswa)
                     ->where('tahun_id', $request->tahun_id)

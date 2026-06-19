@@ -88,7 +88,9 @@ class RegistrasiAkademikController extends Controller
                 ->pluck('siswa_id')->toArray()
             : [];
 
-        $siswaAlumni = RegistrasiAkademik::alumni()->pluck('siswa_id')->toArray();
+        $siswaAlumni = RegistrasiAkademik::alumni()
+            ->whereHas('kelas', fn($q) => $q->where('instansi_id', $instansi->id_instansi))
+            ->pluck('siswa_id')->toArray();
 
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
             ->whereNotIn('id_siswa', array_merge($siswaTeregistrasi, $siswaAlumni))
@@ -120,6 +122,7 @@ class RegistrasiAkademikController extends Controller
 
         $alumniIds = RegistrasiAkademik::alumni()
             ->whereIn('siswa_id', $validated['siswa_id'])
+            ->whereHas('kelas', fn($q) => $q->where('instansi_id', $instansi->id_instansi))
             ->pluck('siswa_id')->toArray();
 
         $berhasil = 0;

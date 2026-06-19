@@ -166,13 +166,17 @@ class SiswaController extends Controller
                     ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $existing->instansi_id))
                     ->exists();
 
-                if (! $hasActive) {
-                    return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
-                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah lulus dari {$existing->instansi->nama_instansi}. Silakan lengkapi data untuk mendaftarkan ulang.");
+                $hasPindah = $existing->registrasiAkademik()
+                    ->where('status', 'Pindah')
+                    ->exists();
+
+                if ($hasActive || $hasPindah) {
+                    return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
+                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah terdaftar di {$existing->instansi->nama_instansi}. Gunakan form Pindah Masuk di bawah untuk memindahkan siswa ini ke sekolah Anda.");
                 }
 
-                return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
-                    ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah terdaftar di {$existing->instansi->nama_instansi}. Gunakan form Pindah Masuk di bawah untuk memindahkan siswa ini ke sekolah Anda.");
+                return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
+                    ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah lulus dari {$existing->instansi->nama_instansi}. Silakan lengkapi data untuk mendaftarkan ulang.");
             }
         }
 
@@ -451,6 +455,8 @@ class SiswaController extends Controller
                 'user_id' => $userSiswa->id,
                 'instansi_id' => $instansi->id_instansi,
             ]);
+
+            $siswa->logPoin()->delete();
 
             if ($validated['pilihan_ortu'] === 'baru') {
                 // Hapus link orang tua lama

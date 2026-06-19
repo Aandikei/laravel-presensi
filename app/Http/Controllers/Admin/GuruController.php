@@ -147,7 +147,17 @@ class GuruController extends Controller
 
         $validated = $request->validate([
             'nama_guru'     => 'required|string|max:255',
-            'nip'           => 'nullable|string|unique:guru,nip',
+            'nip'           => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (!$value) return;
+                    $guruExist = Guru::with('instansi')->where('nip', $value)->first();
+                    if ($guruExist) {
+                        $fail("NIP ini sudah terdaftar atas nama {$guruExist->nama_guru} di {$guruExist->instansi->nama_instansi}. Jika guru tersebut pindah tugas, gunakan menu Mutasi.");
+                    }
+                },
+            ],
             'email'         => 'required|email|unique:users,email',
             'password'      => 'required|min:8',
             'jenis_kelamin' => 'required|in:L,P',
@@ -209,7 +219,20 @@ class GuruController extends Controller
 
         $validated = $request->validate([
             'nama_guru'     => 'required|string|max:255',
-            'nip'           => 'nullable|string|unique:guru,nip,' . $guru->id_guru . ',id_guru',
+            'nip'           => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) use ($guru) {
+                    if (!$value) return;
+                    $guruExist = Guru::with('instansi')
+                        ->where('nip', $value)
+                        ->where('id_guru', '!=', $guru->id_guru)
+                        ->first();
+                    if ($guruExist) {
+                        $fail("NIP ini sudah terdaftar atas nama {$guruExist->nama_guru} di {$guruExist->instansi->nama_instansi}. Jika guru tersebut pindah tugas, gunakan menu Mutasi.");
+                    }
+                },
+            ],
             'email'         => 'required|email|unique:users,email,' . $guru->user_id,
             'jenis_kelamin' => 'required|in:L,P',
             'no_hp'         => 'nullable|string|max:15',
