@@ -25,6 +25,7 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
     protected $berhasil = 0;
     protected $gagal = 0;
     protected $daftarUlang = 0;
+    protected $gagalList = [];
 
     public function __construct(int $instansiId, ?int $tahunId = null)
     {
@@ -34,27 +35,43 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
 
     public function model(array $row)
     {
-        $existingSiswa = Siswa::where('nisn', $row['nisn'])->with(['user', 'orangTua.user'])->first();
+        $existingSiswa = Siswa::where('nisn', $row['nisn'])->with(['user', 'orangTua.user', 'instansi'])->first();
 
         if ($existingSiswa) {
             if ($existingSiswa->instansi_id !== $this->instansiId) {
-                $hasActive = $existingSiswa->registrasiAkademik()
-                    ->aktif()
-                    ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
-                    ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $existingSiswa->instansi_id))
+                $isAlumni = $existingSiswa->registrasiAkademik()
+                    ->where('status', 'Alumni')
                     ->exists();
 
-                if (!$hasActive) {
-                    return $this->prosesDaftarUlang($row, $existingSiswa);
+                if (!$isAlumni) {
+                    $this->gagal++;
+                    $this->gagalList[] = [
+                        'nama' => $existingSiswa->nama_siswa,
+                        'nisn' => $row['nisn'],
+                        'alasan' => 'Masih terdaftar di ' . $existingSiswa->instansi->nama_instansi,
+                    ];
+                    return null;
                 }
+
+                return $this->prosesDaftarUlang($row, $existingSiswa);
             }
 
             $this->gagal++;
+            $this->gagalList[] = [
+                'nama' => $existingSiswa->nama_siswa,
+                'nisn' => $row['nisn'],
+                'alasan' => 'NISN sudah terdaftar di sekolah ini',
+            ];
             return null;
         }
 
         if (User::where('email', $row['email_siswa'])->exists()) {
             $this->gagal++;
+            $this->gagalList[] = [
+                'nama' => $row['nama_siswa'],
+                'nisn' => $row['nisn'],
+                'alasan' => 'Email siswa sudah digunakan',
+            ];
             return null;
         }
 
@@ -154,6 +171,11 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
         } else {
             if (User::where('email', $row['email_siswa'])->exists()) {
                 $this->gagal++;
+                $this->gagalList[] = [
+                    'nama' => $existingSiswa->nama_siswa,
+                    'nisn' => $row['nisn'],
+                    'alasan' => 'Email siswa sudah digunakan',
+                ];
                 return null;
             }
 
@@ -169,6 +191,8 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
             'user_id' => $userSiswa->id,
             'instansi_id' => $this->instansiId,
         ]);
+
+        $existingSiswa->logPoin()->delete();
 
         $tahunId = $this->tahunId;
         $kelasId = null;
@@ -203,6 +227,51 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
             }
         }
 
+        if (!empty($row['email_ortu'])) {
+            $emailSama = $existingSiswa->orangTua->contains(
+                fn($ortu) => $ortu->user->email === $row['email_ortu']
+            );
+
+            if (!$emailSama) {
+                foreach ($existingSiswa->orangTua as $ortu) {
+                    OrtuSiswa::where('siswa_id', $existingSiswa->id_siswa)
+                        ->where('ortu_id', $ortu->id_ortu)->delete();
+
+                    if ($ortu->siswa()->count() === 0) {
+                        $ortu->delete();
+                    }
+                }
+
+                $userOrtu = User::where('email', $row['email_ortu'])->first();
+
+                if (!$userOrtu) {
+                    $userOrtu = User::create([
+                        'name' => $row['nama_ortu'] ?? 'Orang Tua ' . $row['nama_siswa'],
+                        'email' => $row['email_ortu'],
+                        'password' => Hash::make($row['nisn']),
+                    ]);
+                    $userOrtu->assignRole('orang_tua');
+                }
+
+                $ortu = OrangTua::firstOrCreate(
+                    ['user_id' => $userOrtu->id],
+                    [
+                        'nama_ortu' => $row['nama_ortu'] ?? 'Orang Tua ' . $row['nama_siswa'],
+                        'no_hp' => $row['no_hp_ortu'] ?? null,
+                    ]
+                );
+
+                if (!$userOrtu->hasRole('orang_tua')) {
+                    $userOrtu->assignRole('orang_tua');
+                }
+
+                OrtuSiswa::firstOrCreate(
+                    ['ortu_id' => $ortu->id_ortu, 'siswa_id' => $existingSiswa->id_siswa],
+                    ['hubungan' => $row['hubungan'] ?? 'Wali', 'is_primary' => true]
+                );
+            }
+        }
+
         $this->daftarUlang++;
         return null;
     }
@@ -211,4 +280,5 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
     public function getBerhasil(): int { return $this->berhasil; }
     public function getGagal(): int { return $this->gagal; }
     public function getDaftarUlang(): int { return $this->daftarUlang; }
+    public function getGagalList(): array { return $this->gagalList; }
 }

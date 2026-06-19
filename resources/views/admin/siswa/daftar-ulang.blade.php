@@ -64,14 +64,9 @@
                         @enderror
                     </label>
 
-                    <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">Password Siswa <span class="text-gray-400">(kosongkan jika tetap pakai password lama)</span></span>
-                        <input type="password" name="password"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('password') border-red-500 @enderror" />
-                        @error('password')
-                            <span class="text-xs text-red-500">{{ $message }}</span>
-                        @enderror
-                    </label>
+                    <div class="mb-4 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
+                        Password siswa akan menggunakan NISN secara otomatis.
+                    </div>
                 </div>
 
                 {{-- Orang Tua --}}
@@ -152,14 +147,9 @@
                             @enderror
                         </label>
 
-                        <label class="block text-sm mb-4">
-                            <span class="text-gray-700 dark:text-gray-400">Password Orang Tua</span>
-                            <input type="password" name="password_ortu"
-                                class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('password_ortu') border-red-500 @enderror" />
-                            @error('password_ortu')
-                                <span class="text-xs text-red-500">{{ $message }}</span>
-                            @enderror
-                        </label>
+                        <div class="mb-4 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
+                            Password orang tua akan menggunakan NISN siswa secara otomatis.
+                        </div>
                     </div>
                 </div>
 

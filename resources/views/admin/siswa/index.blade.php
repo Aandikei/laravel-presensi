@@ -38,6 +38,38 @@
             </div>
         @endif
 
+        @if(session('gagalList') && count(session('gagalList')) > 0)
+            <div id="gagal-import" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-semibold text-red-700 dark:text-red-400">
+                        Data gagal diimport ({{ count(session('gagalList')) }})
+                    </h4>
+                    <button onclick="document.getElementById('gagal-import').remove()"
+                        class="text-red-400 hover:text-red-600 text-lg leading-none">&times;</button>
+                </div>
+                <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead>
+                            <tr class="text-xs text-red-600 uppercase border-b border-red-200 dark:border-red-800">
+                                <th class="px-3 py-2">Nama</th>
+                                <th class="px-3 py-2">NISN</th>
+                                <th class="px-3 py-2">Alasan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-red-100 dark:divide-red-900">
+                            @foreach(session('gagalList') as $g)
+                                <tr class="text-red-800 dark:text-red-300">
+                                    <td class="px-3 py-1.5">{{ $g['nama'] }}</td>
+                                    <td class="px-3 py-1.5">{{ $g['nisn'] }}</td>
+                                    <td class="px-3 py-1.5">{{ $g['alasan'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
         {{-- Filter --}}
         <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 flex items-center gap-4 flex-wrap">
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Kelas:</label>

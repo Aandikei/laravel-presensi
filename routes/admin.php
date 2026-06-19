@@ -67,15 +67,14 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
     // Siswa — manage (hanya admin & kasek)
     Route::middleware('permission:manage-siswa')->group(function () {
         Route::get('siswa/create', [SiswaController::class, 'create'])->name('siswa.create');
-        Route::post('siswa', [SiswaController::class, 'store'])->name('siswa.store');
-        Route::get('siswa/{siswa}', [SiswaController::class, 'show'])->name('siswa.show');
-        Route::get('siswa/{siswa}/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
-        Route::put('siswa/{siswa}', [SiswaController::class, 'update'])->name('siswa.update');
-        Route::delete('siswa/{siswa}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
+        Route::get('siswa/template', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
         Route::get('siswa/daftar-ulang/{siswa}', [SiswaController::class, 'formDaftarUlang'])->name('siswa.daftar-ulang');
         Route::post('siswa/daftar-ulang', [SiswaController::class, 'prosesDaftarUlang'])->name('siswa.proses-daftar-ulang');
         Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
-        Route::get('siswa/template', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
+        Route::post('siswa', [SiswaController::class, 'store'])->name('siswa.store');
+        Route::get('siswa/{siswa}/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
+        Route::put('siswa/{siswa}', [SiswaController::class, 'update'])->name('siswa.update');
+        Route::delete('siswa/{siswa}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
         Route::get('siswa/{siswa}/pindah', [PindahSiswaController::class, 'formPindah'])->name('siswa.pindah.form');
         Route::post('siswa/{siswa}/pindah', [PindahSiswaController::class, 'out'])->name('siswa.pindah');
         Route::post('siswa/{siswa}/batal-pindah', [PindahSiswaController::class, 'batal'])->name('siswa.batal-pindah');

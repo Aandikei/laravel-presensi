@@ -397,7 +397,6 @@ class SiswaController extends Controller
         $validated = $request->validate([
             'siswa_id' => 'required|exists:siswa,id_siswa',
             'email' => 'required|email',
-            'password' => 'nullable|min:8',
             'kelas_id' => 'nullable|exists:kelas,id_kelas',
             'tahun_id' => 'nullable|exists:tahun_ajaran,id_tahun',
             'pilihan_ortu' => 'required|in:lama,baru',
@@ -405,7 +404,6 @@ class SiswaController extends Controller
             'email_ortu' => 'nullable|email',
             'hubungan' => 'nullable|in:Ayah,Ibu,Wali',
             'no_hp_ortu' => 'nullable|string|max:15',
-            'password_ortu' => 'nullable|min:8',
         ]);
 
         if ($validated['pilihan_ortu'] === 'baru') {
@@ -413,7 +411,6 @@ class SiswaController extends Controller
                 'nama_ortu' => 'required|string|max:255',
                 'email_ortu' => 'required|email',
                 'hubungan' => 'required|in:Ayah,Ibu,Wali',
-                'password_ortu' => 'required|min:8',
             ]);
         }
 
@@ -426,28 +423,22 @@ class SiswaController extends Controller
 
         $oldUser = $siswa->user;
 
-        // Password required jika email diganti (akun baru)
-        if ($validated['email'] !== $oldUser->email && empty($validated['password'])) {
-            return back()->withInput()->withErrors(['password' => 'Password wajib diisi jika email diganti.']);
-        }
-
         if ($validated['email'] !== $oldUser->email && User::where('email', $validated['email'])->exists()) {
             return back()->withInput()->withErrors(['email' => 'Email sudah digunakan oleh akun lain.']);
         }
 
         DB::transaction(function () use ($validated, $siswa, $instansi, $oldUser) {
             if ($validated['email'] === $oldUser->email) {
-                $data = ['name' => $siswa->nama_siswa];
-                if (! empty($validated['password'])) {
-                    $data['password'] = Hash::make($validated['password']);
-                }
-                $oldUser->update($data);
+                $oldUser->update([
+                    'name' => $siswa->nama_siswa,
+                    'password' => Hash::make($siswa->nisn),
+                ]);
                 $userSiswa = $oldUser;
             } else {
                 $userSiswa = User::create([
                     'name' => $siswa->nama_siswa,
                     'email' => $validated['email'],
-                    'password' => Hash::make($validated['password']),
+                    'password' => Hash::make($siswa->nisn),
                 ]);
                 $userSiswa->assignRole('siswa');
 
@@ -481,7 +472,7 @@ class SiswaController extends Controller
                     $userOrtu = User::create([
                         'name' => $validated['nama_ortu'],
                         'email' => $validated['email_ortu'],
-                        'password' => Hash::make($validated['password_ortu']),
+                        'password' => Hash::make($siswa->nisn),
                     ]);
                     $userOrtu->assignRole('orang_tua');
                 }
@@ -546,19 +537,20 @@ class SiswaController extends Controller
         $gagal = $import->getGagal();
         $daftarUlang = $import->getDaftarUlang();
         $kelasNotFound = $import->getKelasNotFound();
+        $gagalList = $import->getGagalList();
 
         $message = "Import selesai! {$berhasil} siswa baru berhasil diimport.";
         if ($daftarUlang > 0) {
             $message .= " {$daftarUlang} siswa alumni berhasil didaftarkan ulang.";
         }
         if ($gagal > 0) {
-            $message .= " {$gagal} baris dilewati (NISN/email sudah terdaftar aktif).";
+            $message .= " {$gagal} baris dilewati.";
         }
         if (! empty($kelasNotFound)) {
             $message .= ' Kelas tidak ditemukan: '.implode(', ', $kelasNotFound).' — siswa tetap diimport tapi belum terdaftar di kelas.';
         }
 
-        return back()->with('success', $message);
+        return back()->with('success', $message)->with('gagalList', $gagalList);
     }
 
     public function downloadTemplate()
