@@ -47,57 +47,57 @@
         {{-- Table --}}
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
-            <table id="tabel-poin" class="w-full whitespace-nowrap">
-                <thead>
-                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                        <th class="px-5 py-3">Tanggal</th>
-                        <th class="px-5 py-3">Pelanggaran</th>
-                        <th class="px-5 py-3">Poin</th>
-                        <th class="px-5 py-3">Keterangan</th>
-                        <th class="px-5 py-3">Dicatat Oleh</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-                    @forelse($logPoin as $log)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
-                            <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
-                                {{ \Carbon\Carbon::parse($log->tanggal)->format('d M Y') }}
-                            </td>
-                            <td class="px-5 py-3 text-sm font-medium text-gray-700 dark:text-gray-200">
-                                {{ $log->masterPoin->nama_pelanggaran }}
-                            </td>
-                            <td class="px-5 py-3">
-                                <span class="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded-full">
-                                    +{{ $log->masterPoin->jumlah_poin }}
-                                </span>
-                            </td>
-                            <td class="px-5 py-3 text-sm text-gray-500">{{ $log->keterangan ?? '-' }}</td>
-                            <td class="px-5 py-3 text-sm text-gray-500">{{ $log->createdBy->name ?? '-' }}</td>
+            @if($logPoin->isNotEmpty())
+                <table id="tabel-poin" class="w-full whitespace-nowrap">
+                    <thead>
+                        <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                            <th class="px-5 py-3">Tanggal</th>
+                            <th class="px-5 py-3">Pelanggaran</th>
+                            <th class="px-5 py-3">Poin</th>
+                            <th class="px-5 py-3">Keterangan</th>
+                            <th class="px-5 py-3">Dicatat Oleh</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-5 py-8 text-center text-gray-500">
-                                Tidak ada pelanggaran bulan ini 🎉
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                        @foreach($logPoin as $log)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
+                                <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ \Carbon\Carbon::parse($log->tanggal)->format('d M Y') }}
+                                </td>
+                                <td class="px-5 py-3 text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    {{ $log->masterPoin->nama_pelanggaran }}
+                                </td>
+                                <td class="px-5 py-3">
+                                    <span class="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded-full">
+                                        +{{ $log->masterPoin->jumlah_poin }}
+                                    </span>
+                                </td>
+                                <td class="px-5 py-3 text-sm text-gray-500">{{ $log->keterangan ?? '-' }}</td>
+                                <td class="px-5 py-3 text-sm text-gray-500">{{ $log->createdBy->name ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                @push('scripts')
+                <script>
+                    $(document).ready(function() {
+                        $('#tabel-poin').DataTable({
+                            paging: false,
+                            info: false,
+                            ordering: true,
+                            searching: true,
+                            language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
+                        });
+                    });
+                </script>
+                @endpush
+            @else
+                <div class="w-full px-5 py-8 text-center text-gray-500">
+                    Tidak ada pelanggaran bulan ini 🎉
+                </div>
+            @endif
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-        $(document).ready(function() {
-            $('#tabel-poin').DataTable({
-                paging: false,
-                info: false,
-                ordering: true,
-                searching: true,
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
-            });
-        });
-    </script>
-    @endpush
 </x-layouts.admin>
