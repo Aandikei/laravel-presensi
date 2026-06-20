@@ -73,15 +73,6 @@
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
                     </label>
-
-                    <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">Password Siswa</span>
-                        <input type="password" name="password"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('password') border-red-500 @enderror" />
-                        @error('password')
-                            <span class="text-xs text-red-500">{{ $message }}</span>
-                        @enderror
-                    </label>
                 </div>
 
                 {{-- Data Orang Tua --}}
@@ -90,61 +81,63 @@
                         Data Orang Tua
                     </h3>
 
-                    <div
-                        class="mb-3 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
-                        Jika orang tua sudah memiliki akun, cukup masukkan email yang sama. Password bisa dikosongkan.
-                    </div>
-
-                    <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">Nama Orang Tua</span>
-                        <input type="text" name="nama_ortu" value="{{ old('nama_ortu') }}"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nama_ortu') border-red-500 @enderror" />
-                        @error('nama_ortu')
-                            <span class="text-xs text-red-500">{{ $message }}</span>
-                        @enderror
-                    </label>
-
-                    <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">Hubungan</span>
-                        <select name="hubungan"
-                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('hubungan') border-red-500 @enderror">
-                            <option value="">-- Pilih --</option>
-                            <option value="Ayah" {{ old('hubungan') == 'Ayah' ? 'selected' : '' }}>Ayah</option>
-                            <option value="Ibu" {{ old('hubungan') == 'Ibu' ? 'selected' : '' }}>Ibu</option>
-                            <option value="Wali" {{ old('hubungan') == 'Wali' ? 'selected' : '' }}>Wali</option>
-                        </select>
-                        @error('hubungan')
-                            <span class="text-xs text-red-500">{{ $message }}</span>
-                        @enderror
-                    </label>
-
-                    <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">No HP <span
-                                class="text-gray-400">(opsional)</span></span>
-                        <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
-                    </label>
-
+                    {{-- Email orang tua — satu-satunya yang tampil di awal --}}
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Email Orang Tua</span>
-                        <input type="email" name="email_ortu" value="{{ old('email_ortu') }}"
+                        <input type="email" name="email_ortu" id="email_ortu" value="{{ old('email_ortu') }}"
                             class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('email_ortu') border-red-500 @enderror" />
                         @error('email_ortu')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
                     </label>
 
-                    <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">
-                            Password Orang Tua
-                            <span class="text-gray-400">(kosongkan jika akun sudah ada)</span>
-                        </span>
-                        <input type="password" name="password_ortu"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('password_ortu') border-red-500 @enderror" />
-                        @error('password_ortu')
-                            <span class="text-xs text-red-500">{{ $message }}</span>
-                        @enderror
-                    </label>
+                    <div
+                        class="mb-3 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
+                        Password default orang tua = <strong>NISN</strong>.
+                        Jika lupa, gunakan fitur <strong>Lupa Password</strong> di halaman login.
+                    </div>
+
+                    {{-- Info email sudah terdaftar (muncul setelah cek) --}}
+                    <div id="ortu_lama_info" class="hidden mb-3 px-3 py-2 text-xs text-green-700 bg-green-50 rounded-lg dark:bg-green-900/30 dark:text-green-300">
+                        Email sudah terdaftar atas nama: <strong id="ortu_lama_nama"></strong>.
+                        Cukup isi <strong>Hubungan</strong> saja.
+                    </div>
+
+                    {{-- Field yang muncul setelah cek email (sembunyi di awal) --}}
+                    <div id="ortu_fields_after_check" class="hidden">
+                        {{-- Nama & No HP untuk ortu baru --}}
+                        <div id="ortu_baru_fields">
+                            <label class="block text-sm mb-4">
+                                <span class="text-gray-700 dark:text-gray-400">Nama Orang Tua</span>
+                                <input type="text" name="nama_ortu" value="{{ old('nama_ortu') }}"
+                                    class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nama_ortu') border-red-500 @enderror" />
+                                @error('nama_ortu')
+                                    <span class="text-xs text-red-500">{{ $message }}</span>
+                                @enderror
+                            </label>
+
+                            <label class="block text-sm mb-4">
+                                <span class="text-gray-700 dark:text-gray-400">No HP <span
+                                        class="text-gray-400">(opsional)</span></span>
+                                <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}"
+                                    class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
+                            </label>
+                        </div>
+
+                        <label class="block text-sm mb-4">
+                            <span class="text-gray-700 dark:text-gray-400">Hubungan</span>
+                            <select name="hubungan"
+                                class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('hubungan') border-red-500 @enderror">
+                                <option value="">-- Pilih --</option>
+                                <option value="Ayah" {{ old('hubungan') == 'Ayah' ? 'selected' : '' }}>Ayah</option>
+                                <option value="Ibu" {{ old('hubungan') == 'Ibu' ? 'selected' : '' }}>Ibu</option>
+                                <option value="Wali" {{ old('hubungan') == 'Wali' ? 'selected' : '' }}>Wali</option>
+                            </select>
+                            @error('hubungan')
+                                <span class="text-xs text-red-500">{{ $message }}</span>
+                            @enderror
+                        </label>
+                    </div>
                 </div>
 
                 {{-- Registrasi Kelas (Opsional) --}}
@@ -188,4 +181,42 @@
             </form>
         </div>
     </div>
+    @push('scripts')
+    <script>
+        const emailInput = document.getElementById('email_ortu');
+        const afterCheck = document.getElementById('ortu_fields_after_check');
+        const ortuBaruFields = document.getElementById('ortu_baru_fields');
+        const ortuLamaInfo = document.getElementById('ortu_lama_info');
+        const ortuLamaNama = document.getElementById('ortu_lama_nama');
+        let debounceTimer;
+
+        emailInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const email = this.value.trim();
+
+            if (!email || !email.includes('@')) {
+                afterCheck.classList.add('hidden');
+                ortuLamaInfo.classList.add('hidden');
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetch('{{ route("admin.siswa.cek-email-ortu") }}?email=' + encodeURIComponent(email))
+                    .then(res => res.json())
+                    .then(data => {
+                        afterCheck.classList.remove('hidden');
+
+                        if (data.exists) {
+                            ortuBaruFields.classList.add('hidden');
+                            ortuLamaInfo.classList.remove('hidden');
+                            ortuLamaNama.textContent = data.nama_ortu;
+                        } else {
+                            ortuBaruFields.classList.remove('hidden');
+                            ortuLamaInfo.classList.add('hidden');
+                        }
+                    });
+            }, 500);
+        });
+    </script>
+    @endpush
 </x-layouts.admin>

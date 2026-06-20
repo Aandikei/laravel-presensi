@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmailContract
 {
-    use HasRoles, Notifiable;
+    use HasRoles, Notifiable, MustVerifyEmailTrait;
 
     protected $fillable = ['name', 'email', 'password', 'instansi_id'];
 
@@ -32,6 +34,11 @@ class User extends Authenticatable
     public function orangTua()
     {
         return $this->hasOne(OrangTua::class, 'user_id', 'id');
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\VerifyEmail);
     }
 
     public function instansi()

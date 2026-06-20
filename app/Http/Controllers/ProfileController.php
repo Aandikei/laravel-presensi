@@ -29,7 +29,9 @@ class ProfileController extends Controller
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+            $request->user()->email_verified_at = $request->user()->hasAnyRole(['super_admin', 'admin', 'kepala_sekolah', 'wakil_kepala_sekolah'])
+                ? now()
+                : null;
         }
 
         $request->user()->save();

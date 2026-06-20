@@ -30,6 +30,17 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
+        // Jika ada intended URL (misal dari middleware verified/guest), lanjutkan ke sana
+        if ($intended = session()->pull('url.intended')) {
+            return redirect($intended);
+        }
+
+        // User belum verifikasi email → skip validasi status aktif,
+        // nanti dicegah middleware 'verified' di dashboard route
+        if (! $user->hasVerifiedEmail()) {
+            return redirect('/');
+        }
+
         if ($user->hasRole('super_admin')) {
             return redirect()->route('superadmin.dashboard');
         } elseif ($user->hasRole('admin')) {

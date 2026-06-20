@@ -180,9 +180,10 @@ class GuruController extends Controller
         DB::transaction(function () use ($validated, $instansi) {
             // Buat user
             $user = User::create([
-                'name'     => $validated['nama_guru'],
-                'email'    => $validated['email'],
+                'name' => $validated['nama_guru'],
+                'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
+                'instansi_id' => $instansi->id_instansi,
             ]);
 
             // Assign role guru
@@ -190,6 +191,7 @@ class GuruController extends Controller
 
             if (!empty($validated['jabatan'])) {
                 $user->assignRole($validated['jabatan']);
+                $user->forceFill(['email_verified_at' => now()])->save();
             }
 
             // Buat data guru
@@ -294,6 +296,11 @@ class GuruController extends Controller
                         $user->removeRole($role);
                     }
                 }
+            }
+
+            // Auto verify jika punya jabatan kepala/wakil
+            if (!empty($validated['jabatan'])) {
+                $user->forceFill(['email_verified_at' => now()])->save();
             }
         });
 

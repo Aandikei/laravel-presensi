@@ -136,6 +136,23 @@ class SiswaController extends Controller
         return view('admin.siswa.index', compact('kelas', 'tahunAjaran'));
     }
 
+    public function cekEmailOrtu(Request $request)
+    {
+        $exists = User::where('email', $request->email)->exists();
+        $namaOrtu = null;
+
+        if ($exists) {
+            $user = User::where('email', $request->email)->first();
+            $ortu = OrangTua::where('user_id', $user->id)->first();
+            $namaOrtu = $ortu?->nama_ortu;
+        }
+
+        return response()->json([
+            'exists' => $exists,
+            'nama_ortu' => $namaOrtu,
+        ]);
+    }
+
     public function create()
     {
         $instansi = Auth::user()->getInstansi();
@@ -192,24 +209,25 @@ class SiswaController extends Controller
             'tanggal_lahir' => 'nullable|date',
             // Akun siswa
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
             // Data orang tua
-            'nama_ortu' => 'required|string|max:255',
+            'nama_ortu' => 'nullable|string|max:255',
             'no_hp_ortu' => 'nullable|string|max:15',
             'hubungan' => 'required|in:Ayah,Ibu,Wali',
-            'email_ortu' => 'required|email|',
-            'password_ortu' => 'nullable|min:8',
+            'email_ortu' => 'required|email',
             // Registrasi opsional
             'kelas_id' => 'nullable|exists:kelas,id_kelas',
             'tahun_id' => 'nullable|exists:tahun_ajaran,id_tahun',
         ]);
 
-        DB::transaction(function () use ($validated, $instansi) {
+        $ortuAlreadyExisted = false;
+        $namaOrtu = null;
+
+        DB::transaction(function () use ($validated, $instansi, &$ortuAlreadyExisted, &$namaOrtu) {
             // Buat user siswa
             $userSiswa = User::create([
                 'name' => $validated['nama_siswa'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make($validated['nisn']),
             ]);
             $userSiswa->assignRole('siswa');
 
@@ -227,27 +245,26 @@ class SiswaController extends Controller
             $userOrtu = User::where('email', '=', $validated['email_ortu'])->first();
 
             if ($userOrtu) {
-                // User sudah ada, cek apakah sudah punya data orang tua
                 $ortu = OrangTua::where('user_id', '=', $userOrtu->id)->first();
 
-                if (! $ortu) {
-                    // Punya akun tapi belum ada data orang tua — buatkan
+                if ($ortu) {
+                    $ortuAlreadyExisted = true;
+                    $namaOrtu = $ortu->nama_ortu;
+                } else {
                     $ortu = OrangTua::create([
                         'user_id' => $userOrtu->id,
                         'nama_ortu' => $validated['nama_ortu'],
                         'no_hp' => $validated['no_hp_ortu'] ?? null,
                     ]);
-                    // Assign role kalau belum punya
                     if (! $userOrtu->hasRole('orang_tua')) {
                         $userOrtu->assignRole('orang_tua');
                     }
                 }
             } else {
-                // User belum ada, buat baru
                 $userOrtu = User::create([
                     'name' => $validated['nama_ortu'],
                     'email' => $validated['email_ortu'],
-                    'password' => Hash::make($validated['password_ortu']),
+                    'password' => Hash::make($validated['nisn']),
                 ]);
                 $userOrtu->assignRole('orang_tua');
 
@@ -285,6 +302,11 @@ class SiswaController extends Controller
                 }
             }
         });
+
+        if ($ortuAlreadyExisted) {
+            return redirect()->route('admin.siswa.index')
+                ->with('success', "Siswa berhasil ditambahkan! {$namaOrtu} sudah terdaftar, data orang tua tidak berubah.");
+        }
 
         return redirect()->route('admin.siswa.index')
             ->with('success', 'Siswa berhasil ditambahkan!');
@@ -408,7 +430,7 @@ class SiswaController extends Controller
 
         if ($validated['pilihan_ortu'] === 'baru') {
             $request->validate([
-                'nama_ortu' => 'required|string|max:255',
+                'nama_ortu' => 'nullable|string|max:255',
                 'email_ortu' => 'required|email',
                 'hubungan' => 'required|in:Ayah,Ibu,Wali',
             ]);

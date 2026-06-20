@@ -65,7 +65,7 @@
                     </label>
 
                     <div class="mb-4 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
-                        Password siswa akan menggunakan NISN secara otomatis.
+                        Password siswa = NISN. Jika lupa, gunakan fitur <strong>Lupa Password</strong> di halaman login.
                     </div>
                 </div>
 
@@ -148,7 +148,7 @@
                         </label>
 
                         <div class="mb-4 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
-                            Password orang tua akan menggunakan NISN siswa secara otomatis.
+                            Password orang tua = NISN. Jika lupa, gunakan fitur <strong>Lupa Password</strong> di halaman login.
                         </div>
                     </div>
                 </div>

@@ -88,10 +88,11 @@ class SekolahController extends Controller
             ]);
 
             $user = User::create([
-                'name'         => $validated['admin_name'],
-                'email'        => $validated['admin_email'],
-                'password'     => Hash::make($validated['admin_password']),
-                'instansi_id'  => $instansi->id_instansi,
+                'name'        => $validated['admin_name'],
+                'email'       => $validated['admin_email'],
+                'password'    => Hash::make($validated['admin_password']),
+                'instansi_id' => $instansi->id_instansi,
+                'email_verified_at' => now(),
             ]);
 
             $user->assignRole('admin');
@@ -189,10 +190,11 @@ class SekolahController extends Controller
 
         DB::transaction(function () use ($validated, $instansi) {
             $user = User::create([
-                'name'         => $validated['name'],
-                'email'        => $validated['email'],
-                'password'     => Hash::make($validated['password']),
-                'instansi_id'  => $instansi->id_instansi,
+                'name'        => $validated['name'],
+                'email'       => $validated['email'],
+                'password'    => Hash::make($validated['password']),
+                'instansi_id' => $instansi->id_instansi,
+                'email_verified_at' => now(),
             ]);
 
             $user->assignRole('admin');
@@ -219,7 +221,7 @@ class SekolahController extends Controller
             'password' => 'nullable|min:8',
         ]);
 
-        $updateData = ['name' => $validated['name'], 'email' => $validated['email']];
+        $updateData = ['name' => $validated['name'], 'email' => $validated['email'], 'email_verified_at' => now()];
         if (!empty($validated['password'])) {
             $updateData['password'] = Hash::make($validated['password']);
         }
