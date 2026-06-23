@@ -206,6 +206,8 @@ class WaliKelasController extends Controller
         $jadwal = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran', 'kurikulum.guru'])
             ->findOrFail($request->jadwal_id);
 
+        abort_if($jadwal->kurikulum->kelas->instansi_id !== $guru->instansi_id, 403);
+
         $absensi = Absensi::with('registrasi.siswa')
             ->where('jadwal_id', $request->jadwal_id)
             ->whereDate('tanggal', $request->tanggal)

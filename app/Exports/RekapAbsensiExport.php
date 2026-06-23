@@ -15,16 +15,18 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTitle, WithColumnWidths
 {
     protected $guruId;
+    protected $instansiId;
     protected $bulan;
     protected $tahun;
     protected $mapelId;
 
-    public function __construct(int $guruId, int $bulan, int $tahun, ?int $mapelId = null)
+    public function __construct(int $guruId, int $instansiId, int $bulan, int $tahun, ?int $mapelId = null)
     {
-        $this->guruId  = $guruId;
-        $this->bulan   = $bulan;
-        $this->tahun   = $tahun;
-        $this->mapelId = $mapelId;
+        $this->guruId      = $guruId;
+        $this->instansiId  = $instansiId;
+        $this->bulan       = $bulan;
+        $this->tahun       = $tahun;
+        $this->mapelId     = $mapelId;
     }
 
     public function collection()
@@ -34,7 +36,9 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
                 'jadwal.kurikulum.kelas',
                 'registrasi.siswa'
             ])
-            ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $this->guruId))
+            ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $this->guruId)
+                ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $this->instansiId))
+            )
             ->whereMonth('tanggal', $this->bulan)
             ->whereYear('tanggal', $this->tahun)
             ->when($this->mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $this->mapelId)))

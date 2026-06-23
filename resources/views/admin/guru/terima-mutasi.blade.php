@@ -9,12 +9,6 @@
             <p class="text-sm text-gray-500 mt-1">Masukkan token dari sekolah asal untuk menerima guru pindahan.</p>
         </div>
 
-        @if(session('error'))
-            <div class="px-4 py-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
-
         <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.guru.mutasi.terima.verifikasi') }}">
                 @csrf

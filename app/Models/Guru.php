@@ -119,4 +119,13 @@ class Guru extends Model
     {
         $this->update(['status' => 'Pensiun']);
     }
+
+    public function getStatusLabelAttribute(): ?string
+    {
+        return match ($this->status) {
+            'Keluar' => 'Keluar',
+            'Pensiun' => 'Pensiun',
+            default => null,
+        };
+    }
 }

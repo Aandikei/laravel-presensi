@@ -25,7 +25,9 @@ class GuruController extends Controller
         $hariIni = $hariMap[now()->format('l')] ?? null;
 
         $jadwalHariIni = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
-            ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
+            ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
+                ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $guru->instansi_id))
+            )
             ->where('hari', $hariIni)
             ->orderBy('jam_mulai')
             ->get()

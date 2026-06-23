@@ -118,7 +118,14 @@
                                         {{ $jadwal->kurikulum->mataPelajaran->nama_mapel }}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $jadwal->kurikulum?->guru?->nama_guru ?? '-' }}
+                                        @if($guru = $jadwal->kurikulum?->guru)
+                                            {{ $guru->nama_guru }}
+                                            @if($guru->status_label)
+                                                <span class="text-xs text-red-500">({{ $guru->status_label }})</span>
+                                            @endif
+                                        @else
+                                            -
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

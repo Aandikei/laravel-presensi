@@ -33,7 +33,16 @@
                 </div>
                 <div>
                     <span class="text-gray-500 dark:text-gray-400">Guru</span>
-                    <p class="font-medium text-gray-700 dark:text-gray-200">{{ $jadwal->kurikulum?->guru?->nama_guru ?? '-' }}</p>
+                    <p class="font-medium text-gray-700 dark:text-gray-200">
+                        @if($guru = $jadwal->kurikulum?->guru)
+                            {{ $guru->nama_guru }}
+                            @if($guru->status_label)
+                                <span class="text-xs text-red-500">({{ $guru->status_label }})</span>
+                            @endif
+                        @else
+                            -
+                        @endif
+                    </p>
                 </div>
                 <div>
                     <span class="text-gray-500 dark:text-gray-400">Jam</span>

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 
 class GuruController extends Controller
@@ -138,7 +139,21 @@ class GuruController extends Controller
 
     public function create()
     {
-        return view('admin.guru.create');
+        $instansi = Auth::user()->getInstansi();
+
+        $jabatanTerpakai = Role::whereIn('name', ['kepala_sekolah', 'wakil_kepala_sekolah'])
+            ->whereHas('users', fn ($q) => $q->whereHas('guru', fn ($q) => $q->where('instansi_id', $instansi->id_instansi)->whereNull('status')))
+            ->pluck('name')
+            ->toArray();
+
+        $semuaJabatan = [
+            'kepala_sekolah' => 'Kepala Sekolah',
+            'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
+        ];
+
+        $jabatanTersedia = array_diff_key($semuaJabatan, array_flip($jabatanTerpakai));
+
+        return view('admin.guru.create', compact('jabatanTersedia'));
     }
 
     public function store(Request $request)
@@ -212,7 +227,28 @@ class GuruController extends Controller
     public function edit(Guru $guru)
     {
         $this->authorizeInstansi($guru);
-        return view('admin.guru.edit', compact('guru'));
+
+        $instansi = Auth::user()->getInstansi();
+
+        $jabatanTerpakai = Role::whereIn('name', ['kepala_sekolah', 'wakil_kepala_sekolah'])
+            ->whereHas('users', fn ($q) => $q
+                ->whereHas('guru', fn ($q) => $q
+                    ->where('instansi_id', $instansi->id_instansi)
+                    ->whereNull('status')
+                    ->where('id_guru', '!=', $guru->id_guru)
+                )
+            )
+            ->pluck('name')
+            ->toArray();
+
+        $semuaJabatan = [
+            'kepala_sekolah' => 'Kepala Sekolah',
+            'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
+        ];
+
+        $jabatanTersedia = array_diff_key($semuaJabatan, array_flip($jabatanTerpakai));
+
+        return view('admin.guru.edit', compact('guru', 'jabatanTersedia'));
     }
 
     public function update(Request $request, Guru $guru)
@@ -408,11 +444,13 @@ class GuruController extends Controller
                 $guru->kelasWali()->update(['guru_wali_id' => null]);
             }
 
-            // Lepaskan guru dari kurikulum (data historis tetap ada)
-            $guru->kurikulum()->update(['guru_id' => null]);
-
             // Pindahkan guru
             $guru->update([
+                'instansi_id' => $instansiTujuan->id_instansi,
+            ]);
+
+            // Sync users.instansi_id agar getInstansi() mengembalikan sekolah baru
+            $guru->user()->update([
                 'instansi_id' => $instansiTujuan->id_instansi,
             ]);
 
@@ -496,10 +534,6 @@ class GuruController extends Controller
 
         // Lepaskan wali kelas
         $guru->kelasWali()->update(['guru_wali_id' => null]);
-
-        // Hapus kurikulum & jadwal
-        $guru->kurikulum()->each(fn ($k) => $k->jadwal()->delete());
-        $guru->kurikulum()->delete();
 
         // Hapus token mutasi jika ada
         $guru->clearTransferToken();

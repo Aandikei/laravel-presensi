@@ -34,7 +34,9 @@ class AbsensiController extends Controller
         $hariIni = $hariMap[now()->format('l')] ?? null;
 
         $jadwalHariIni = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
-            ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
+            ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
+                ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $guru->instansi_id))
+            )
             ->where('hari', $hariIni)
             ->orderBy('jam_mulai')
             ->get()
@@ -54,8 +56,9 @@ class AbsensiController extends Controller
     {
         $guru = Auth::user()->guru;
 
-        // Pastiin jadwal ini milik guru yang login
+        // Pastiin jadwal ini milik guru yang login & di sekolahnya
         abort_if($jadwal->kurikulum->guru_id !== $guru->id_guru, 403);
+        abort_if($jadwal->kurikulum->kelas->instansi_id !== $guru->instansi_id, 403);
 
         // Cek hari libur
         $instansi = Auth::user()->getInstansi();
@@ -89,6 +92,7 @@ class AbsensiController extends Controller
     {
         $guru = Auth::user()->guru;
         abort_if($jadwal->kurikulum->guru_id !== $guru->id_guru, 403);
+        abort_if($jadwal->kurikulum->kelas->instansi_id !== $guru->instansi_id, 403);
 
         $instansi = Auth::user()->getInstansi();
         $namaLibur = HariLibur::getNamaLibur(now()->toDateString(), $instansi->id_instansi);
@@ -163,7 +167,9 @@ class AbsensiController extends Controller
                 SUM(status = "Terlambat") as terlambat,
                 SUM(status = "Bolos") as bolos
             ')
-            ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
+            ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
+                ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $guru->instansi_id))
+            )
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
@@ -188,7 +194,9 @@ class AbsensiController extends Controller
         });
 
         $mapels = MataPelajaran::where('instansi_id', $guru->instansi_id)
-            ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru))
+            ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
+                ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $guru->instansi_id))
+            )
             ->get();
 
         return view('guru.absensi.rekap', compact('riwayat', 'guru', 'mapels', 'mapelId', 'bulan', 'tahun'));
@@ -204,6 +212,8 @@ class AbsensiController extends Controller
         $guru = Auth::user()->guru;
         $jadwal = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
             ->findOrFail($request->jadwal_id);
+
+        abort_if($jadwal->kurikulum->kelas->instansi_id !== $guru->instansi_id, 403);
 
         $absensi = Absensi::with('registrasi.siswa')
             ->where('jadwal_id', $request->jadwal_id)
@@ -225,7 +235,7 @@ class AbsensiController extends Controller
         $namaBulan = \Carbon\Carbon::create()->month((int) $bulan)->locale('id')->monthName;
 
         return Excel::download(
-            new RekapAbsensiExport($guru->id_guru, (int) $bulan, (int) $tahun, $mapelId ? (int) $mapelId : null),
+            new RekapAbsensiExport($guru->id_guru, $guru->instansi_id, (int) $bulan, (int) $tahun, $mapelId ? (int) $mapelId : null),
             "rekap-absensi-{$namaBulan}-{$tahun}.xlsx"
         );
     }

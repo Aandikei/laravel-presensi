@@ -35,6 +35,7 @@
 
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
+                @if($riwayat->isNotEmpty())
                 <table id="tabel-rekap" class="w-full whitespace-nowrap">
                     <thead>
                         <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/50">
@@ -54,34 +55,28 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-                        @forelse($riwayat as $r)
-                            <tr class="text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
-                                <td class="px-4 py-3 text-sm">{{ \Carbon\Carbon::parse($r->tanggal)->locale('id')->isoFormat('D MMM YYYY') }}</td>
-                                <td class="px-4 py-3 text-sm font-medium">{{ $r->kelas_nama }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $r->mapel_nama }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $r->guru_nama }}</td>
-                                <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>
-                                <td class="px-4 py-3 text-sm text-center font-semibold text-green-600">{{ $r->hadir }}</td>
-                                <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">{{ $r->sakit }}</td>
-                                <td class="px-4 py-3 text-sm text-center font-semibold text-yellow-600">{{ $r->izin }}</td>
-                                <td class="px-4 py-3 text-sm text-center font-semibold text-red-600">{{ $r->alpa }}</td>
-                                <td class="px-4 py-3 text-sm text-center font-semibold text-orange-600">{{ $r->terlambat }}</td>
-                                <td class="px-4 py-3 text-sm text-center font-semibold text-pink-600">{{ $r->bolos }}</td>
-                                <td class="px-4 py-3 text-sm text-center">
-                                    <a href="{{ route('admin.laporan.rekap-absensi.detail', ['jadwal_id' => $r->jadwal_id, 'tanggal' => \Carbon\Carbon::parse($r->tanggal)->format('Y-m-d')]) }}"
-                                        class="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300">
-                                        Detail
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="13" class="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
-                                    Tidak ada data absensi untuk periode ini.
-                                </td>
-                            </tr>
-                        @endforelse
+                        @foreach($riwayat as $r)
+                        <tr class="text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors">
+                            <td class="px-4 py-3 text-sm">{{ \Carbon\Carbon::parse($r->tanggal)->locale('id')->isoFormat('D MMM YYYY') }}</td>
+                            <td class="px-4 py-3 text-sm font-medium">{{ $r->kelas_nama }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $r->mapel_nama }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $r->guru_nama }}</td>
+                            <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>
+                            <td class="px-4 py-3 text-sm text-center font-semibold text-green-600">{{ $r->hadir }}</td>
+                            <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">{{ $r->sakit }}</td>
+                            <td class="px-4 py-3 text-sm text-center font-semibold text-yellow-600">{{ $r->izin }}</td>
+                            <td class="px-4 py-3 text-sm text-center font-semibold text-red-600">{{ $r->alpa }}</td>
+                            <td class="px-4 py-3 text-sm text-center font-semibold text-orange-600">{{ $r->terlambat }}</td>
+                            <td class="px-4 py-3 text-sm text-center font-semibold text-pink-600">{{ $r->bolos }}</td>
+                            <td class="px-4 py-3 text-sm text-center">
+                                <a href="{{ route('admin.laporan.rekap-absensi.detail', ['jadwal_id' => $r->jadwal_id, 'tanggal' => \Carbon\Carbon::parse($r->tanggal)->format('Y-m-d')]) }}"
+                                    class="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300">
+                                    Detail
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -105,4 +100,9 @@
         });
     </script>
     @endpush
+                @else
+                <div class="w-full px-5 py-8 text-center text-gray-500 dark:text-gray-400">
+                    Tidak ada data absensi untuk periode ini.
+                </div>
+                @endif
 </x-layouts.admin>
