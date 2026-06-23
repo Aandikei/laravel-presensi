@@ -46,23 +46,32 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->belongsTo(Instansi::class, 'instansi_id', 'id_instansi');
     }
 
-    // Helper: dapat instansi dari user apapun rolenya
+    private ?Instansi $cachedInstansi = null;
+
     public function getInstansi(): ?Instansi
     {
-        // Admin punya instansi_id langsung di tabel users
-        if ($this->instansi_id) {
-            return Instansi::find($this->instansi_id);
-        }
-        if ($this->guru) {
-            return $this->guru->instansi;
-        }
-        if ($this->siswa) {
-            return $this->siswa->instansi;
-        }
-        if ($this->orangTua) {
-            return $this->orangTua->siswa()->first()?->instansi;
+        if ($this->cachedInstansi) {
+            return $this->cachedInstansi;
         }
 
-        return null;
+        if ($this->instansi_id) {
+            $this->cachedInstansi = Instansi::find($this->instansi_id);
+        } elseif ($this->relationLoaded('guru') && $this->guru) {
+            $this->cachedInstansi = $this->guru->instansi;
+        } elseif ($this->relationLoaded('siswa') && $this->siswa) {
+            $this->cachedInstansi = $this->siswa->instansi;
+        } elseif ($this->relationLoaded('orangTua') && $this->orangTua) {
+            $this->cachedInstansi = $this->orangTua->siswa()->first()?->instansi;
+        } else {
+            if ($this->guru) {
+                $this->cachedInstansi = $this->guru->instansi;
+            } elseif ($this->siswa) {
+                $this->cachedInstansi = $this->siswa->instansi;
+            } elseif ($this->orangTua) {
+                $this->cachedInstansi = $this->orangTua->siswa()->first()?->instansi;
+            }
+        }
+
+        return $this->cachedInstansi;
     }
 }

@@ -29,7 +29,12 @@ class PoinExport implements FromCollection, WithHeadings, WithStyles, WithTitle,
 
     public function collection()
     {
-        $siswa = Siswa::where('instansi_id', $this->instansiId)
+        $siswa = Siswa::with(['logPoin' => fn($q) => $q
+            ->whereMonth('tanggal', $this->bulan)
+            ->whereYear('tanggal', $this->tahun),
+            'logPoin.masterPoin',
+        ])
+            ->where('instansi_id', $this->instansiId)
             ->whereNull('status')
             ->when($this->kelasId, fn($q) =>
                 $q->whereHas('registrasiAktif', fn($q) =>
@@ -43,11 +48,7 @@ class PoinExport implements FromCollection, WithHeadings, WithStyles, WithTitle,
         $no   = 1;
 
         foreach ($siswa as $s) {
-            $logPoin = LogPoinSiswa::where('siswa_id', $s->id_siswa)
-                ->whereMonth('tanggal', $this->bulan)
-                ->whereYear('tanggal', $this->tahun)
-                ->with('masterPoin')
-                ->get();
+            $logPoin = $s->logPoin;
 
             $totalPoin = $logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
 

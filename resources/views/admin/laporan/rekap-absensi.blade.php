@@ -17,22 +17,35 @@
                 </p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('admin.laporan.export-absensi-excel', $request->all()) }}"
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Excel
-                </a>
-                <a href="{{ route('admin.laporan.export-absensi-pdf', $request->all()) }}"
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    PDF
-                </a>
+                <form method="POST" action="{{ route('admin.laporan.export-absensi-excel') }}" class="inline">
+                    @csrf
+                    <input type="hidden" name="kelas_id" value="{{ $request->kelas_id }}">
+                    <input type="hidden" name="mapel_id" value="{{ $request->mapel_id }}">
+                    <input type="hidden" name="bulan" value="{{ $request->bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $request->tahun }}">
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Excel
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.laporan.export-absensi-pdf') }}" class="inline">
+                    @csrf
+                    <input type="hidden" name="kelas_id" value="{{ $request->kelas_id }}">
+                    <input type="hidden" name="bulan" value="{{ $request->bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $request->tahun }}">
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        PDF
+                    </button>
+                </form>
                 <a href="{{ route('admin.laporan.index') }}"
                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
                     ← Kembali

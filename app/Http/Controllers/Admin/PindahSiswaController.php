@@ -27,9 +27,7 @@ class PindahSiswaController extends Controller
     public function formMasuk(Request $request)
     {
         $instansi = Auth::user()->getInstansi();
-        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->where('is_aktif', true)
-            ->first();
+        $tahunAktif = TahunAjaran::getAktif($instansi->id_instansi);
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
             ->orderBy('tingkat')
             ->orderBy('nama_kelas')
@@ -78,9 +76,7 @@ class PindahSiswaController extends Controller
                 ->with('error', 'Kode transfer sudah kedaluwarsa. Minta sekolah asal untuk membuat kode baru.');
         }
 
-        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->where('is_aktif', true)
-            ->first();
+        $tahunAktif = TahunAjaran::getAktif($instansi->id_instansi);
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
             ->orderBy('tingkat')
             ->orderBy('nama_kelas')

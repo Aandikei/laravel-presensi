@@ -4,29 +4,35 @@ namespace App\Exports;
 
 use App\Models\Absensi;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTitle, WithColumnWidths
+class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTitle, WithColumnWidths, WithColumnFormatting
 {
     protected $guruId;
     protected $instansiId;
     protected $bulan;
     protected $tahun;
     protected $mapelId;
+    protected $tingkat;
+    protected $jurusan;
 
-    public function __construct(int $guruId, int $instansiId, int $bulan, int $tahun, ?int $mapelId = null)
+    public function __construct(int $guruId, int $instansiId, int $bulan, int $tahun, ?int $mapelId = null, ?string $tingkat = null, ?string $jurusan = null)
     {
         $this->guruId      = $guruId;
         $this->instansiId  = $instansiId;
         $this->bulan       = $bulan;
         $this->tahun       = $tahun;
         $this->mapelId     = $mapelId;
+        $this->tingkat     = $tingkat;
+        $this->jurusan     = $jurusan;
     }
 
     public function collection()
@@ -39,9 +45,12 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
             ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $this->guruId)
                 ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $this->instansiId))
             )
+            ->whereHas('registrasi', fn ($q) => $q->aktif())
             ->whereMonth('tanggal', $this->bulan)
             ->whereYear('tanggal', $this->tahun)
             ->when($this->mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $this->mapelId)))
+            ->when($this->tingkat, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('tingkat', $this->tingkat)))
+            ->when($this->jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('nama_kelas', 'like', '% ' . $this->jurusan . ' %')))
             ->orderBy('tanggal', 'desc')
             ->orderBy('jadwal_id')
             ->get();
@@ -110,6 +119,13 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
             'I' => 25,
             'J' => 14,
             'K' => 16,
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'G' => NumberFormat::FORMAT_TEXT,
         ];
     }
 

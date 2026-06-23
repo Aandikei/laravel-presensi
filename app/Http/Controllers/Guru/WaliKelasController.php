@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateExport;
 use App\Models\Absensi;
+use App\Models\ExportJob;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\LogPoinSiswa;
 use App\Models\MasterPoin;
+use App\Models\MataPelajaran;
 use App\Models\RegistrasiAkademik;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
@@ -152,6 +155,7 @@ class WaliKelasController extends Controller
 
         $bulan = $request->input('bulan', now()->month);
         $tahun = $request->input('tahun', now()->year);
+        $mapelId = $request->input('mapel_id');
 
         $riwayat = Absensi::selectRaw('
                 absensi.jadwal_id,
@@ -167,6 +171,7 @@ class WaliKelasController extends Controller
             ->join('jadwal', 'absensi.jadwal_id', '=', 'jadwal.id_jadwal')
             ->join('kurikulum_kelas', 'jadwal.kurikulum_id', '=', 'kurikulum_kelas.id_kurikulum')
             ->where('kurikulum_kelas.kelas_id', $kelasSaya->id_kelas)
+            ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
             ->whereMonth('absensi.tanggal', $bulan)
             ->whereYear('absensi.tanggal', $tahun)
             ->groupBy('absensi.jadwal_id', 'absensi.tanggal')
@@ -192,8 +197,12 @@ class WaliKelasController extends Controller
         $bulanNama = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
             ->locale('id')->monthName;
 
+        $mapels = MataPelajaran::where('instansi_id', $kelasSaya->instansi_id)
+            ->whereHas('kurikulum', fn ($q) => $q->where('kelas_id', $kelasSaya->id_kelas))
+            ->get();
+
         return view('guru.wali-kelas.rekap-absensi', compact(
-            'kelasSaya', 'riwayat', 'bulanNama', 'bulan', 'tahun'
+            'kelasSaya', 'riwayat', 'bulanNama', 'bulan', 'tahun', 'mapels', 'mapelId'
         ));
     }
 
@@ -220,5 +229,57 @@ class WaliKelasController extends Controller
             ->get();
 
         return view('guru.wali-kelas.rekap-absensi-detail', compact('jadwal', 'absensi', 'kelasSaya'));
+    }
+
+    // ── Export Absensi Excel via Queue ────────
+    public function exportAbsensiExcel(Request $request)
+    {
+        $guru = Auth::user()->guru;
+        $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
+        abort_if(!$kelasSaya, 403);
+
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'absensi-excel',
+            'source'  => 'guru',
+            'filters' => [
+                'kelas_id' => $kelasSaya->id_kelas,
+                'bulan'    => $request->input('bulan', now()->month),
+                'tahun'    => $request->input('tahun', now()->year),
+                'mapel_id' => $request->input('mapel_id'),
+            ],
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('guru.wali-kelas.rekap-absensi', $request->only(['bulan', 'tahun', 'mapel_id']))
+            ->with('info', 'Export Excel sedang diproses. Cek "Export Saya" di halaman Laporan.');
+    }
+
+    // ── Export Absensi PDF via Queue ──────────
+    public function exportAbsensiPdf(Request $request)
+    {
+        $guru = Auth::user()->guru;
+        $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
+        abort_if(!$kelasSaya, 403);
+
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'absensi-pdf',
+            'source'  => 'guru',
+            'filters' => [
+                'kelas_id' => $kelasSaya->id_kelas,
+                'bulan'    => $request->input('bulan', now()->month),
+                'tahun'    => $request->input('tahun', now()->year),
+                'mapel_id' => $request->input('mapel_id'),
+            ],
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('guru.wali-kelas.rekap-absensi', $request->only(['bulan', 'tahun', 'mapel_id']))
+            ->with('info', 'Export PDF sedang diproses. Cek "Export Saya" di halaman Laporan.');
     }
 }

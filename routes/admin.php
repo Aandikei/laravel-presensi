@@ -198,11 +198,18 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
         Route::get('/', [LaporanController::class, 'index'])->name('index');
         Route::get('/rekap-absensi', [LaporanController::class, 'rekapAbsensi'])->name('rekap-absensi');
         Route::get('/rekap-absensi/detail', [LaporanController::class, 'detailAbsensi'])->name('rekap-absensi.detail');
-        Route::get('/export-absensi-excel', [LaporanController::class, 'exportAbsensiExcel'])->name('export-absensi-excel');
-        Route::get('/export-absensi-pdf', [LaporanController::class, 'exportAbsensiPdf'])->name('export-absensi-pdf');
         Route::get('/rekap-poin', [LaporanController::class, 'rekapPoin'])->name('rekap-poin');
-        Route::get('/export-poin-excel', [LaporanController::class, 'exportPoinExcel'])->name('export-poin-excel');
-        Route::get('/export-poin-pdf', [LaporanController::class, 'exportPoinPdf'])->name('export-poin-pdf');
+
+        // Export via Queue
+        Route::post('/export-absensi-excel', [LaporanController::class, 'exportAbsensiExcel'])->name('export-absensi-excel');
+        Route::post('/export-absensi-pdf', [LaporanController::class, 'exportAbsensiPdf'])->name('export-absensi-pdf');
+        Route::post('/export-poin-excel', [LaporanController::class, 'exportPoinExcel'])->name('export-poin-excel');
+        Route::post('/export-poin-pdf', [LaporanController::class, 'exportPoinPdf'])->name('export-poin-pdf');
+
+        // Daftar, download & hapus export
+        Route::get('/exports', [LaporanController::class, 'exports'])->name('exports');
+        Route::get('/exports/{exportJob}/download', [LaporanController::class, 'downloadExport'])->name('export-download');
+        Route::delete('/exports/{exportJob}', [LaporanController::class, 'destroyExport'])->name('export-destroy');
     });
 
     // Setting

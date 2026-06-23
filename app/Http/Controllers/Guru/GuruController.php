@@ -9,6 +9,7 @@ use App\Models\LogPoinSiswa;
 use App\Models\MasterPoin;
 use App\Models\RegistrasiAkademik;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Auth;
 
 class GuruController extends Controller
@@ -46,9 +47,10 @@ class GuruController extends Controller
         if ($isWaliKelas) {
             $kelasSaya = $guru->kelasWali()->with(['instansi'])->first();
             if ($kelasSaya) {
+                $tahunAktif = TahunAjaran::getAktif($guru->instansi_id);
                 $siswaIds = RegistrasiAkademik::where('kelas_id', $kelasSaya->id_kelas)
-                    ->aktif()
-                    ->whereRaw('tahun_id = (SELECT MAX(r2.tahun_id) FROM registrasi_akademik r2 WHERE r2.siswa_id = registrasi_akademik.siswa_id AND r2.status = ?)', ['Aktif'])
+                    ->where('tahun_id', $tahunAktif?->id_tahun)
+                    ->where('status', 'Aktif')
                     ->whereHas('siswa', fn($q) => $q->whereNull('status'))
                     ->pluck('siswa_id');
                 $jumlahSiswa = $siswaIds->count();

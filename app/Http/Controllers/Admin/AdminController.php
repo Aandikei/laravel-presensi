@@ -39,24 +39,35 @@ class AdminController extends Controller
             ? round(($totalHadir / $totalAbsensi) * 100, 1)
             : 0);
 
-        // Chart: kehadiran 7 hari terakhir
+        // Chart: kehadiran 7 hari terakhir (2 query total, bukan 14)
+        $dates = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $dates->push(now()->subDays($i)->toDateString());
+        }
+
+        $chartTotals = Absensi::whereHas('registrasi.kelas', fn($q) =>
+            $q->where('instansi_id', $instansi->id_instansi)
+        )
+            ->whereIn('tanggal', $dates)
+            ->selectRaw('tanggal, count(*) as total')
+            ->groupBy('tanggal')
+            ->pluck('total', 'tanggal');
+
+        $chartHadir = Absensi::whereHas('registrasi.kelas', fn($q) =>
+            $q->where('instansi_id', $instansi->id_instansi)
+        )
+            ->whereIn('tanggal', $dates)
+            ->where('status', 'Hadir')
+            ->selectRaw('tanggal, count(*) as total')
+            ->groupBy('tanggal')
+            ->pluck('total', 'tanggal');
+
         $chartData = [];
         for ($i = 6; $i >= 0; $i--) {
             $tanggal = now()->subDays($i)->toDateString();
             $label   = now()->subDays($i)->locale('id')->dayName;
-
-            $total = Absensi::whereHas('registrasi.kelas', fn($q) =>
-                    $q->where('instansi_id', $instansi->id_instansi)
-                )
-                ->where('tanggal', $tanggal)
-                ->count();
-
-            $hadir = Absensi::whereHas('registrasi.kelas', fn($q) =>
-                    $q->where('instansi_id', $instansi->id_instansi)
-                )
-                ->where('tanggal', $tanggal)
-                ->where('status', 'Hadir')
-                ->count();
+            $total   = (int) ($chartTotals[$tanggal] ?? 0);
+            $hadir   = (int) ($chartHadir[$tanggal] ?? 0);
 
             $chartData[] = [
                 'label'  => $label,

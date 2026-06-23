@@ -17,14 +17,26 @@
                 </p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('admin.laporan.export-poin-excel', $request->all()) }}"
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                    Excel
-                </a>
-                <a href="{{ route('admin.laporan.export-poin-pdf', $request->all()) }}"
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                    PDF
-                </a>
+                <form method="POST" action="{{ route('admin.laporan.export-poin-excel') }}" class="inline">
+                    @csrf
+                    <input type="hidden" name="kelas_id" value="{{ $request->kelas_id }}">
+                    <input type="hidden" name="bulan" value="{{ $request->bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $request->tahun }}">
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        Excel
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.laporan.export-poin-pdf') }}" class="inline">
+                    @csrf
+                    <input type="hidden" name="kelas_id" value="{{ $request->kelas_id }}">
+                    <input type="hidden" name="bulan" value="{{ $request->bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $request->tahun }}">
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                        PDF
+                    </button>
+                </form>
                 <a href="{{ route('admin.laporan.index') }}"
                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
                     ← Kembali

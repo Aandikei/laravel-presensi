@@ -108,6 +108,8 @@ class TahunAjaranController extends Controller
         // Aktifkan yang dipilih
         $tahunAjaran->update(['is_aktif' => true]);
 
+        TahunAjaran::flushAktifCache($instansi->id_instansi);
+
         return back()->with('success', "Tahun ajaran {$tahunAjaran->nama_tahun} {$tahunAjaran->semester} berhasil diaktifkan!");
     }
 

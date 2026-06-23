@@ -3,21 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Exports\AbsensiExport;
-use App\Exports\PoinExport;
+use App\Jobs\GenerateExport;
 use App\Models\Absensi;
+use App\Models\ExportJob;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
 use App\Models\RegistrasiAkademik;
-use App\Models\LogPoinSiswa;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 
 class LaporanController extends Controller
 {
@@ -123,7 +121,7 @@ class LaporanController extends Controller
         return view('admin.laporan.rekap-absensi-detail', compact('jadwal', 'absensi', 'request'));
     }
 
-    // ── Export Excel Absensi ──────────────────
+    // ── Export via Queue ──────────────────────
     public function exportAbsensiExcel(Request $request)
     {
         $request->validate([
@@ -132,23 +130,24 @@ class LaporanController extends Controller
             'tahun'    => 'required|integer|min:2020',
         ]);
 
-        $instansi  = Auth::user()->getInstansi();
-        $tahunAktif = TahunAjaran::where('is_aktif', true)
-            ->where('instansi_id', $instansi->id_instansi)
-            ->firstOrFail();
-
-        $kelas    = Kelas::findOrFail($request->kelas_id);
+        $instansi = Auth::user()->getInstansi();
+        $kelas = Kelas::findOrFail($request->kelas_id);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
-        $filename = 'rekap-absensi-' . $kelas->nama_kelas . '-' . $request->bulan . '-' . $request->tahun . '.xlsx';
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'absensi-excel',
+            'source'  => 'admin',
+            'filters' => $request->only(['kelas_id', 'bulan', 'tahun', 'mapel_id']),
+            'status'  => 'pending',
+        ]);
 
-        return Excel::download(
-            new AbsensiExport($request->kelas_id, $request->bulan, $request->tahun, $request->mapel_id, $tahunAktif->id_tahun),
-            $filename
-        );
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export Excel Absensi sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
     }
 
-    // ── Export PDF Absensi ────────────────────
     public function exportAbsensiPdf(Request $request)
     {
         $request->validate([
@@ -158,44 +157,21 @@ class LaporanController extends Controller
         ]);
 
         $instansi = Auth::user()->getInstansi();
-        $tahunAktif = TahunAjaran::where('is_aktif', true)
-            ->where('instansi_id', $instansi->id_instansi)
-            ->firstOrFail();
-
-        $kelas    = Kelas::with(['waliKelas'])->findOrFail($request->kelas_id);
+        $kelas = Kelas::findOrFail($request->kelas_id);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
-        $registrasi = RegistrasiAkademik::with(['siswa', 'absensi' => function ($q) use ($request) {
-                $q->whereMonth('tanggal', $request->bulan)
-                  ->whereYear('tanggal', $request->tahun);
-            }])
-            ->aktif()
-            ->where('kelas_id', $request->kelas_id)
-            ->where('tahun_id', $tahunAktif->id_tahun)
-            ->get()
-            ->map(function($reg) {
-                $absensi = $reg->absensi;
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'absensi-pdf',
+            'source'  => 'admin',
+            'filters' => $request->only(['kelas_id', 'bulan', 'tahun']),
+            'status'  => 'pending',
+        ]);
 
-                $reg->hadir     = $absensi->where('status', 'Hadir')->count();
-                $reg->sakit     = $absensi->where('status', 'Sakit')->count();
-                $reg->izin      = $absensi->where('status', 'Izin')->count();
-                $reg->alpa      = $absensi->where('status', 'Alpa')->count();
-                $reg->terlambat = $absensi->where('status', 'Terlambat')->count();
-                $reg->bolos     = $absensi->where('status', 'Bolos')->count();
-                $reg->total     = $absensi->count();
-                $reg->persen    = $reg->total > 0
-                    ? round(($reg->hadir / $reg->total) * 100, 1) : 0;
-                return $reg;
-            });
+        GenerateExport::dispatch($exportJob);
 
-        $bulanNama = \Carbon\Carbon::createFromDate($request->tahun, $request->bulan, 1)
-            ->locale('id')->monthName;
-
-        $pdf = Pdf::loadView('admin.laporan.pdf.rekap-absensi', compact(
-            'registrasi', 'kelas', 'bulanNama', 'request'
-        ))->setPaper('a4', 'landscape');
-
-        return $pdf->download('rekap-absensi-' . $kelas->nama_kelas . '-' . $request->bulan . '-' . $request->tahun . '.pdf');
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export PDF Absensi sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
     }
 
     // ── Preview Rekap Poin ────────────────────
@@ -239,56 +215,130 @@ class LaporanController extends Controller
         return view('admin.laporan.rekap-poin', compact('siswa', 'kelas', 'bulanNama', 'request'));
     }
 
-    // ── Export Excel Poin ─────────────────────
+    // ── Export via Queue ──────────────────────
     public function exportPoinExcel(Request $request)
     {
-        $instansi = Auth::user()->getInstansi();
-        $filename = 'rekap-poin-' . $request->bulan . '-' . $request->tahun . '.xlsx';
+        $request->validate([
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2020',
+        ]);
 
-        return Excel::download(
-            new PoinExport($instansi->id_instansi, $request->kelas_id, $request->bulan, $request->tahun),
-            $filename
-        );
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'poin-excel',
+            'source'  => 'admin',
+            'filters' => $request->only(['kelas_id', 'bulan', 'tahun']),
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export Excel Poin sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
     }
 
-    // ── Export PDF Poin ───────────────────────
     public function exportPoinPdf(Request $request)
     {
-        $instansi = Auth::user()->getInstansi();
+        $request->validate([
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2020',
+        ]);
 
-        $kelas = $request->kelas_id
-            ? Kelas::find($request->kelas_id)
-            : null;
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'poin-pdf',
+            'source'  => 'admin',
+            'filters' => $request->only(['kelas_id', 'bulan', 'tahun']),
+            'status'  => 'pending',
+        ]);
 
-        $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
-            ->whereNull('status')
-            ->when($request->kelas_id, fn($q) =>
-                $q->whereHas('registrasiAktif', fn($q) =>
-                    $q->where('kelas_id', $request->kelas_id)
-                )
-            )
-            ->with(['logPoin' => fn($q) => $q
-                ->whereMonth('tanggal', $request->bulan)
-                ->whereYear('tanggal', $request->tahun),
-                'logPoin.masterPoin',
-            ])
-            ->orderBy('nama_siswa')
-            ->get()
-            ->map(function($s) {
-                $s->jumlah_pelanggaran = $s->logPoin->count();
-                $s->total_poin = $s->logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
-                $s->status_poin = $s->total_poin >= 100 ? 'PERHATIAN'
-                    : ($s->total_poin >= 50 ? 'WASPADA' : 'AMAN');
-                return $s;
-            });
+        GenerateExport::dispatch($exportJob);
 
-        $bulanNama = \Carbon\Carbon::createFromDate($request->tahun, $request->bulan, 1)
-            ->locale('id')->monthName;
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export PDF Poin sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
+    }
 
-        $pdf = Pdf::loadView('admin.laporan.pdf.rekap-poin', compact(
-            'siswa', 'kelas', 'bulanNama', 'request', 'instansi'
-        ))->setPaper('a4', 'portrait');
+    // ── Daftar Export Saya ────────────────────
+    public function exports(Request $request)
+    {
+        $isAdmin = $request->routeIs('admin.*');
 
-        return $pdf->download('rekap-poin-' . $request->bulan . '-' . $request->tahun . '.pdf');
+        if ($request->ajax()) {
+            $exports = ExportJob::where('user_id', Auth::id())
+                ->where('source', 'admin')
+                ->latest()
+                ->select('export_jobs.*');
+
+            return DataTables::of($exports)
+                ->addIndexColumn()
+                ->addColumn('type_label', fn($row) => $row->type_label)
+                ->addColumn('status_badge', function ($row) {
+                    return match ($row->status) {
+                        'completed' => '<span class="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">Selesai</span>',
+                        'processing' => '<span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Memproses</span>',
+                        'failed' => '<span class="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full" title="' . e($row->error_message) . '">Gagal</span>',
+                        default => '<span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">Menunggu</span>',
+                    };
+                })
+                ->addColumn('aksi', function ($row) use ($isAdmin) {
+                    $downloadRoute = $isAdmin ? 'admin.laporan.export-download' : 'guru.export-download';
+                    $destroyRoute  = $isAdmin ? 'admin.laporan.export-destroy' : 'guru.export-destroy';
+                    $btn = '';
+                    if ($row->status === 'completed') {
+                        $btn .= '<a href="' . route($downloadRoute, $row) . '" class="text-green-600 hover:text-green-800 mr-3" title="Download">
+                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </a>';
+                    } elseif ($row->status === 'failed') {
+                        $btn .= '<span class="text-red-500 cursor-help mr-3" title="' . e($row->error_message) . '">Gagal</span>';
+                    } else {
+                        $btn .= '<span class="text-gray-400 mr-3">Proses...</span>';
+                    }
+                    $btn .= '<form method="POST" action="' . route($destroyRoute, $row) . '" class="inline" onsubmit="return confirm(\'Hapus export ini?\')">
+                        <input type="hidden" name="_token" value="' . csrf_token() . '">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="text-red-600 hover:text-red-800" title="Hapus">
+                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </form>';
+                    return $btn;
+                })
+                ->editColumn('created_at', fn($row) => $row->created_at->format('d M Y H:i'))
+                ->rawColumns(['status_badge', 'aksi'])
+                ->make(true);
+        }
+
+        return view('admin.laporan.exports', compact('isAdmin'));
+    }
+
+    // ── Download Export ───────────────────────
+    public function downloadExport(ExportJob $exportJob)
+    {
+        abort_if($exportJob->user_id !== Auth::id(), 403);
+        abort_if($exportJob->status !== 'completed', 404);
+
+        return Storage::disk('local')->download($exportJob->filepath, $exportJob->filename);
+    }
+
+    // ── Hapus Export ──────────────────────────
+    public function destroyExport(ExportJob $exportJob)
+    {
+        abort_if($exportJob->user_id !== Auth::id(), 403);
+
+        if ($exportJob->filepath && Storage::disk('local')->exists($exportJob->filepath)) {
+            Storage::disk('local')->delete($exportJob->filepath);
+        }
+
+        $exportJob->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['message' => 'Export berhasil dihapus.']);
+        }
+
+        return redirect()->route('admin.laporan.exports')
+            ->with('success', 'Export berhasil dihapus.');
     }
 }

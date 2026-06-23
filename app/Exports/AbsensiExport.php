@@ -5,15 +5,17 @@ namespace App\Exports;
 use App\Models\RegistrasiAkademik;
 use App\Models\TahunAjaran;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTitle, WithColumnWidths
+class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTitle, WithColumnWidths, WithColumnFormatting
 {
     protected $kelasId;
     protected $bulan;
@@ -41,9 +43,9 @@ class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTit
                       )
                   );
             }])
+            ->aktif()
             ->where('kelas_id', $this->kelasId)
             ->where('tahun_id', $this->tahunAktifId)
-            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
             ->get();
 
         $rows = collect();
@@ -120,6 +122,13 @@ class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTit
             'I' => 8,
             'J' => 8,
             'K' => 14,
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'C' => NumberFormat::FORMAT_TEXT,
         ];
     }
 

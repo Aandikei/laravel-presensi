@@ -152,15 +152,14 @@ class SiswaController extends Controller
                 ->make(true);
         }
         // Tambah data kelas untuk filter
-        $tahunAktif = TahunAjaran::where('instansi_id', '=', $instansi->id_instansi)
-            ->where('is_aktif', '=', true)->first();
+        $tahunAktif = TahunAjaran::getAktif($instansi->id_instansi);
 
-        $kelas = Kelas::where('instansi_id', '=', $instansi->id_instansi)
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
             ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
 
-        $tahunAjaran = TahunAjaran::where('instansi_id', '=', $instansi->id_instansi)
+        $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
             ->orderByDesc('is_aktif')
             ->get();
 
@@ -187,9 +186,8 @@ class SiswaController extends Controller
     public function create()
     {
         $instansi = Auth::user()->getInstansi();
-        $tahunAktif = TahunAjaran::where('instansi_id', '=', $instansi->id_instansi)
-            ->where('is_aktif', '=', true)->first();
-        $kelas = Kelas::where('instansi_id', '=', $instansi->id_instansi)
+        $tahunAktif = TahunAjaran::getAktif($instansi->id_instansi);
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
             ->orderBy('tingkat')
             ->orderBy('nama_kelas')
             ->get();
@@ -467,8 +465,7 @@ class SiswaController extends Controller
 
         $siswa->load(['user', 'orangTua.user', 'instansi']);
 
-        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->where('is_aktif', true)->first();
+        $tahunAktif = TahunAjaran::getAktif($instansi->id_instansi);
         $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
             ->orderBy('tingkat')
             ->orderBy('nama_kelas')

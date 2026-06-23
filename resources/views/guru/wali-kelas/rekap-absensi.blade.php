@@ -26,29 +26,72 @@
 
         {{-- Filter --}}
         <div class="p-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
-            <form method="GET" class="flex flex-wrap items-end gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bulan</label>
-                    <select name="bulan" class="w-40 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-                        @foreach(range(1, 12) as $m)
-                            <option value="{{ $m }}" {{ (int)$bulan === $m ? 'selected' : '' }}>
-                                {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tahun</label>
-                    <select name="tahun" class="w-24 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-                        @for($y = now()->year; $y >= now()->year - 2; $y--)
-                            <option value="{{ $y }}" {{ (int)$tahun === $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
-                    Filter
-                </button>
-            </form>
+            <div class="flex flex-wrap items-end gap-4">
+                <form method="GET" class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bulan</label>
+                        <select name="bulan" class="w-40 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            @foreach(range(1, 12) as $m)
+                                <option value="{{ $m }}" {{ (int)$bulan === $m ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tahun</label>
+                        <select name="tahun" class="w-24 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            @for($y = now()->year; $y >= now()->year - 2; $y--)
+                                <option value="{{ $y }}" {{ (int)$tahun === $y ? 'selected' : '' }}>{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Mata Pelajaran</label>
+                        <select name="mapel_id" class="w-48 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            <option value="">Semua Mapel</option>
+                            @foreach($mapels as $mapel)
+                                <option value="{{ $mapel->id_mapel }}" {{ (int)$mapelId === $mapel->id_mapel ? 'selected' : '' }}>
+                                    {{ $mapel->nama_mapel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                        Filter
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('guru.wali-kelas.rekap-absensi.export-excel') }}">
+                    @csrf
+                    <input type="hidden" name="bulan" value="{{ $bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $tahun }}">
+                    @if($mapelId)
+                        <input type="hidden" name="mapel_id" value="{{ $mapelId }}">
+                    @endif
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Excel
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('guru.wali-kelas.rekap-absensi.export-pdf') }}">
+                    @csrf
+                    <input type="hidden" name="bulan" value="{{ $bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $tahun }}">
+                    @if($mapelId)
+                        <input type="hidden" name="mapel_id" value="{{ $mapelId }}">
+                    @endif
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        PDF
+                    </button>
+                </form>
+            </div>
         </div>
 
         {{-- Tabel Grouped --}}

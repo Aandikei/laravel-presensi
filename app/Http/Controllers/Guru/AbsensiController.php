@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateExport;
 use App\Models\Absensi;
+use App\Models\ExportJob;
 use App\Models\HariLibur;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\RegistrasiAkademik;
 use App\Models\RekapBulanan;
-use App\Exports\RekapAbsensiExport;
 use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 
 class AbsensiController extends Controller
 {
@@ -157,10 +157,13 @@ class AbsensiController extends Controller
     public function rekap(Request $request)
     {
         $guru = Auth::user()->guru;
+        $instansi = Auth::user()->getInstansi();
 
         $mapelId = $request->input('mapel_id');
         $bulan = $request->input('bulan', now()->month);
         $tahun = $request->input('tahun', now()->year);
+        $tingkat = $request->input('tingkat');
+        $jurusan = $request->input('jurusan');
 
         $riwayat = Absensi::selectRaw('
                 jadwal_id,
@@ -179,6 +182,8 @@ class AbsensiController extends Controller
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
+            ->when($tingkat, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('tingkat', $tingkat)))
+            ->when($jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('nama_kelas', 'like', '% ' . $jurusan . ' %')))
             ->groupBy('jadwal_id', 'tanggal')
             ->orderBy('tanggal', 'desc')
             ->orderBy('jadwal_id')
@@ -205,7 +210,17 @@ class AbsensiController extends Controller
             )
             ->get();
 
-        return view('guru.absensi.rekap', compact('riwayat', 'guru', 'mapels', 'mapelId', 'bulan', 'tahun'));
+        $tingkatList = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->selectRaw('DISTINCT tingkat')->pluck('tingkat')->sort()->values();
+
+        $jurusanList = collect();
+        if ($instansi->jenjang === 'SMA') {
+            $jurusanList = Kelas::where('instansi_id', $instansi->id_instansi)
+                ->selectRaw('DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(nama_kelas, " ", 2), " ", -1) as jurusan')
+                ->pluck('jurusan')->sort()->values();
+        }
+
+        return view('guru.absensi.rekap', compact('riwayat', 'guru', 'mapels', 'mapelId', 'bulan', 'tahun', 'tingkat', 'jurusan', 'tingkatList', 'jurusanList'));
     }
 
     public function detailRekap(Request $request)
@@ -234,16 +249,26 @@ class AbsensiController extends Controller
     {
         $guru = Auth::user()->guru;
 
-        $bulan   = $request->input('bulan', now()->month);
-        $tahun   = $request->input('tahun', now()->year);
-        $mapelId = $request->input('mapel_id');
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'guru-rekap-excel',
+            'source'  => 'guru',
+            'filters' => [
+                'guru_id'    => $guru->id_guru,
+                'instansi_id'=> $guru->instansi_id,
+                'bulan'      => $request->input('bulan', now()->month),
+                'tahun'      => $request->input('tahun', now()->year),
+                'mapel_id'   => $request->input('mapel_id'),
+                'tingkat'    => $request->input('tingkat'),
+                'jurusan'    => $request->input('jurusan'),
+            ],
+            'status'  => 'pending',
+        ]);
 
-        $namaBulan = \Carbon\Carbon::create()->month((int) $bulan)->locale('id')->monthName;
+        GenerateExport::dispatch($exportJob);
 
-        return Excel::download(
-            new RekapAbsensiExport($guru->id_guru, $guru->instansi_id, (int) $bulan, (int) $tahun, $mapelId ? (int) $mapelId : null),
-            "rekap-absensi-{$namaBulan}-{$tahun}.xlsx"
-        );
+        return redirect()->route('guru.absensi.rekap', $request->only(['bulan', 'tahun', 'mapel_id']))
+            ->with('info', 'Export Excel sedang diproses. Cek "Export Saya" di halaman Laporan.');
     }
 
     private function updateRekap(int $regId, string $tanggal): void

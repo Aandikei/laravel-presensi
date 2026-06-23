@@ -508,7 +508,7 @@
         </li>
         {{-- Laporan --}}
         <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
-          @php $isLaporan = request()->routeIs('admin.laporan.*'); @endphp
+          @php $isLaporan = request()->routeIs('admin.laporan.*') && !request()->routeIs('admin.laporan.exports'); @endphp
           @if ($isLaporan)
             <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
           @endif
@@ -518,6 +518,17 @@
               <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
             <span class="ml-4">Laporan</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isExportSaya = request()->routeIs('admin.laporan.exports'); @endphp
+          @if ($isExportSaya)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isExportSaya ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.laporan.exports') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span class="ml-4">Export Saya</span>
           </a>
         </li>
         </ul>
@@ -646,7 +657,7 @@
           </a>
         </li>
         <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
-          @php $isLaporan = request()->routeIs('admin.laporan.*'); @endphp
+          @php $isLaporan = request()->routeIs('admin.laporan.*') && !request()->routeIs('admin.laporan.exports'); @endphp
           @if ($isLaporan)
             <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
           @endif
@@ -728,7 +739,7 @@
           </a>
         </li>
         <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
-          @php $isLaporan = request()->routeIs('admin.laporan.*'); @endphp
+          @php $isLaporan = request()->routeIs('admin.laporan.*') && !request()->routeIs('admin.laporan.exports'); @endphp
           @if ($isLaporan)
             <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
           @endif
@@ -736,6 +747,17 @@
             href="{{ route('admin.laporan.index') }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span class="ml-4">Laporan</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isExportSaya = request()->routeIs('admin.laporan.exports'); @endphp
+          @if ($isExportSaya)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isExportSaya ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('admin.laporan.exports') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span class="ml-4">Export Saya</span>
           </a>
         </li>
         </ul>
@@ -781,6 +803,17 @@
               <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
             <span class="ml-4">Rekap Absensi</span>
+          </a>
+        </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isExportSaya = request()->routeIs('guru.exports'); @endphp
+          @if ($isExportSaya)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isExportSaya ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('guru.exports') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span class="ml-4">Export Saya</span>
           </a>
         </li>
         </ul>

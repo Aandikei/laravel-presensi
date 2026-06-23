@@ -79,8 +79,7 @@ class RegistrasiAkademikController extends Controller
             ->get();
 
         // Siswa yang belum terdaftar di tahun ajaran aktif
-        $tahunAktif = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->where('is_aktif', true)->first();
+        $tahunAktif = TahunAjaran::getAktif($instansi->id_instansi);
 
         $siswaTeregistrasi = $tahunAktif
             ? RegistrasiAkademik::where('tahun_id', $tahunAktif->id_tahun)
