@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
         Route::post('guru/{guru}/mutasi/batal', [GuruController::class, 'batalMutasi'])->name('guru.mutasi.batal');
         Route::post('guru/{guru}/tandai-keluar', [GuruController::class, 'tandaiKeluar'])->name('guru.tandai-keluar');
         Route::post('guru/{guru}/tandai-pensiun', [GuruController::class, 'tandaiPensiun'])->name('guru.tandai-pensiun');
+        Route::post('guru/{guru}/batalkan-status', [GuruController::class, 'batalkanStatus'])->name('guru.batalkan-status');
     });
 
     // Siswa — view (semua)

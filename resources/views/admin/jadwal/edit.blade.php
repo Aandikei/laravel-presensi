@@ -20,8 +20,14 @@
                     <p><span class="font-medium">Guru:</span>
                         @if($guru = $jadwal->kurikulum?->guru)
                             {{ $guru->nama_guru }}
-                            @if($guru->status_label)
-                                <span class="text-xs text-red-500">({{ $guru->status_label }})</span>
+                            @if($guru->transfer_token && !$guru->isTransferTokenExpired())
+                                <span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">Mutasi</span>
+                            @elseif($guru->instansi_id !== auth()->user()->instansi_id)
+                                <span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Pindah</span>
+                            @elseif($guru->status === 'Keluar')
+                                <span class="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">Keluar</span>
+                            @elseif($guru->status === 'Pensiun')
+                                <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">Pensiun</span>
                             @endif
                         @else
                             -

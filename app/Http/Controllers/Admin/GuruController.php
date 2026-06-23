@@ -115,6 +115,14 @@ class GuruController extends Controller
                             </form>';
                         }
 
+                        // Batalkan Keluar/Pensiun
+                        if (!$row->isAktif()) {
+                            $html .= '<form method="POST" action="' . route('admin.guru.batalkan-status', $row->id_guru) . '" class="inline ml-1">
+                                <input type="hidden" name="_token" value="' . csrf_token() . '">
+                                <button type="submit" title="Batalkan Status" class="text-green-500 hover:text-green-700 text-xs" onclick="return confirm(\'Kembalikan guru ini ke status Aktif?\')">↩</button>
+                            </form>';
+                        }
+
                         // Delete
                         $html .= '<form method="POST" action="' . route('admin.guru.destroy', $row->id_guru) . '" class="inline ml-1">
                             <input type="hidden" name="_token" value="' . csrf_token() . '">
@@ -503,6 +511,23 @@ class GuruController extends Controller
 
         return redirect()->route('admin.guru.index')
             ->with('success', "Guru {$guru->nama_guru} ditandai sebagai Pensiun.");
+    }
+
+    public function batalkanStatus(Guru $guru)
+    {
+        $this->authorizeInstansi($guru);
+
+        if ($guru->isAktif()) {
+            return back()->with('error', 'Guru ini masih aktif.');
+        }
+
+        DB::transaction(function () use ($guru) {
+            $guru->update(['status' => null]);
+            $guru->user->assignRole('guru');
+        });
+
+        return redirect()->route('admin.guru.index')
+            ->with('success', "Status {$guru->nama_guru} dikembalikan ke Aktif.");
     }
 
     public function destroy(Guru $guru)

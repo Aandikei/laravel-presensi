@@ -30,7 +30,24 @@ class JadwalController extends Controller
                 ->addIndexColumn()
                 ->addColumn('kelas', fn($row) => $row->kurikulum->kelas->nama_kelas)
                 ->addColumn('mata_pelajaran', fn($row) => $row->kurikulum->mataPelajaran->nama_mapel)
-                ->addColumn('guru', fn($row) => $row->kurikulum?->guru?->nama_guru ?? '-')
+                ->addColumn('guru', function ($row) use ($instansi) {
+                    $guru = $row->kurikulum?->guru;
+                    if (!$guru) return '-';
+                    $name = $guru->nama_guru;
+                    if ($guru->transfer_token && !$guru->isTransferTokenExpired()) {
+                        return $name . ' <span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">Mutasi</span>';
+                    }
+                    if ($guru->instansi_id !== $instansi->id_instansi) {
+                        return $name . ' <span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Pindah</span>';
+                    }
+                    if ($guru->status === 'Keluar') {
+                        return $name . ' <span class="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">Keluar</span>';
+                    }
+                    if ($guru->status === 'Pensiun') {
+                        return $name . ' <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">Pensiun</span>';
+                    }
+                    return $name;
+                })
                 ->addColumn('jam', fn($row) => substr($row->jam_mulai, 0, 5) . ' - ' . substr($row->jam_selesai, 0, 5))
                 ->addColumn('aksi', function ($row) {
                     if (!Auth::user()->can('manage-settings')) {
@@ -52,7 +69,7 @@ class JadwalController extends Controller
                         </form>';
                     return $edit . ' ' . $delete;
                 })
-                ->rawColumns(['aksi'])
+                ->rawColumns(['guru', 'aksi'])
                 ->make(true);
         }
 
