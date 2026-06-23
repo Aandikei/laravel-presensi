@@ -3,13 +3,14 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+                ['label' => 'Data Siswa', 'url' => route('admin.siswa.index')],
+                ['label' => 'Edit Siswa'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Edit Siswa
             </h2>
-            <a href="{{ route('admin.siswa.index') }}"
-                class="text-sm text-purple-600 hover:underline dark:text-purple-400">
-                ← Kembali
-            </a>
         </div>
 
         {{-- Status & Transfer Info --}}

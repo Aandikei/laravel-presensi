@@ -5,9 +5,12 @@
         {{-- Header --}}
         <div class="flex items-center justify-between my-6">
             <div>
+                <x-breadcrumb :items="[
+                    ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+                    ['label' => 'Monitor Absensi', 'url' => route('admin.absensi.index')],
+                    ['label' => 'Detail'],
+                ]" />
                 <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Detail Absensi</h2>
-                <a href="{{ route('admin.absensi.index') }}"
-                    class="text-sm text-purple-600 hover:underline dark:text-purple-400">← Kembali</a>
             </div>
             <span class="px-3 py-1 text-sm font-medium rounded-full
                 {{ $terkunci ? 'text-red-700 bg-red-100 dark:bg-red-800 dark:text-red-200' : 'text-green-700 bg-green-100 dark:bg-green-800 dark:text-green-200' }}">

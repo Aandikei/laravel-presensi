@@ -32,7 +32,11 @@
     <x-slot:title>Profile</x-slot:title>
 
     <div class="container px-6 py-8 mx-auto">
-        <h2 class="mb-8 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+        <x-breadcrumb :items="[
+            ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+            ['label' => 'Profile'],
+        ]" />
+        <h2 class="mt-4 mb-8 text-2xl font-semibold text-gray-700 dark:text-gray-200">
             Profile
         </h2>
 

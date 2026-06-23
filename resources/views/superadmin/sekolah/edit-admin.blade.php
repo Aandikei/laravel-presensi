@@ -3,13 +3,15 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('superadmin.dashboard')],
+                ['label' => 'Kelola Sekolah', 'url' => route('superadmin.sekolah.index')],
+                ['label' => 'Detail Sekolah', 'url' => route('superadmin.sekolah.show', $instansi->id_instansi)],
+                ['label' => 'Edit Admin'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Edit Admin: {{ $user->name }}
             </h2>
-            <a href="{{ route('superadmin.sekolah.assign-admin', $instansi->id_instansi) }}"
-                class="text-sm text-purple-600 hover:underline dark:text-purple-400">
-                ← Kembali ke Kelola Admin
-            </a>
         </div>
 
         @if($errors->any())

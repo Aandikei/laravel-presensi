@@ -3,7 +3,13 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
-            <div class="flex items-center justify-between">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('guru.dashboard')],
+                ['label' => 'Wali Kelas', 'url' => route('guru.wali-kelas.siswa-poin')],
+                ['label' => 'Rekap Absensi', 'url' => route('guru.wali-kelas.rekap-absensi')],
+                ['label' => 'Detail'],
+            ]" />
+            <div class="flex items-center justify-between mt-2">
                 <div>
                     <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                         Detail Absensi
@@ -14,10 +20,6 @@
                         {{ \Carbon\Carbon::parse(request('tanggal'))->locale('id')->isoFormat('D MMM YYYY') }}
                     </p>
                 </div>
-                <a href="{{ route('guru.wali-kelas.rekap-absensi', request()->only(['bulan', 'tahun'])) }}"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
-                    ← Kembali
-                </a>
             </div>
         </div>
 

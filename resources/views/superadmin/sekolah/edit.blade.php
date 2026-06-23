@@ -3,13 +3,14 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('superadmin.dashboard')],
+                ['label' => 'Kelola Sekolah', 'url' => route('superadmin.sekolah.index')],
+                ['label' => 'Edit Sekolah'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Edit Sekolah
             </h2>
-            <a href="{{ route('superadmin.dashboard') }}"
-                class="text-sm text-purple-600 hover:underline dark:text-purple-400">
-                ← Kembali ke Dashboard
-            </a>
         </div>
 
         <div class="max-w-2xl p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">

@@ -3,6 +3,10 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+                ['label' => 'Laporan'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Laporan</h2>
         </div>
 

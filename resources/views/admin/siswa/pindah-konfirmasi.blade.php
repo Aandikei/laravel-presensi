@@ -3,13 +3,14 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+                ['label' => 'Terima Pindahan', 'url' => route('admin.siswa.pindah.form-masuk')],
+                ['label' => 'Konfirmasi'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Konfirmasi Penerimaan Siswa Pindahan
             </h2>
-            <a href="{{ route('admin.siswa.pindah.form-masuk') }}"
-                class="text-sm text-purple-600 hover:underline dark:text-purple-400">
-                ← Cari siswa lain
-            </a>
         </div>
 
         <div class="grid gap-6 lg:grid-cols-2">

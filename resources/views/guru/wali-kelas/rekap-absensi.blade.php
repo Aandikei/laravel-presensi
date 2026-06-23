@@ -2,7 +2,14 @@
     <x-slot:title>Rekap Absensi - {{ $kelasSaya->nama_kelas }}</x-slot:title>
 
     <div class="container px-6 mx-auto">
-        <div class="flex items-center justify-between my-6">
+        <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('guru.dashboard')],
+                ['label' => 'Wali Kelas', 'url' => route('guru.wali-kelas.siswa-poin')],
+                ['label' => 'Rekap Absensi'],
+            ]" />
+        </div>
+        <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                     Rekap Absensi

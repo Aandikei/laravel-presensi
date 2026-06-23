@@ -3,9 +3,12 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('guru.dashboard')],
+                ['label' => 'Absensi', 'url' => route('guru.absensi.index')],
+                ['label' => 'Input Absensi'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Input Absensi</h2>
-            <a href="{{ route('guru.absensi.index') }}"
-                class="text-sm text-purple-600 hover:underline dark:text-purple-400">← Kembali</a>
         </div>
 
         {{-- Info Jadwal --}}

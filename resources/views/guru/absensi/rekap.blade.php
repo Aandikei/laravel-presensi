@@ -3,6 +3,11 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('guru.dashboard')],
+                ['label' => 'Absensi', 'url' => route('guru.absensi.index')],
+                ['label' => 'Rekap'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Rekap Absensi
             </h2>

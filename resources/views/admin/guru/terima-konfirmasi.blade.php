@@ -3,6 +3,11 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+                ['label' => 'Terima Mutasi Guru', 'url' => route('admin.guru.mutasi.terima')],
+                ['label' => 'Konfirmasi'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Konfirmasi Mutasi Guru
             </h2>

@@ -3,13 +3,14 @@
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('superadmin.dashboard')],
+                ['label' => 'Roles', 'url' => route('superadmin.roles.index')],
+                ['label' => 'Tambah Role'],
+            ]" />
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                 Tambah Role Baru
             </h2>
-            <a href="{{ route('superadmin.roles.index') }}"
-                class="text-sm text-purple-600 hover:underline dark:text-purple-400">
-                ← Kembali
-            </a>
         </div>
 
         <div class="max-w-2xl p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">

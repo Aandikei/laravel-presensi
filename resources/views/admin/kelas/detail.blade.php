@@ -4,11 +4,14 @@
     <div class="container px-6 mx-auto">
         <div class="my-6 flex items-center justify-between">
             <div>
+                <x-breadcrumb :items="[
+                    ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+                    ['label' => 'Kelas', 'url' => route('admin.kelas.index')],
+                    ['label' => 'Detail Kelas'],
+                ]" />
                 <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
                     Detail Kelas — {{ $kelas->nama_kelas }}
                 </h2>
-                <a href="{{ route('admin.kelas.index') }}"
-                    class="text-sm text-purple-600 hover:underline dark:text-purple-400">← Kembali</a>
             </div>
             <form method="GET" class="flex items-center gap-3">
                 <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Tahun Ajaran:</label>

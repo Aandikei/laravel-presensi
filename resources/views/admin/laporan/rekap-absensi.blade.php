@@ -2,7 +2,14 @@
     <x-slot:title>Rekap Absensi</x-slot:title>
 
     <div class="container px-6 mx-auto">
-        <div class="flex items-center justify-between my-6">
+        <div class="my-6">
+            <x-breadcrumb :items="[
+                ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+                ['label' => 'Laporan', 'url' => route('admin.laporan.index')],
+                ['label' => 'Rekap Absensi'],
+            ]" />
+        </div>
+        <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Rekap Absensi</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
