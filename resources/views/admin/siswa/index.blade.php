@@ -84,6 +84,7 @@
             <select id="filter-status" class="text-sm dark:bg-gray-700 dark:text-gray-300">
                 <option value="">Semua Status</option>
                 <option value="Aktif">Aktif</option>
+                <option value="Keluar">Keluar</option>
                 <option value="Pindah">Pindah</option>
                 <option value="Alumni">Alumni</option>
                 <option value="belum_terdaftar">Belum Terdaftar</option>
@@ -101,6 +102,7 @@
                             <th class="px-4 py-3">Email</th>
                             <th class="px-4 py-3">Jenis Kelamin</th>
                             <th class="px-4 py-3">Kelas Aktif</th>
+                            <th class="px-4 py-3">Status</th>
                             <th class="px-4 py-3">Total Poin</th>
                             <th class="px-4 py-3">Aksi</th>
                         </tr>
@@ -209,6 +211,7 @@
                     { data: 'email' },
                     { data: 'jenis_kelamin' },
                     { data: 'kelas', orderable: false },
+                    { data: 'status_badge', orderable: false, searchable: false },
                     { data: 'total_poin', orderable: false, searchable: false },
                     { data: 'aksi', orderable: false, searchable: false },
                 ],

@@ -69,6 +69,7 @@
                                 <th class="px-4 py-3">No</th>
                                 <th class="px-4 py-3">NISN</th>
                                 <th class="px-4 py-3">Nama Siswa</th>
+                                <th class="px-4 py-3">Status</th>
                                 <th class="px-4 py-3 text-center">Total Poin</th>
                             </tr>
                         </thead>
@@ -78,6 +79,13 @@
                                     <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
                                     <td class="px-4 py-3 text-sm">{{ $s->nisn }}</td>
                                     <td class="px-4 py-3 text-sm font-medium">{{ $s->nama_siswa }}</td>
+                                    <td class="px-4 py-3">
+                                        @if(!$s->isAktif())
+                                            <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $s->status_label }}</span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">Aktif</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-sm text-center">
                                         @if($s->total_poin > 0)
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full

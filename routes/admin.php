@@ -77,6 +77,8 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
         Route::get('siswa/{siswa}/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
         Route::put('siswa/{siswa}', [SiswaController::class, 'update'])->name('siswa.update');
         Route::delete('siswa/{siswa}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
+        Route::post('siswa/{siswa}/tandai-keluar', [SiswaController::class, 'tandaiKeluar'])->name('siswa.tandai-keluar');
+        Route::post('siswa/{siswa}/batalkan-status', [SiswaController::class, 'batalkanStatus'])->name('siswa.batalkan-status');
         Route::get('siswa/{siswa}/pindah', [PindahSiswaController::class, 'formPindah'])->name('siswa.pindah.form');
         Route::post('siswa/{siswa}/pindah', [PindahSiswaController::class, 'out'])->name('siswa.pindah');
         Route::post('siswa/{siswa}/batal-pindah', [PindahSiswaController::class, 'batal'])->name('siswa.batal-pindah');

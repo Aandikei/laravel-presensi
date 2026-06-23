@@ -97,6 +97,15 @@ class AuthenticatedSessionController extends Controller
                 ]);
             }
 
+            if ($user->siswa && !$user->siswa->isAktif()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                throw ValidationException::withMessages([
+                    'email' => 'Akun siswa sudah tidak aktif.',
+                ]);
+            }
+
             return redirect()->route('siswa.dashboard');
         } elseif ($user->hasRole('orang_tua')) {
             return redirect()->route('orangtua.dashboard');

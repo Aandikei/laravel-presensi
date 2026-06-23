@@ -18,7 +18,7 @@ class AdminController extends Controller
 
         // Stats
         $totalGuru   = Guru::where('instansi_id', $instansi->id_instansi)->count();
-        $totalSiswa  = Siswa::where('instansi_id', $instansi->id_instansi)->count();
+        $totalSiswa  = Siswa::where('instansi_id', $instansi->id_instansi)->whereNull('status')->count();
         $totalKelas  = Kelas::where('instansi_id', $instansi->id_instansi)->count();
 
         // Kehadiran hari ini

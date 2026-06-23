@@ -26,6 +26,7 @@ class WaliKelasController extends Controller
             ->aktif()
             ->where('kelas_id', $kelas->id_kelas)
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
+            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
             ->get()
             ->map(function ($reg) {
                 return $reg->siswa;
@@ -54,6 +55,7 @@ class WaliKelasController extends Controller
             ->where('siswa_id', $siswa->id_siswa)
             ->aktif()
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
+            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
             ->exists();
         abort_if(!$isSiswaSaya, 403);
 
@@ -74,7 +76,8 @@ class WaliKelasController extends Controller
         $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
         abort_if(!$kelasSaya, 403);
 
-        $siswa = Siswa::whereHas('registrasiAkademik', function ($q) use ($kelasSaya) {
+        $siswa = Siswa::whereNull('status')
+            ->whereHas('registrasiAkademik', function ($q) use ($kelasSaya) {
                 $q->aktif()
                   ->where('kelas_id', $kelasSaya->id_kelas)
                   ->whereHas('tahunAjaran', fn($qq) => $qq->where('is_aktif', true));
@@ -104,6 +107,7 @@ class WaliKelasController extends Controller
         $siswaIds = RegistrasiAkademik::where('kelas_id', $kelasSaya->id_kelas)
             ->aktif()
             ->whereRaw('tahun_id = (SELECT MAX(r2.tahun_id) FROM registrasi_akademik r2 WHERE r2.siswa_id = registrasi_akademik.siswa_id AND r2.status = ?)', ['Aktif'])
+            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
             ->pluck('siswa_id');
 
         $logPoin = LogPoinSiswa::with(['siswa', 'masterPoin', 'createdBy'])
@@ -131,6 +135,7 @@ class WaliKelasController extends Controller
             ->where('siswa_id', $logPoin->siswa_id)
             ->aktif()
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
+            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
             ->exists();
         abort_if(!$isSiswaSaya, 403);
 

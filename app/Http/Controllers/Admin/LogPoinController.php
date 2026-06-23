@@ -66,6 +66,7 @@ class LogPoinController extends Controller
 
         $instansi = Auth::user()->getInstansi();
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
+            ->whereNull('status')
             ->orderBy('nama_siswa')
             ->get();
         $masterPoin = MasterPoin::where('instansi_id', $instansi->id_instansi)
@@ -86,9 +87,10 @@ class LogPoinController extends Controller
             'keterangan' => 'nullable|string|max:255',
         ]);
 
-        // Pastiin siswa milik instansi ini
+        // Pastiin siswa milik instansi ini & masih aktif
         $siswa = Siswa::findOrFail($validated['siswa_id']);
         abort_if($siswa->instansi_id !== $instansi->id_instansi, 403);
+        abort_if(!$siswa->isAktif(), 403, 'Siswa sudah tidak aktif.');
 
         LogPoinSiswa::create([
             ...$validated,

@@ -41,8 +41,10 @@ class SiswaController extends Controller
             }
 
             // Filter status
-            if ($request->status === 'Aktif') {
-                $siswa->has('registrasiAktif');
+            if ($request->status === 'Keluar') {
+                $siswa->where('status', 'Keluar');
+            } elseif ($request->status === 'Aktif') {
+                $siswa->whereNull('status')->has('registrasiAktif');
             } elseif ($request->status === 'Pindah') {
                 $siswa->whereHas('registrasiAkademik', fn ($q) => $q
                     ->where('status', 'Pindah')
@@ -79,6 +81,15 @@ class SiswaController extends Controller
                     return '<span class="text-gray-500">Belum terdaftar</span>';
                 })
                 // ->addColumn('total_poin', fn($row) => $row->logPoin()->sum('jumlah_poin') ?? 0)
+                ->addColumn('status_badge', function ($row) {
+                    if (!$row->isAktif()) {
+                        return '<span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">'.$row->status_label.'</span>';
+                    }
+                    if ($row->registrasiAktif) {
+                        return '<span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">Aktif</span>';
+                    }
+                    return '<span class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-400">-</span>';
+                })
                 ->addColumn('total_poin', function ($row) {
                     return $row->logPoin()
                         ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
@@ -100,6 +111,26 @@ class SiswaController extends Controller
                                 </svg>
                             </a>'
                             : '';
+                        $tandaiKeluar = $row->isAktif()
+                            ? '<form method="POST" action="'.route('admin.siswa.tandai-keluar', $row->id_siswa).'" class="inline" onsubmit="return confirm(\'Yakin menandai siswa ini sebagai Keluar?\')">
+                                <input type="hidden" name="_token" value="'.csrf_token().'">
+                                <button type="submit" title="Tandai Keluar" class="text-red-600 hover:text-red-800">
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                </button>
+                            </form>'
+                            : '';
+                        $batalkan = !$row->isAktif()
+                            ? '<form method="POST" action="'.route('admin.siswa.batalkan-status', $row->id_siswa).'" class="inline" onsubmit="return confirm(\'Aktifkan kembali siswa ini?\')">
+                                <input type="hidden" name="_token" value="'.csrf_token().'">
+                                <button type="submit" title="Aktifkan Kembali" class="text-green-600 hover:text-green-800">
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                </button>
+                            </form>'
+                            : '';
                         $delete = '<form method="POST" action="'.route('admin.siswa.destroy', $row->id_siswa).'" class="inline">
                             <input type="hidden" name="_token" value="'.csrf_token().'">
                             <input type="hidden" name="_method" value="DELETE">
@@ -109,12 +140,12 @@ class SiswaController extends Controller
                                 </svg>
                             </button>
                             </form>';
-                        return $edit.' '.$pindah.' '.$delete;
+                        return $edit.' '.$pindah.' '.$tandaiKeluar.' '.$batalkan.' '.$delete;
                     }
 
                     return '';
                 })
-                ->rawColumns(['kelas', 'aksi'])
+                ->rawColumns(['kelas', 'status_badge', 'aksi'])
                 ->filterColumn('nama_siswa', function ($query, $keyword) {
                     $query->where('nama_siswa', 'like', "%{$keyword}%");
                 })
@@ -310,6 +341,40 @@ class SiswaController extends Controller
 
         return redirect()->route('admin.siswa.index')
             ->with('success', 'Siswa berhasil ditambahkan!');
+    }
+
+    public function tandaiKeluar(Siswa $siswa)
+    {
+        $this->authorizeInstansi($siswa);
+
+        if (!$siswa->isAktif()) {
+            return back()->with('error', 'Siswa sudah tidak aktif.');
+        }
+
+        DB::transaction(function () use ($siswa) {
+            $this->nonaktifkanSiswa($siswa);
+            $siswa->markAsKeluar();
+        });
+
+        return redirect()->route('admin.siswa.index')
+            ->with('success', "Siswa {$siswa->nama_siswa} ditandai sebagai Keluar.");
+    }
+
+    public function batalkanStatus(Siswa $siswa)
+    {
+        $this->authorizeInstansi($siswa);
+
+        if ($siswa->isAktif()) {
+            return back()->with('error', 'Siswa ini masih aktif.');
+        }
+
+        DB::transaction(function () use ($siswa) {
+            $siswa->update(['status' => null]);
+            $siswa->user->assignRole('siswa');
+        });
+
+        return redirect()->route('admin.siswa.index')
+            ->with('success', "Status {$siswa->nama_siswa} dikembalikan ke Aktif.");
     }
 
     public function edit(Siswa $siswa)
@@ -535,6 +600,17 @@ class SiswaController extends Controller
 
         return redirect()->route('admin.siswa.index')
             ->with('success', 'Siswa alumni berhasil didaftarkan ulang!');
+    }
+
+    private function nonaktifkanSiswa(Siswa $siswa): void
+    {
+        $user = $siswa->user;
+
+        $user->removeRole('siswa');
+
+        User::where('id', $user->id)->update(['email_verified_at' => null]);
+
+        $siswa->clearTransferToken();
     }
 
     private function authorizeInstansi(Siswa $siswa): void

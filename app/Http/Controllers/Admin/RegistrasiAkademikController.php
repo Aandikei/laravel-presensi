@@ -93,6 +93,7 @@ class RegistrasiAkademikController extends Controller
             ->pluck('siswa_id')->toArray();
 
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
+            ->whereNull('status')
             ->whereNotIn('id_siswa', array_merge($siswaTeregistrasi, $siswaAlumni))
             ->orderBy('nama_siswa')
             ->get();

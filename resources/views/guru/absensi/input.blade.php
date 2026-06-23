@@ -64,7 +64,12 @@
                     @foreach($registrasi as $i => $reg)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                             <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
-                            <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">{{ $reg->siswa->nama_siswa }}</td>
+                            <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">
+                                {{ $reg->siswa->nama_siswa }}
+                                @if($reg->siswa && !$reg->siswa->isAktif())
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $reg->siswa->status_label }}</span>
+                                @endif
+                            </td>
                             <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $reg->siswa->nisn }}</td>
                             <td class="px-5 py-3">
                                 <span class="px-3 py-1 text-xs font-medium rounded-full
@@ -132,6 +137,9 @@
                                 <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
                                 <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">
                                     {{ $reg->siswa->nama_siswa }}
+                                    @if($reg->siswa && !$reg->siswa->isAktif())
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $reg->siswa->status_label }}</span>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
                                     {{ $reg->siswa->nisn }}

@@ -30,6 +30,7 @@ class PoinExport implements FromCollection, WithHeadings, WithStyles, WithTitle,
     public function collection()
     {
         $siswa = Siswa::where('instansi_id', $this->instansiId)
+            ->whereNull('status')
             ->when($this->kelasId, fn($q) =>
                 $q->whereHas('registrasiAktif', fn($q) =>
                     $q->where('kelas_id', $this->kelasId)

@@ -72,13 +72,19 @@ class AbsensiController extends Controller
             ->where('is_locked', true)
             ->exists();
 
-        // Ambil semua siswa aktif di kelas ini (tahun ajaran aktif)
+        // Ambil siswa di kelas ini (tahun ajaran aktif)
         $registrasi = RegistrasiAkademik::with('siswa')
             ->aktif()
             ->where('kelas_id', $jadwal->kurikulum->kelas_id)
             ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
-            ->orderBy('id_registrasi')
-            ->get();
+            ->orderBy('id_registrasi');
+
+        // Mode edit: hanya siswa aktif. Mode locked (histori): tampilkan semua
+        if (!$locked) {
+            $registrasi->whereHas('siswa', fn ($q) => $q->whereNull('status'));
+        }
+
+        $registrasi = $registrasi->get();
 
         // Ambil absensi yang sudah ada hari ini
         $absensiHariIni = $jadwal->absensi()

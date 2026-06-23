@@ -55,7 +55,7 @@ class NaikKelasController extends Controller
             ->with(['registrasiAkademik' => fn ($q) => $q
                 ->where('tahun_id', '=', $tahunAsal->id_tahun)
                 ->where('status', '!=', 'Alumni')
-                ->whereHas('siswa', fn ($sq) => $sq->where('instansi_id', $instansi->id_instansi))
+                ->whereHas('siswa', fn ($sq) => $sq->where('instansi_id', $instansi->id_instansi)->whereNull('status'))
                 ->with('siswa')])
             ->orderBy('tingkat')
             ->orderBy('nama_kelas')

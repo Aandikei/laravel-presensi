@@ -59,7 +59,7 @@ class KelasController extends Controller
                 ->addColumn('wali_kelas', fn ($row) => $row->waliKelas?->nama_guru ?? '<span class="text-gray-400">Belum ditentukan</span>')
                 ->addColumn('jumlah_siswa', function ($row) use ($tahunDipilih) {
                     return $tahunDipilih
-                        ? $row->registrasiAkademik()->aktif()->where('tahun_id', $tahunDipilih->id_tahun)->count()
+                        ? $row->registrasiAkademik()->aktif()->where('tahun_id', $tahunDipilih->id_tahun)->whereHas('siswa', fn($q) => $q->whereNull('status'))->count()
                         : 0;
                 })
                 ->addColumn('tahun_ajaran', fn () => $tahunDipilih
@@ -220,6 +220,7 @@ class KelasController extends Controller
             ->when($tahunDipilih, fn ($q) => $q->where('tahun_id', $tahunDipilih->id_tahun))
             ->aktif()
             ->with('siswa')
+            ->whereHas('siswa', fn ($q) => $q->whereNull('status'))
             ->get();
 
         return view('admin.kelas.detail', compact('kelas', 'registrasi', 'tahunDipilih', 'daftarTahun'));

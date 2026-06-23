@@ -212,6 +212,7 @@ class LaporanController extends Controller
             ->orderBy('tingkat')->orderBy('nama_kelas')->get();
 
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
+            ->whereNull('status')
             ->when($request->kelas_id, fn($q) =>
                 $q->whereHas('registrasiAktif', fn($q) =>
                     $q->where('kelas_id', $request->kelas_id)
@@ -260,6 +261,7 @@ class LaporanController extends Controller
             : null;
 
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
+            ->whereNull('status')
             ->when($request->kelas_id, fn($q) =>
                 $q->whereHas('registrasiAktif', fn($q) =>
                     $q->where('kelas_id', $request->kelas_id)

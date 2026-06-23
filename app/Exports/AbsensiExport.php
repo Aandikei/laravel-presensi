@@ -43,6 +43,7 @@ class AbsensiExport implements FromCollection, WithHeadings, WithStyles, WithTit
             }])
             ->where('kelas_id', $this->kelasId)
             ->where('tahun_id', $this->tahunAktifId)
+            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
             ->get();
 
         $rows = collect();

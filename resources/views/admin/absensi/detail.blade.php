@@ -133,6 +133,10 @@
                             <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
                             <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">
                                 {{ $item->registrasi->siswa->nama_siswa }}
+                                @php $siswa = $item->registrasi->siswa; @endphp
+                                @if($siswa && !$siswa->isAktif())
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $siswa->status_label }}</span>
+                                @endif
                             </td>
                             <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
                                 {{ $item->registrasi->siswa->nisn }}

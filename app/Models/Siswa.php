@@ -21,6 +21,7 @@ class Siswa extends Model
         'jenis_kelamin',
         'tanggal_lahir',
         'foto',
+        'status',
         'transfer_token',
         'transfer_token_expires_at',
     ];
@@ -103,6 +104,29 @@ class Siswa extends Model
         return $this->logPoin()
             ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
             ->sum('master_poin.jumlah_poin') ?? 0;
+    }
+
+    public function isAktif(): bool
+    {
+        return is_null($this->status);
+    }
+
+    public function markAsKeluar(): void
+    {
+        $this->update(['status' => 'Keluar']);
+    }
+
+    public function scopeAktif($query)
+    {
+        return $query->whereNull('status');
+    }
+
+    public function getStatusLabelAttribute(): ?string
+    {
+        return match ($this->status) {
+            'Keluar' => 'Keluar',
+            default => null,
+        };
     }
 
     public function getRouteKeyName(): string

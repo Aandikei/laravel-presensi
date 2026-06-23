@@ -181,6 +181,7 @@
                                 <th class="px-4 py-3">No</th>
                                 <th class="px-4 py-3">Nama Siswa</th>
                                 <th class="px-4 py-3">NISN</th>
+                                <th class="px-4 py-3">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y dark:divide-gray-700">
@@ -191,10 +192,18 @@
                                         {{ $reg->siswa->nama_siswa }}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-500">{{ $reg->siswa->nisn }}</td>
+                                    <td class="px-4 py-3">
+                                        @php $siswa = $reg->siswa; @endphp
+                                        @if(!$siswa->isAktif())
+                                            <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $siswa->status_label }}</span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">Aktif</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-4 py-6 text-center text-gray-500">
+                                    <td colspan="4" class="px-4 py-6 text-center text-gray-500">
                                         Belum ada siswa terdaftar di kelas.
                                     </td>
                                 </tr>

@@ -80,7 +80,13 @@
                         @forelse($absensi as $i => $a)
                             <tr class="text-gray-700 dark:text-gray-400">
                                 <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
-                                <td class="px-4 py-3 text-sm font-medium">{{ $a->registrasi->siswa->nama_siswa ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm font-medium">
+                                    {{ $a->registrasi->siswa->nama_siswa ?? '-' }}
+                                    @php $siswa = $a->registrasi->siswa; @endphp
+                                    @if($siswa && !$siswa->isAktif())
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $siswa->status_label }}</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-sm">{{ $a->registrasi->siswa->nisn ?? '-' }}</td>
                                 <td class="px-4 py-3 text-sm">
                                     @switch($a->status)
