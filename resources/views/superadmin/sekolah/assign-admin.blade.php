@@ -14,12 +14,6 @@
             </h2>
         </div>
 
-        @if(session('success'))
-            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         {{-- Daftar Admin --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden mb-6">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">

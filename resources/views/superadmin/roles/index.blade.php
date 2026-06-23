@@ -12,12 +12,6 @@
             </a>
         </div>
 
-        @if(session('success'))
-            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div class="grid gap-4">
             @foreach($roles as $role)
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 overflow-hidden">

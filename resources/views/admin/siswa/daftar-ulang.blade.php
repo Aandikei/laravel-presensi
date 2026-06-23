@@ -13,12 +13,6 @@
             </h2>
         </div>
 
-        @if (session('info'))
-            <div class="px-4 py-3 mb-4 text-sm text-blue-700 bg-blue-100 rounded-lg dark:bg-blue-800 dark:text-blue-200">
-                {{ session('info') }}
-            </div>
-        @endif
-
         <div class="grid gap-6 md:grid-cols-2">
             <form method="POST" action="{{ route('admin.siswa.proses-daftar-ulang') }}">
                 @csrf

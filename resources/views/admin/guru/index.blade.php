@@ -14,12 +14,6 @@
             @endcan
         </div>
 
-        @if(session('success'))
-            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         {{-- Filter --}}
         <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 flex items-center gap-4 flex-wrap">
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Status:</label>

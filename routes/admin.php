@@ -208,4 +208,5 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
     // Setting
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::patch('settings', [SettingsController::class, 'update'])->name('settings.update');
+
 });

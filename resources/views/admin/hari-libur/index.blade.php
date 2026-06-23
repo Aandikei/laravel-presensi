@@ -6,12 +6,6 @@
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Hari Libur</h2>
         </div>
 
-        @if(session('success'))
-            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div class="grid gap-6 lg:grid-cols-2 mb-6">
 
             @can('manage-settings')

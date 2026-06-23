@@ -100,10 +100,5 @@
             </a>
         </div>
 
-        @if(session('success'))
-            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
     </div>
 </x-layouts.admin>

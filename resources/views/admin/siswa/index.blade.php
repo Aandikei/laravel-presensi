@@ -32,12 +32,6 @@
             </div>
         </div>
 
-        @if(session('success'))
-            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         @if(session('gagalList') && count(session('gagalList')) > 0)
             <div id="gagal-import" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800">
                 <div class="flex items-center justify-between mb-3">

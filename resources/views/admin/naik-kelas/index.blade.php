@@ -9,13 +9,6 @@
             </p>
         </div>
 
-        @if (session('success'))
-            <div
-                class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div
             class="mb-4 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg dark:bg-blue-900/30 dark:text-blue-300">
             Pastikan sudah membuat <strong>tahun ajaran baru</strong> sebelum melanjutkan. Kelas bersifat permanen,

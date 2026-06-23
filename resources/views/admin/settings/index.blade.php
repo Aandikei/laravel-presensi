@@ -10,12 +10,6 @@
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Pengaturan Sekolah</h2>
         </div>
 
-        @if(session('success'))
-            <div class="px-4 py-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div class="max-w-2xl p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
 
             {{-- Preview Logo --}}

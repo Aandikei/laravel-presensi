@@ -12,12 +12,6 @@
             </h2>
         </div>
 
-        @if(session('info'))
-            <div class="px-4 py-3 mb-4 text-sm text-blue-700 bg-blue-100 rounded-lg dark:bg-blue-800 dark:text-blue-200">
-                {{ session('info') }}
-            </div>
-        @endif
-
         <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                 Masukkan NISN dan kode transfer dari sekolah asal untuk memindahkan siswa ke sekolah ini.
