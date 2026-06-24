@@ -39,11 +39,11 @@ class SiswaImport implements ToModel, WithHeadingRow, SkipsOnError
 
         if ($existingSiswa) {
             if ($existingSiswa->instansi_id !== $this->instansiId) {
-                $isAlumni = $existingSiswa->registrasiAkademik()
-                    ->where('status', 'Alumni')
+                $bisaDaftarUlang = $existingSiswa->registrasiAkademik()
+                    ->whereIn('status', ['Alumni', 'Keluar'])
                     ->exists();
 
-                if (!$isAlumni) {
+                if (!$bisaDaftarUlang) {
                     $this->gagal++;
                     $this->gagalList[] = [
                         'nama' => $existingSiswa->nama_siswa,
