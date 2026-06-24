@@ -647,8 +647,27 @@ class SiswaController extends Controller
 
         abort_if($siswa->instansi_id === $instansi->id_instansi, 403);
 
-        // Cegah daftar ulang ke jenjang yang lebih rendah
-        abort_if($instansi->tingkat_min < $siswa->instansi->tingkat_min, 403, 'Tidak bisa mendaftarkan alumni ke jenjang yang lebih rendah.');
+        $currentTk = $instansi->tingkat_min;
+        $studentTk = $siswa->instansi->tingkat_min;
+
+        $isKeluar = !$siswa->isAktif();
+        $isAlumni = !$isKeluar && $siswa->registrasiAkademik()->alumni()->exists();
+
+        if ($isKeluar) {
+            if ($currentTk < $studentTk) {
+                abort(403, 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.');
+            }
+        } elseif ($isAlumni) {
+            if ($currentTk <= $studentTk) {
+                abort(403, 'Tidak bisa mendaftarkan ulang alumni ke jenjang yang sama atau lebih rendah.');
+            }
+        } else {
+            if ($currentTk !== $studentTk) {
+                abort(403, 'Pindahan siswa hanya bisa diterima untuk jenjang yang sama.');
+            }
+            return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $siswa->nisn])
+                ->with('info', 'Siswa ini harus menggunakan Pindah Masuk.');
+        }
 
         $oldUser = $siswa->user;
 

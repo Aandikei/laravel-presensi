@@ -58,7 +58,7 @@ class PindahSiswaController extends Controller
                 ->with('error', "Siswa {$siswa->nama_siswa} sudah terdaftar di sekolah ini.");
         }
 
-        if ($siswa->instansi->jenjang !== $instansi->jenjang) {
+        if ($siswa->instansi->tingkat_min !== $instansi->tingkat_min) {
             return back()
                 ->withInput()
                 ->with('error', "Tidak bisa memindahkan siswa dari jenjang {$siswa->instansi->jenjang} ke {$instansi->jenjang}. Pindah hanya untuk jenjang yang sama.");
@@ -111,7 +111,7 @@ class PindahSiswaController extends Controller
                 abort(422, 'Siswa sudah terdaftar di sekolah ini.');
             }
 
-            if ($siswa->instansi->jenjang !== $instansi->jenjang) {
+            if ($siswa->instansi->tingkat_min !== $instansi->tingkat_min) {
                 abort(422, "Tidak bisa memindahkan siswa dari jenjang {$siswa->instansi->jenjang} ke {$instansi->jenjang}.");
             }
 
