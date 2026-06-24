@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\KurikulumKelas;
 use App\Models\MataPelajaran;
@@ -22,6 +23,18 @@ class KurikulumKelasController extends Controller
             $kurikulum = KurikulumKelas::with(['kelas', 'mataPelajaran', 'guru'])
                 ->whereHas('kelas', function ($q) use ($instansi) {
                     $q->where('instansi_id', '=', $instansi->id_instansi);
+                })
+                ->when($request->kelas_id, fn($q) => $q->where('kelas_id', $request->kelas_id))
+                ->when($request->mapel_id, fn($q) => $q->where('mapel_id', $request->mapel_id))
+                ->when($request->status_guru, function ($q) use ($request, $instansi) {
+                    match ($request->status_guru) {
+                        'Aktif'   => $q->whereHas('guru', fn($qq) => $qq->where('instansi_id', $instansi->id_instansi)->whereNull('status')),
+                        'Keluar'  => $q->whereHas('guru', fn($qq) => $qq->where('status', 'Keluar')),
+                        'Pensiun' => $q->whereHas('guru', fn($qq) => $qq->where('status', 'Pensiun')),
+                        'Pindah'  => $q->whereHas('guru', fn($qq) => $qq->where('instansi_id', '!=', $instansi->id_instansi)->whereNull('status')),
+                        'Mutasi'  => $q->whereHas('guru', fn($qq) => $qq->whereNotNull('transfer_token')->whereRaw('transfer_token_expires_at > NOW()')),
+                        default   => $q,
+                    };
                 })
                 ->select('kurikulum_kelas.*');
 
@@ -72,7 +85,15 @@ class KurikulumKelasController extends Controller
                 ->make(true);
         }
 
-        return view('admin.kurikulum.index');
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('tingkat')->orderBy('nama_kelas')
+            ->get();
+
+        $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_mapel')
+            ->get();
+
+        return view('admin.kurikulum.index', compact('kelas', 'mapel'));
     }
 
     public function create()
@@ -110,20 +131,44 @@ class KurikulumKelasController extends Controller
             'guru_id' => 'required|exists:guru,id_guru',
         ]);
 
-        // Cek duplikat
-        $exists = KurikulumKelas::where('kelas_id', '=', $validated['kelas_id'])
-            ->where('mapel_id', '=', $validated['mapel_id'])
-            ->exists();
-
-        if ($exists) {
-            return back()->withErrors([
-                'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut!',
-            ])->withInput();
-        }
-
         // Pastiin kelas milik instansi ini
         $kelas = Kelas::findOrFail($validated['kelas_id']);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+
+        // Cek duplikat — tolak hanya jika guru lama masih aktif
+        $existing = KurikulumKelas::with('guru')
+            ->where('kelas_id', $validated['kelas_id'])
+            ->where('mapel_id', $validated['mapel_id'])
+            ->first();
+
+        if ($existing) {
+            $guruLama = $existing->guru;
+            if ($guruLama && $guruLama->instansi_id === $instansi->id_instansi && is_null($guruLama->status)) {
+                return back()->withErrors([
+                    'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut dengan guru yang masih aktif!',
+                ])->withInput();
+            }
+            // Guru lama non-aktif — insert baru + copy jadwal
+            $kurikulumBaru = KurikulumKelas::create($validated);
+
+            $jadwalLama = Jadwal::where('kurikulum_id', $existing->id_kurikulum)->get();
+
+            if ($jadwalLama->isNotEmpty()) {
+                Jadwal::insert(
+                    $jadwalLama->map(fn($j) => [
+                        'kurikulum_id' => $kurikulumBaru->id_kurikulum,
+                        'hari'         => $j->hari,
+                        'jam_mulai'    => $j->jam_mulai,
+                        'jam_selesai'  => $j->jam_selesai,
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ])->toArray()
+                );
+            }
+
+            return redirect()->route('admin.kurikulum.index')
+                ->with('success', 'Kurikulum berhasil ditambahkan beserta jadwal dari guru sebelumnya!');
+        }
 
         KurikulumKelas::create($validated);
 
@@ -156,6 +201,7 @@ class KurikulumKelasController extends Controller
 
     public function update(Request $request, KurikulumKelas $kurikulum)
     {
+        $instansi = Auth::user()->getInstansi();
         $this->authorizeInstansi($kurikulum);
 
         $validated = $request->validate([
@@ -164,16 +210,21 @@ class KurikulumKelasController extends Controller
             'guru_id' => 'required|exists:guru,id_guru',
         ]);
 
-        // Cek duplikat kecuali data ini sendiri
-        $exists = KurikulumKelas::where('kelas_id', '=', $validated['kelas_id'])
-            ->where('mapel_id', '=', $validated['mapel_id'])
+        // Cek duplikat — tolak hanya jika guru lama masih aktif
+        $existing = KurikulumKelas::with('guru')
+            ->where('kelas_id', $validated['kelas_id'])
+            ->where('mapel_id', $validated['mapel_id'])
             ->where('id_kurikulum', '!=', $kurikulum->id_kurikulum)
-            ->exists();
+            ->first();
 
-        if ($exists) {
-            return back()->withErrors([
-                'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut!',
-            ])->withInput();
+        if ($existing) {
+            $guruLama = $existing->guru;
+            if ($guruLama && $guruLama->instansi_id === $instansi->id_instansi && is_null($guruLama->status)) {
+                return back()->withErrors([
+                    'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut dengan guru yang masih aktif!',
+                ])->withInput();
+            }
+            // Guru lama non-aktif — biarkan duplikat, data historis tetap tersimpan
         }
 
         $kurikulum->update($validated);

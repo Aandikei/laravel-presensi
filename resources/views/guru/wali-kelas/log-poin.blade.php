@@ -35,7 +35,13 @@
                             @foreach($logPoin as $log)
                                 <tr class="text-gray-700 dark:text-gray-400">
                                     <td class="px-4 py-3 text-sm">{{ \Carbon\Carbon::parse($log->tanggal)->locale('id')->isoFormat('D MMM YYYY') }}</td>
-                                    <td class="px-4 py-3 text-sm font-medium">{{ $log->siswa?->nama_siswa ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-sm font-medium">
+                                        {{ $log->siswa?->nama_siswa ?? '-' }}
+                                        @php $siswa = $log->siswa; @endphp
+                                        @if($siswa && !$siswa->isAktif())
+                                            <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $siswa->status_label }}</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-sm">{{ $log->masterPoin?->nama_pelanggaran ?? '-' }}</td>
                                     <td class="px-4 py-3 text-sm">
                                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">

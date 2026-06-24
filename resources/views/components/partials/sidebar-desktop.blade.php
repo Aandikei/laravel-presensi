@@ -608,6 +608,17 @@
             <span class="ml-4">Rekap Absensi</span>
           </a>
         </li>
+        <li class="relative px-6 py-3 dark:hover:bg-gray-700/30 transition-colors duration-150 rounded-lg">
+          @php $isRekapPoin = request()->routeIs('guru.wali-kelas.rekap-poin'); @endphp
+          @if ($isRekapPoin)
+            <span class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+          @endif
+          <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 {{ $isRekapPoin ? 'text-gray-800 dark:text-gray-100 ' : '' }}"
+            href="{{ route('guru.wali-kelas.rekap-poin') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            <span class="ml-4">Rekap Poin</span>
+          </a>
+        </li>
         </ul>
       </div>
     @endif

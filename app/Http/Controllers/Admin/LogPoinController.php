@@ -32,7 +32,14 @@ class LogPoinController extends Controller
             return DataTables::of($logPoin)
                 ->addIndexColumn()
                 ->editColumn('tanggal', fn($row) => $row->tanggal->format('d M Y'))
-                ->addColumn('nama_siswa', fn($row) => $row->siswa->nama_siswa)
+                ->addColumn('nama_siswa', function ($row) {
+                    $siswa = $row->siswa;
+                    $html = e($siswa->nama_siswa);
+                    if (!$siswa->isAktif()) {
+                        $html .= ' <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full">' . e($siswa->status_label) . '</span>';
+                    }
+                    return $html;
+                })
                 ->addColumn('pelanggaran', fn($row) => $row->masterPoin->nama_pelanggaran)
                 ->addColumn('poin', fn($row) => $row->masterPoin->jumlah_poin)
                 ->addColumn('dicatat_oleh', fn($row) => $row->createdBy->name ?? '-')
@@ -60,7 +67,7 @@ class LogPoinController extends Controller
                         </button>
                         </form>';
                 })
-                ->rawColumns(['aksi'])
+                ->rawColumns(['aksi', 'nama_siswa'])
                 ->make(true);
         }
 

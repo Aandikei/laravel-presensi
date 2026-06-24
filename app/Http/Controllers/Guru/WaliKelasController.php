@@ -29,7 +29,7 @@ class WaliKelasController extends Controller
             ->aktif()
             ->where('kelas_id', $kelas->id_kelas)
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
-            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
+            ->whereHas('siswa', fn($q) => $q->whereNull('status')->where('instansi_id', $kelas->instansi_id))
             ->get()
             ->map(function ($reg) {
                 return $reg->siswa;
@@ -58,7 +58,7 @@ class WaliKelasController extends Controller
             ->where('siswa_id', $siswa->id_siswa)
             ->aktif()
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
-            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
+            ->whereHas('siswa', fn($q) => $q->whereNull('status')->where('instansi_id', $kelasSaya->instansi_id))
             ->exists();
         abort_if(!$isSiswaSaya, 403);
 
@@ -79,18 +79,18 @@ class WaliKelasController extends Controller
         $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
         abort_if(!$kelasSaya, 403);
 
-        $siswa = Siswa::whereNull('status')
-            ->whereHas('registrasiAkademik', function ($q) use ($kelasSaya) {
-                $q->aktif()
-                  ->where('kelas_id', $kelasSaya->id_kelas)
-                  ->whereHas('tahunAjaran', fn($qq) => $qq->where('is_aktif', true));
-            })
-            ->with(['logPoin.masterPoin'])
+        $siswa = RegistrasiAkademik::with(['siswa.logPoin.masterPoin'])
+            ->aktif()
+            ->where('kelas_id', $kelasSaya->id_kelas)
+            ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
+            ->whereHas('siswa', fn($q) => $q->whereNull('status')->where('instansi_id', $kelasSaya->instansi_id))
             ->get()
-            ->map(function ($s) {
+            ->map(function ($reg) {
+                $s = $reg->siswa;
                 $s->total_poin = $s->logPoin->sum(fn($lp) => $lp->masterPoin?->jumlah_poin ?? 0);
                 return $s;
             })
+            ->filter()
             ->sortByDesc('total_poin')
             ->values();
 
@@ -110,7 +110,7 @@ class WaliKelasController extends Controller
         $siswaIds = RegistrasiAkademik::where('kelas_id', $kelasSaya->id_kelas)
             ->aktif()
             ->whereRaw('tahun_id = (SELECT MAX(r2.tahun_id) FROM registrasi_akademik r2 WHERE r2.siswa_id = registrasi_akademik.siswa_id AND r2.status = ?)', ['Aktif'])
-            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
+            ->whereHas('siswa', fn($q) => $q->where('instansi_id', $kelasSaya->instansi_id))
             ->pluck('siswa_id');
 
         $logPoin = LogPoinSiswa::with(['siswa', 'masterPoin', 'createdBy'])
@@ -138,7 +138,7 @@ class WaliKelasController extends Controller
             ->where('siswa_id', $logPoin->siswa_id)
             ->aktif()
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
-            ->whereHas('siswa', fn($q) => $q->whereNull('status'))
+            ->whereHas('siswa', fn($q) => $q->whereNull('status')->where('instansi_id', $kelasSaya->instansi_id))
             ->exists();
         abort_if(!$isSiswaSaya, 403);
 
@@ -177,7 +177,7 @@ class WaliKelasController extends Controller
             ->groupBy('absensi.jadwal_id', 'absensi.tanggal')
             ->orderBy('absensi.tanggal', 'desc')
             ->orderBy('absensi.jadwal_id')
-            ->paginate(50)->withQueryString();
+            ->get();
 
         $jadwalIds = $riwayat->pluck('jadwal_id')->unique();
         $jadwals = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran', 'kurikulum.guru'])
@@ -185,12 +185,13 @@ class WaliKelasController extends Controller
             ->get()
             ->keyBy('id_jadwal');
 
-        $riwayat->getCollection()->transform(function ($item) use ($jadwals) {
+        $riwayat = $riwayat->transform(function ($item) use ($jadwals) {
             $j = $jadwals->get($item->jadwal_id);
             $item->kelas_nama  = $j?->kurikulum?->kelas?->nama_kelas ?? '-';
             $item->mapel_nama  = $j?->kurikulum?->mataPelajaran?->nama_mapel ?? '-';
             $item->jam         = $j ? (substr($j->jam_mulai, 0, 5) . ' - ' . substr($j->jam_selesai, 0, 5)) : '-';
-            $item->guru_nama   = $j?->kurikulum?->guru?->nama_guru ?? '-';
+            $item->guru        = $j?->kurikulum?->guru;
+            $item->guru_nama   = $item->guru?->nama_guru ?? '-';
             return $item;
         });
 
@@ -280,6 +281,87 @@ class WaliKelasController extends Controller
         GenerateExport::dispatch($exportJob);
 
         return redirect()->route('guru.wali-kelas.rekap-absensi', $request->only(['bulan', 'tahun', 'mapel_id']))
+            ->with('info', 'Export PDF sedang diproses. Cek "Export Saya" di halaman Laporan.');
+    }
+
+    // ── Rekap Poin ──────────────────────────────
+    public function rekapPoin(Request $request)
+    {
+        $guru = Auth::user()->guru;
+        $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
+        abort_if(!$kelasSaya, 403);
+
+        $bulan = $request->input('bulan', now()->month);
+        $tahun = $request->input('tahun', now()->year);
+
+        $siswaIds = RegistrasiAkademik::where('kelas_id', $kelasSaya->id_kelas)
+            ->aktif()
+            ->pluck('siswa_id');
+
+        $siswa = Siswa::whereIn('id_siswa', $siswaIds)
+            ->where('instansi_id', $kelasSaya->instansi_id)
+            ->with(['logPoin' => fn($q) => $q->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun), 'logPoin.masterPoin'])
+            ->orderBy('nama_siswa')
+            ->get()
+            ->map(function ($s) {
+                $s->jumlah_pelanggaran = $s->logPoin->count();
+                $totalPoin = $s->logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
+                $s->total_poin = $totalPoin;
+                $s->status_poin = $totalPoin >= 100 ? 'PERHATIAN' : ($totalPoin >= 50 ? 'WASPADA' : 'AMAN');
+                $s->tanggal_terakhir = $s->logPoin->max('tanggal');
+                return $s;
+            });
+
+        $bulanNama = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->locale('id')->monthName;
+
+        return view('guru.wali-kelas.rekap-poin', compact('kelasSaya', 'siswa', 'bulan', 'tahun', 'bulanNama'));
+    }
+
+    public function exportPoinExcel(Request $request)
+    {
+        $guru = Auth::user()->guru;
+        $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
+        abort_if(!$kelasSaya, 403);
+
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'poin-excel',
+            'source'  => 'guru',
+            'filters' => [
+                'kelas_id' => $kelasSaya->id_kelas,
+                'bulan'    => $request->input('bulan', now()->month),
+                'tahun'    => $request->input('tahun', now()->year),
+            ],
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('guru.wali-kelas.rekap-poin', $request->only(['bulan', 'tahun']))
+            ->with('info', 'Export Excel sedang diproses. Cek "Export Saya" di halaman Laporan.');
+    }
+
+    public function exportPoinPdf(Request $request)
+    {
+        $guru = Auth::user()->guru;
+        $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
+        abort_if(!$kelasSaya, 403);
+
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'poin-pdf',
+            'source'  => 'guru',
+            'filters' => [
+                'kelas_id' => $kelasSaya->id_kelas,
+                'bulan'    => $request->input('bulan', now()->month),
+                'tahun'    => $request->input('tahun', now()->year),
+            ],
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('guru.wali-kelas.rekap-poin', $request->only(['bulan', 'tahun']))
             ->with('info', 'Export PDF sedang diproses. Cek "Export Saya" di halaman Laporan.');
     }
 }

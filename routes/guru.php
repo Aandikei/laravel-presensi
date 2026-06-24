@@ -30,6 +30,11 @@ Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('wali-ke
     // Export via Queue
     Route::post('/rekap-absensi/export-excel', [WaliKelasController::class, 'exportAbsensiExcel'])->name('rekap-absensi.export-excel');
     Route::post('/rekap-absensi/export-pdf', [WaliKelasController::class, 'exportAbsensiPdf'])->name('rekap-absensi.export-pdf');
+
+    // Rekap Poin
+    Route::get('/rekap-poin', [WaliKelasController::class, 'rekapPoin'])->name('rekap-poin');
+    Route::post('/rekap-poin/export-excel', [WaliKelasController::class, 'exportPoinExcel'])->name('rekap-poin.export-excel');
+    Route::post('/rekap-poin/export-pdf', [WaliKelasController::class, 'exportPoinPdf'])->name('rekap-poin.export-pdf');
 });
 
 // Export Saya (for guru, wali kelas, etc.)

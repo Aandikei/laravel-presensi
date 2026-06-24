@@ -85,6 +85,8 @@
                                     @php $siswa = $a->registrasi->siswa; @endphp
                                     @if($siswa && !$siswa->isAktif())
                                         <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $siswa->status_label }}</span>
+                                    @elseif($a->registrasi->status === 'Pindah')
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pindah</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm">{{ $a->registrasi->siswa->nisn ?? '-' }}</td>

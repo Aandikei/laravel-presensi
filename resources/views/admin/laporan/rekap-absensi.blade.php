@@ -81,7 +81,18 @@
                             <td class="px-4 py-3 text-sm font-medium">{{ $r->kelas_nama }}</td>
                             <td class="px-4 py-3 text-sm">{{ $r->mapel_nama }}</td>
                             <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
-                            <td class="px-4 py-3 text-sm">{{ $r->guru_nama }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                {{ $r->guru_nama }}
+                                @if($g = $r->guru)
+                                    @if($g->transfer_token && !$g->isTransferTokenExpired())
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">Mutasi</span>
+                                    @elseif(!$g->isAktif())
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $g->status_label }}</span>
+                                    @elseif($g->instansi_id !== auth()->user()->instansi_id)
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">Pindah</span>
+                                    @endif
+                                @endif
+                            </td>
                             <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>
                             <td class="px-4 py-3 text-sm text-center font-semibold text-green-600">{{ $r->hadir }}</td>
                             <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">{{ $r->sakit }}</td>
@@ -101,9 +112,6 @@
                 </table>
             </div>
             </div>
-            <div class="px-4 py-3 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
-                {{ $riwayat->links() }}
-            </div>
         </div>
     </div>
 
@@ -111,8 +119,10 @@
     <script>
         $(document).ready(function() {
             $('#tabel-rekap').DataTable({
-                paging: false,
-                info: false,
+                paging: true,
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                info: true,
                 ordering: true,
                 searching: true,
                 language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }

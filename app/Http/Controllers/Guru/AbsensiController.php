@@ -8,6 +8,7 @@ use App\Models\Absensi;
 use App\Models\ExportJob;
 use App\Models\HariLibur;
 use App\Models\Jadwal;
+use App\Models\KurikulumKelas;
 use App\Models\Kelas;
 use App\Models\RegistrasiAkademik;
 use App\Models\RekapBulanan;
@@ -165,44 +166,12 @@ class AbsensiController extends Controller
         $tingkat = $request->input('tingkat');
         $jurusan = $request->input('jurusan');
 
-        $riwayat = Absensi::selectRaw('
-                jadwal_id,
-                tanggal,
-                COUNT(*) as total_siswa,
-                SUM(status = "Hadir") as hadir,
-                SUM(status = "Sakit") as sakit,
-                SUM(status = "Izin") as izin,
-                SUM(status = "Alpa") as alpa,
-                SUM(status = "Terlambat") as terlambat,
-                SUM(status = "Bolos") as bolos
-            ')
-            ->whereHas('jadwal.kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
-                ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $guru->instansi_id))
-            )
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
-            ->when($tingkat, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('tingkat', $tingkat)))
-            ->when($jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('nama_kelas', 'like', '% ' . $jurusan . ' %')))
-            ->groupBy('jadwal_id', 'tanggal')
-            ->orderBy('tanggal', 'desc')
-            ->orderBy('jadwal_id')
-            ->paginate(50)->withQueryString();
+        $myCombos = KurikulumKelas::where('guru_id', $guru->id_guru)
+            ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $guru->instansi_id))
+            ->select('kelas_id', 'mapel_id')
+            ->get();
 
-        $jadwalIds = $riwayat->pluck('jadwal_id')->unique();
-        $jadwals = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
-            ->whereIn('id_jadwal', $jadwalIds)
-            ->get()
-            ->keyBy('id_jadwal');
-
-        $riwayat->getCollection()->transform(function ($item) use ($jadwals) {
-            $j = $jadwals->get($item->jadwal_id);
-            $item->kelas_nama  = $j?->kurikulum?->kelas?->nama_kelas ?? '-';
-            $item->mapel_nama  = $j?->kurikulum?->mataPelajaran?->nama_mapel ?? '-';
-            $item->jam         = $j ? (substr($j->jam_mulai, 0, 5) . ' - ' . substr($j->jam_selesai, 0, 5)) : '-';
-            $item->guru_nama   = $j?->kurikulum?->guru?->nama_guru ?? '-';
-            return $item;
-        });
+        $tahunAktif = TahunAjaran::where('instansi_id', $guru->instansi_id)->where('is_aktif', true)->first();
 
         $mapels = MataPelajaran::where('instansi_id', $guru->instansi_id)
             ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
@@ -220,6 +189,67 @@ class AbsensiController extends Controller
                 ->pluck('jurusan')->sort()->values();
         }
 
+        if ($myCombos->isEmpty()) {
+            return view('guru.absensi.rekap', array_merge(
+                compact('guru', 'mapels', 'mapelId', 'bulan', 'tahun', 'tingkat', 'jurusan', 'tingkatList', 'jurusanList'),
+                ['riwayat' => collect()]
+            ));
+        }
+
+        $filterJadwalIds = DB::table('jadwal')
+            ->join('kurikulum_kelas', 'jadwal.kurikulum_id', '=', 'kurikulum_kelas.id_kurikulum')
+            ->where(function ($q) use ($myCombos) {
+                foreach ($myCombos as $combo) {
+                    $q->orWhere(function ($qq) use ($combo) {
+                        $qq->where('kurikulum_kelas.kelas_id', $combo->kelas_id)
+                           ->where('kurikulum_kelas.mapel_id', $combo->mapel_id);
+                    });
+                }
+            })
+            ->pluck('jadwal.id_jadwal');
+
+        $semesterMulai = $tahunAktif?->tanggal_mulai?->startOfDay();
+        $semesterSelesai = $tahunAktif?->tanggal_selesai?->endOfDay();
+
+        $riwayat = Absensi::selectRaw('
+                jadwal_id,
+                tanggal,
+                COUNT(*) as total_siswa,
+                SUM(status = "Hadir") as hadir,
+                SUM(status = "Sakit") as sakit,
+                SUM(status = "Izin") as izin,
+                SUM(status = "Alpa") as alpa,
+                SUM(status = "Terlambat") as terlambat,
+                SUM(status = "Bolos") as bolos
+            ')
+            ->whereIn('jadwal_id', $filterJadwalIds)
+            ->when($semesterMulai && $semesterSelesai, fn ($q) => $q->whereBetween('tanggal', [$semesterMulai, $semesterSelesai]))
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
+            ->when($tingkat, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('tingkat', $tingkat)))
+            ->when($jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('nama_kelas', 'like', '% ' . $jurusan . ' %')))
+            ->groupBy('jadwal_id', 'tanggal')
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('jadwal_id')
+            ->get();
+
+        $jadwalIds = $riwayat->pluck('jadwal_id')->unique();
+        $jadwals = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran', 'kurikulum.guru'])
+            ->whereIn('id_jadwal', $jadwalIds)
+            ->get()
+            ->keyBy('id_jadwal');
+
+        $riwayat = $riwayat->transform(function ($item) use ($jadwals) {
+            $j = $jadwals->get($item->jadwal_id);
+            $item->kelas_nama  = $j?->kurikulum?->kelas?->nama_kelas ?? '-';
+            $item->mapel_nama  = $j?->kurikulum?->mataPelajaran?->nama_mapel ?? '-';
+            $item->jam         = $j ? (substr($j->jam_mulai, 0, 5) . ' - ' . substr($j->jam_selesai, 0, 5)) : '-';
+            $item->guru        = $j?->kurikulum?->guru;
+            $item->guru_nama   = $item->guru?->nama_guru ?? '-';
+            return $item;
+        });
+
         return view('guru.absensi.rekap', compact('riwayat', 'guru', 'mapels', 'mapelId', 'bulan', 'tahun', 'tingkat', 'jurusan', 'tingkatList', 'jurusanList'));
     }
 
@@ -231,7 +261,7 @@ class AbsensiController extends Controller
         ]);
 
         $guru = Auth::user()->guru;
-        $jadwal = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
+        $jadwal = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran', 'kurikulum.guru'])
             ->findOrFail($request->jadwal_id);
 
         abort_if($jadwal->kurikulum->kelas->instansi_id !== $guru->instansi_id, 403);

@@ -30,7 +30,9 @@ class SiswaController extends Controller
             $siswa = Siswa::with([
                 'user',
                 'registrasiAktif.kelas',
-                'registrasiAkademik' => fn ($q) => $q->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)),
+                'registrasiAkademik' => fn ($q) => $q
+                    ->with('kelas')
+                    ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)),
             ])
                 ->where('instansi_id', '=', $instansi->id_instansi)
                 ->select('siswa.*');
@@ -70,8 +72,8 @@ class SiswaController extends Controller
                     }
 
                     $regPindah = $row->registrasiAkademik->firstWhere('status', 'Pindah');
-                    if ($regPindah) {
-                        return '<span class="font-medium text-yellow-600 dark:text-yellow-400">Pindah</span>';
+                    if ($regPindah && $regPindah->kelas) {
+                        return $regPindah->kelas->nama_kelas . ' <span class="text-xs text-yellow-600 dark:text-yellow-400">(Pindah)</span>';
                     }
 
                     if ($row->registrasiAkademik->isNotEmpty()) {
@@ -87,6 +89,9 @@ class SiswaController extends Controller
                     }
                     if ($row->registrasiAktif) {
                         return '<span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">Aktif</span>';
+                    }
+                    if ($row->registrasiAkademik->firstWhere('status', 'Pindah')) {
+                        return '<span class="px-2 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pindah</span>';
                     }
                     return '<span class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-400">-</span>';
                 })

@@ -14,7 +14,40 @@
             @endcan
         </div>
 
-
+        {{-- Filter --}}
+        <div class="p-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
+            <div class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Kelas</label>
+                    <select id="filter-kelas" class="w-48 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        <option value="">Semua Kelas</option>
+                        @foreach($kelas as $k)
+                            <option value="{{ $k->id_kelas }}">{{ $k->nama_kelas }} (Tingkat {{ $k->tingkat }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Mata Pelajaran</label>
+                    <select id="filter-mapel" class="w-48 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        <option value="">Semua Mapel</option>
+                        @foreach($mapel as $m)
+                            <option value="{{ $m->id_mapel }}">{{ $m->nama_mapel }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Status Guru</label>
+                    <select id="filter-status" class="w-40 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        <option value="">Semua Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Keluar">Keluar</option>
+                        <option value="Pensiun">Pensiun</option>
+                        <option value="Pindah">Pindah</option>
+                        <option value="Mutasi">Mutasi</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
@@ -43,7 +76,12 @@
                     processing: true,
                     serverSide: true,
                     ajax: {
-                        url: '{{ route('admin.kurikulum.index') }}'
+                        url: '{{ route('admin.kurikulum.index') }}',
+                        data: function(d) {
+                            d.kelas_id = $('#filter-kelas').val();
+                            d.mapel_id = $('#filter-mapel').val();
+                            d.status_guru = $('#filter-status').val();
+                        }
                     },
                     columns: [{
                             data: 'DT_RowIndex',
@@ -70,7 +108,9 @@
                     }
                 });
 
-
+                $('#filter-kelas, #filter-mapel, #filter-status').on('change', function() {
+                    table.ajax.reload();
+                });
             });
         </script>
     @endpush

@@ -37,7 +37,7 @@
                 @if($siswa->transfer_token)
                     <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
                         Kode transfer: <strong class="text-sm text-yellow-700 dark:text-yellow-300">{{ $siswa->transfer_token }}</strong>
-                        <button onclick="navigator.clipboard.writeText('{{ $siswa->transfer_token }}')" class="ml-1 text-purple-600 hover:underline text-xs">Salin</button>
+                        <button onclick="navigator.clipboard.writeText('{{ $siswa->transfer_token }}').then(() => window.dispatchEvent(new CustomEvent('app-toast', { detail: { type: 'success', message: 'Kode berhasil disalin!' } })))" class="ml-1 text-purple-600 hover:underline text-xs">Salin</button>
                         @if($siswa->transfer_token_expires_at)
                             <span class="block text-xs mt-1">Berlaku sampai {{ $siswa->transfer_token_expires_at->format('j M Y H:i') }}</span>
                         @endif

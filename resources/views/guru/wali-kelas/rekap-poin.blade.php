@@ -1,50 +1,81 @@
 <x-layouts.admin>
-    <x-slot:title>Rekap Poin</x-slot:title>
+    <x-slot:title>Rekap Poin - {{ $kelasSaya->nama_kelas }}</x-slot:title>
 
     <div class="container px-6 mx-auto">
         <div class="my-6">
             <x-breadcrumb :items="[
-                ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
-                ['label' => 'Laporan', 'url' => route('admin.laporan.index')],
+                ['label' => 'Dashboard', 'url' => route('guru.dashboard')],
+                ['label' => 'Wali Kelas', 'url' => route('guru.wali-kelas.siswa-poin')],
                 ['label' => 'Rekap Poin'],
             ]" />
         </div>
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Rekap Poin Pelanggaran</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                    Rekap Poin Pelanggaran
+                </h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {{ ucfirst($bulanNama) }} {{ $request->tahun }}
+                    Kelas {{ $kelasSaya->nama_kelas }} — {{ ucfirst($bulanNama) }} {{ $tahun }}
                 </p>
             </div>
-            <div class="flex gap-2">
-                <form method="POST" action="{{ route('admin.laporan.export-poin-excel') }}" class="inline">
+            <a href="{{ route('guru.wali-kelas.log-poin') }}"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
+                ← Kembali
+            </a>
+        </div>
+
+        {{-- Filter + Export --}}
+        <div id="filter-section" class="p-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
+            <div class="flex flex-wrap items-end gap-4">
+                <form id="filter-form" method="GET" class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bulan</label>
+                        <select name="bulan" class="filter-select w-40 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            @foreach(range(1, 12) as $m)
+                                <option value="{{ $m }}" {{ (int)$bulan === $m ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tahun</label>
+                        <select name="tahun" class="filter-select w-24 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            @for($y = now()->year; $y >= now()->year - 2; $y--)
+                                <option value="{{ $y }}" {{ (int)$tahun === $y ? 'selected' : '' }}>{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </form>
+                <form method="POST" action="{{ route('guru.wali-kelas.rekap-poin.export-excel') }}">
                     @csrf
-                    <input type="hidden" name="kelas_id" value="{{ $request->kelas_id }}">
-                    <input type="hidden" name="bulan" value="{{ $request->bulan }}">
-                    <input type="hidden" name="tahun" value="{{ $request->tahun }}">
+                    <input type="hidden" name="bulan" value="{{ $bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $tahun }}">
                     <button type="submit"
                         class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
                         Excel
                     </button>
                 </form>
-                <form method="POST" action="{{ route('admin.laporan.export-poin-pdf') }}" class="inline">
+                <form method="POST" action="{{ route('guru.wali-kelas.rekap-poin.export-pdf') }}">
                     @csrf
-                    <input type="hidden" name="kelas_id" value="{{ $request->kelas_id }}">
-                    <input type="hidden" name="bulan" value="{{ $request->bulan }}">
-                    <input type="hidden" name="tahun" value="{{ $request->tahun }}">
+                    <input type="hidden" name="bulan" value="{{ $bulan }}">
+                    <input type="hidden" name="tahun" value="{{ $tahun }}">
                     <button type="submit"
                         class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
                         PDF
                     </button>
                 </form>
-                <a href="{{ route('admin.laporan.index') }}"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
-                    ← Kembali
-                </a>
             </div>
         </div>
 
-        <div class="w-full overflow-hidden rounded-lg shadow-xs">
+        {{-- Tabel --}}
+        <div id="table-section" class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
             @if($siswa->isNotEmpty())
                 <table id="tabel-rekap-poin" class="w-full whitespace-nowrap">
@@ -92,7 +123,10 @@
 
                 @push('scripts')
                 <script>
-                    $(document).ready(function() {
+                    function initTable() {
+                        if ($.fn.DataTable.isDataTable('#tabel-rekap-poin')) {
+                            $('#tabel-rekap-poin').DataTable().destroy();
+                        }
                         $('#tabel-rekap-poin').DataTable({
                             paging: true,
                             pageLength: 10,
@@ -102,11 +136,26 @@
                             searching: true,
                             language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
                         });
+                    }
+
+                    $(document).ready(function() {
+                        initTable();
+
+                        $('.filter-select').on('change', function() {
+                            var params = $('#filter-form').serialize();
+                            var url = window.location.pathname + '?' + params;
+
+                            $.get(url, function(html) {
+                                var newTable = $(html).find('#table-section').html();
+                                $('#table-section').html(newTable);
+                                initTable();
+                            });
+                        });
                     });
                 </script>
                 @endpush
             @else
-                <div class="w-full px-5 py-8 text-center text-gray-500">
+                <div class="w-full px-5 py-8 text-center text-gray-500 dark:text-gray-400">
                     Tidak ada data poin untuk periode ini.
                 </div>
             @endif

@@ -24,7 +24,7 @@
         </div>
 
         <div class="p-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                 <div>
                     <span class="text-gray-500 dark:text-gray-400">Kelas</span>
                     <p class="font-medium text-gray-700 dark:text-gray-200">{{ $jadwal->kurikulum->kelas->nama_kelas ?? '-' }}</p>
@@ -32,6 +32,19 @@
                 <div>
                     <span class="text-gray-500 dark:text-gray-400">Mata Pelajaran</span>
                     <p class="font-medium text-gray-700 dark:text-gray-200">{{ $jadwal->kurikulum->mataPelajaran->nama_mapel ?? '-' }}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400">Guru</span>
+                    <p class="font-medium text-gray-700 dark:text-gray-200">
+                        @if($g = $jadwal->kurikulum?->guru)
+                            {{ $g->nama_guru }}
+                            @if($g->status_label)
+                                <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $g->status_label }}</span>
+                            @endif
+                        @else
+                            -
+                        @endif
+                    </p>
                 </div>
                 <div>
                     <span class="text-gray-500 dark:text-gray-400">Jam</span>
@@ -67,6 +80,8 @@
                                     @php $siswa = $a->registrasi->siswa; @endphp
                                     @if($siswa && !$siswa->isAktif())
                                         <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $siswa->status_label }}</span>
+                                    @elseif($a->registrasi->status === 'Pindah')
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pindah</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm">{{ $a->registrasi->siswa->nisn ?? '-' }}</td>

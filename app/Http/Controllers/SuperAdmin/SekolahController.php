@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Guru;
 use App\Models\Instansi;
 use App\Models\OrangTua;
+use App\Models\OrtuSiswa;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -92,8 +93,9 @@ class SekolahController extends Controller
                 'email'       => $validated['admin_email'],
                 'password'    => Hash::make($validated['admin_password']),
                 'instansi_id' => $instansi->id_instansi,
-                'email_verified_at' => now(),
             ]);
+
+            $user->markEmailAsVerified();
 
             $user->assignRole('admin');
         });
@@ -168,7 +170,7 @@ class SekolahController extends Controller
         });
 
         return redirect()->route('superadmin.sekolah.index')
-            ->with('warning', "Sekolah beserta seluruh data (siswa, guru, kelas, absensi, dll) berhasil dihapus permanen!");
+            ->with('success', "Sekolah beserta seluruh data (siswa, guru, kelas, absensi, dll) berhasil dihapus permanen!");
     }
 
     public function assignAdmin(Instansi $instansi)
@@ -194,9 +196,9 @@ class SekolahController extends Controller
                 'email'       => $validated['email'],
                 'password'    => Hash::make($validated['password']),
                 'instansi_id' => $instansi->id_instansi,
-                'email_verified_at' => now(),
             ]);
 
+            $user->markEmailAsVerified();
             $user->assignRole('admin');
         });
 
@@ -221,12 +223,13 @@ class SekolahController extends Controller
             'password' => 'nullable|min:8',
         ]);
 
-        $updateData = ['name' => $validated['name'], 'email' => $validated['email'], 'email_verified_at' => now()];
+        $updateData = ['name' => $validated['name'], 'email' => $validated['email']];
         if (!empty($validated['password'])) {
             $updateData['password'] = Hash::make($validated['password']);
         }
 
         $user->update($updateData);
+        $user->markEmailAsVerified();
 
         return redirect()->route('superadmin.sekolah.assign-admin', $instansi->id_instansi)
             ->with('success', 'Admin berhasil diperbarui!');

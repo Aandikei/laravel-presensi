@@ -13,6 +13,40 @@
             </h2>
         </div>
 
+        {{-- Status & Transfer Info --}}
+        @php
+            $sedangMutasi = $guru->transfer_token && !$guru->isTransferTokenExpired();
+        @endphp
+        @if($sedangMutasi || !$guru->isAktif())
+            <div class="max-w-lg mb-4 p-4 rounded-lg border {{ $sedangMutasi ? 'bg-yellow-50 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-700' : 'bg-red-50 border-red-300 dark:bg-red-900/20 dark:border-red-700' }}">
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    @if($sedangMutasi)
+                        Status: <span class="text-yellow-600 dark:text-yellow-400">Mutasi ke {{ $guru->instansiTujuan->nama_instansi ?? '?' }}</span>
+                    @else
+                        Status: <span class="text-red-600 dark:text-red-400">{{ $guru->status_label ?? 'Tidak Aktif' }}</span>
+                    @endif
+                </h4>
+                @if($sedangMutasi && $guru->transfer_token)
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        Kode transfer: <strong class="text-sm text-yellow-700 dark:text-yellow-300">{{ $guru->transfer_token }}</strong>
+                        <button onclick="navigator.clipboard.writeText('{{ $guru->transfer_token }}').then(() => window.dispatchEvent(new CustomEvent('app-toast', { detail: { type: 'success', message: 'Kode berhasil disalin!' } })))" class="ml-1 text-purple-600 hover:underline text-xs">Salin</button>
+                        @if($guru->transfer_token_expires_at)
+                            <span class="block text-xs mt-1">Berlaku sampai {{ $guru->transfer_token_expires_at->format('j M Y H:i') }}</span>
+                        @endif
+                    </p>
+                @endif
+                @if($sedangMutasi)
+                    <form method="POST" action="{{ route('admin.guru.mutasi.batal', $guru) }}" class="inline"
+                        onsubmit="return confirm('Batalkan mutasi? Guru akan kembali aktif.')">
+                        @csrf
+                        <button type="submit" class="text-xs px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                            Batalkan Mutasi
+                        </button>
+                    </form>
+                @endif
+            </div>
+        @endif
+
         <div class="max-w-lg p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
             <form method="POST" action="{{ route('admin.guru.update', $guru) }}">
                 @csrf

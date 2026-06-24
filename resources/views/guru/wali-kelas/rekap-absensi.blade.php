@@ -25,12 +25,12 @@
         </div>
 
         {{-- Filter --}}
-        <div class="p-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
+        <div id="filter-section" class="p-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700">
             <div class="flex flex-wrap items-end gap-4">
-                <form method="GET" class="flex flex-wrap items-end gap-4">
+                <form id="filter-form" method="GET" class="flex flex-wrap items-end gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bulan</label>
-                        <select name="bulan" class="w-40 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        <select name="bulan" class="filter-select w-40 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
                             @foreach(range(1, 12) as $m)
                                 <option value="{{ $m }}" {{ (int)$bulan === $m ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
@@ -40,7 +40,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tahun</label>
-                        <select name="tahun" class="w-24 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        <select name="tahun" class="filter-select w-24 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
                             @for($y = now()->year; $y >= now()->year - 2; $y--)
                                 <option value="{{ $y }}" {{ (int)$tahun === $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
@@ -48,7 +48,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Mata Pelajaran</label>
-                        <select name="mapel_id" class="w-48 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                        <select name="mapel_id" class="filter-select w-48 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
                             <option value="">Semua Mapel</option>
                             @foreach($mapels as $mapel)
                                 <option value="{{ $mapel->id_mapel }}" {{ (int)$mapelId === $mapel->id_mapel ? 'selected' : '' }}>
@@ -57,9 +57,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
-                        Filter
-                    </button>
                 </form>
                 <form method="POST" action="{{ route('guru.wali-kelas.rekap-absensi.export-excel') }}">
                     @csrf
@@ -95,7 +92,7 @@
         </div>
 
         {{-- Tabel Grouped --}}
-        <div class="w-full overflow-hidden rounded-lg shadow-xs">
+        <div id="table-section" class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
                 @if($riwayat->isNotEmpty())
                 <table id="tabel-rekap" class="w-full whitespace-nowrap">
@@ -123,7 +120,16 @@
                             <td class="px-4 py-3 text-sm font-medium">{{ $r->kelas_nama }}</td>
                             <td class="px-4 py-3 text-sm">{{ $r->mapel_nama }}</td>
                             <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
-                            <td class="px-4 py-3 text-sm">{{ $r->guru_nama }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                {{ $r->guru_nama }}
+                                @if($r->guru && $r->guru->transfer_token && !$r->guru->isTransferTokenExpired())
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">Mutasi</span>
+                                @elseif($r->guru && $r->guru->instansi_id !== $kelasSaya->instansi_id)
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">Pindah</span>
+                                @elseif($r->guru && $r->guru->status_label)
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $r->guru->status_label }}</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>
                             <td class="px-4 py-3 text-sm text-center font-semibold text-green-600">{{ $r->hadir }}</td>
                             <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">{{ $r->sakit }}</td>
@@ -143,21 +149,38 @@
                 </table>
             </div>
             </div>
-            <div class="px-4 py-3 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
-                {{ $riwayat->links() }}
-            </div>
         </div>
     </div>
 
     @push('scripts')
     <script>
-        $(document).ready(function() {
+        function initTable() {
+            if ($.fn.DataTable.isDataTable('#tabel-rekap')) {
+                $('#tabel-rekap').DataTable().destroy();
+            }
             $('#tabel-rekap').DataTable({
-                paging: false,
-                info: false,
+                paging: true,
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                info: true,
                 ordering: true,
                 searching: true,
                 language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' }
+            });
+        }
+
+        $(document).ready(function() {
+            initTable();
+
+            $('.filter-select').on('change', function() {
+                var params = $('#filter-form').serialize();
+                var url = window.location.pathname + '?' + params;
+
+                $.get(url, function(html) {
+                    var newTable = $(html).find('#table-section').html();
+                    $('#table-section').html(newTable);
+                    initTable();
+                });
             });
         });
     </script>

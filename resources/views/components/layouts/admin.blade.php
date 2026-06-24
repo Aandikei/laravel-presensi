@@ -75,6 +75,9 @@
                                     @elseif(session('info'))
                                         this.show('info', {!! json_encode(session('info')) !!});
                                     @endif
+                                    window.addEventListener('app-toast', (e) => {
+                                        this.show(e.detail.type, e.detail.message);
+                                    });
                                 },
                                 show(type, message) {
                                     this.type = type;

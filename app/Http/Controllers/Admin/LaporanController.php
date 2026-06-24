@@ -72,7 +72,7 @@ class LaporanController extends Controller
             ->groupBy('absensi.jadwal_id', 'absensi.tanggal')
             ->orderBy('absensi.tanggal', 'desc')
             ->orderBy('absensi.jadwal_id')
-            ->paginate(50)->withQueryString();
+            ->get();
 
         $jadwalIds = $riwayat->pluck('jadwal_id')->unique();
         $jadwals = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran', 'kurikulum.guru'])
@@ -80,12 +80,14 @@ class LaporanController extends Controller
             ->get()
             ->keyBy('id_jadwal');
 
-        $riwayat->getCollection()->transform(function ($item) use ($jadwals) {
+        $riwayat = $riwayat->transform(function ($item) use ($jadwals) {
             $j = $jadwals->get($item->jadwal_id);
             $item->kelas_nama  = $j?->kurikulum?->kelas?->nama_kelas ?? '-';
             $item->mapel_nama  = $j?->kurikulum?->mataPelajaran?->nama_mapel ?? '-';
             $item->jam         = $j ? (substr($j->jam_mulai, 0, 5) . ' - ' . substr($j->jam_selesai, 0, 5)) : '-';
-            $item->guru_nama   = $j?->kurikulum?->guru?->nama_guru ?? '-';
+            $guru            = $j?->kurikulum?->guru;
+            $item->guru_nama = $guru?->nama_guru ?? '-';
+            $item->guru      = $guru;
             return $item;
         });
 
@@ -188,7 +190,6 @@ class LaporanController extends Controller
             ->orderBy('tingkat')->orderBy('nama_kelas')->get();
 
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
-            ->whereNull('status')
             ->when($request->kelas_id, fn($q) =>
                 $q->whereHas('registrasiAktif', fn($q) =>
                     $q->where('kelas_id', $request->kelas_id)
@@ -206,6 +207,7 @@ class LaporanController extends Controller
                 $s->total_poin = $s->logPoin->sum(fn($l) => $l->masterPoin->jumlah_poin ?? 0);
                 $s->status_poin = $s->total_poin >= 100 ? 'PERHATIAN'
                     : ($s->total_poin >= 50 ? 'WASPADA' : 'AMAN');
+                $s->tanggal_terakhir = $s->logPoin->max('tanggal');
                 return $s;
             });
 
