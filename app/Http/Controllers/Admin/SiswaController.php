@@ -11,6 +11,7 @@ use App\Models\RegistrasiAkademik;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -193,6 +194,92 @@ class SiswaController extends Controller
         ]);
     }
 
+    public function cekNisn(Request $request)
+    {
+        $existing = Siswa::with('instansi')->where('nisn', $request->nisn)->first();
+
+        if (!$existing) {
+            return response()->json(['found' => false]);
+        }
+
+        $sameInstansi = $existing->instansi_id === Auth::user()->getInstansi()->id_instansi;
+
+        $reg = $existing->registrasiAkademik();
+        $hasActive = (clone $reg)->aktif()->exists();
+        $hasPindah = (clone $reg)->where('status', 'Pindah')->exists();
+        $hasAlumni = (clone $reg)->alumni()->exists();
+
+        $instansi = Auth::user()->getInstansi();
+
+        // ── Same school ──
+        if ($sameInstansi && $hasActive) {
+            return response()->json([
+                'found' => true,
+                'same_instansi' => true,
+                'nama' => $existing->nama_siswa,
+            ]);
+        }
+
+        if ($sameInstansi && $hasPindah) {
+            return response()->json([
+                'found' => true,
+                'same_instansi' => true,
+                'status' => 'Pindah',
+                'nama' => $existing->nama_siswa,
+            ]);
+        }
+
+        if ($sameInstansi && !$existing->isAktif()) {
+            return response()->json([
+                'found' => true,
+                'same_instansi' => true,
+                'status' => 'Keluar',
+                'siswa_id' => $existing->id_siswa,
+                'nama' => $existing->nama_siswa,
+            ]);
+        }
+
+        // ── Cross-school ──
+        $currentTk = $instansi->tingkat_min;
+        $studentTk = $existing->instansi->tingkat_min;
+
+        $isKeluar = !$existing->isAktif();
+        $isAlumni = $hasAlumni && !$isKeluar;
+
+        if ($isKeluar) {
+            // Keluar: blokir hanya turun jenjang
+            if ($currentTk < $studentTk) {
+                return $this->blockedResponse($existing, 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.');
+            }
+            return $this->daftarUlangResponse($existing, 'Keluar');
+        }
+
+        if ($isAlumni) {
+            // Alumni: hanya boleh naik jenjang
+            if ($currentTk <= $studentTk) {
+                return $this->blockedResponse($existing, 'Tidak bisa mendaftarkan ulang alumni ke jenjang yang sama atau lebih rendah.');
+            }
+            return $this->daftarUlangResponse($existing, 'Alumni');
+        }
+
+        // Pindah / Aktif dari luar: hanya boleh sama jenjang
+        if ($hasPindah || $hasActive) {
+            if ($currentTk !== $studentTk) {
+                return $this->blockedResponse($existing, 'Pindahan siswa hanya bisa diterima untuk jenjang yang sama.');
+            }
+            return response()->json([
+                'found' => true,
+                'same_instansi' => false,
+                'action' => 'pindah',
+                'nama' => $existing->nama_siswa,
+                'instansi' => $existing->instansi->nama_instansi,
+            ]);
+        }
+
+        // Fallback: ada catatan tapi ga jelas statusnya → blok
+        return $this->blockedResponse($existing, 'Status siswa tidak dikenali.');
+    }
+
     public function create()
     {
         $instansi = Auth::user()->getInstansi();
@@ -213,8 +300,15 @@ class SiswaController extends Controller
         if ($request->nisn) {
             $existing = Siswa::where('nisn', $request->nisn)->with('instansi')->first();
             if ($existing && $existing->instansi_id !== $instansi->id_instansi) {
+                $currentTk = $instansi->tingkat_min;
+                $studentTk = $existing->instansi->tingkat_min;
+
                 // Jika siswa sudah ditandai Keluar, langsung ke daftar ulang
                 if (!$existing->isAktif()) {
+                    if ($currentTk < $studentTk) {
+                        return redirect()->back()->with('error', 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.')
+                            ->withInput();
+                    }
                     return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
                         ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah tidak aktif di {$existing->instansi->nama_instansi}. Silakan daftarkan ulang.");
                 }
@@ -229,20 +323,31 @@ class SiswaController extends Controller
                     ->where('status', 'Pindah')
                     ->exists();
 
-                $hasAnyReg = $existing->registrasiAkademik()->exists();
+                $hasAlumni = $existing->registrasiAkademik()->alumni()->exists();
 
                 if ($hasActive || $hasPindah) {
+                    // Pindah/Aktif dari luar: hanya boleh sama jenjang
+                    if ($currentTk !== $studentTk) {
+                        return redirect()->back()->with('error', 'Pindahan siswa hanya bisa diterima untuk jenjang yang sama.')
+                            ->withInput();
+                    }
                     return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
                         ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah terdaftar di {$existing->instansi->nama_instansi}. Gunakan form Pindah Masuk di bawah untuk memindahkan siswa ini ke sekolah Anda.");
                 }
 
-                if (! $hasAnyReg) {
-                    return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
-                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) terdaftar di {$existing->instansi->nama_instansi} namun belum memiliki data kelas. Minta sekolah asal untuk mendaftarkan ke kelas dan membuat kode transfer.");
+                if ($hasAlumni) {
+                    // Alumni: hanya boleh naik jenjang
+                    if ($currentTk <= $studentTk) {
+                        return redirect()->back()->with('error', 'Tidak bisa mendaftarkan ulang alumni ke jenjang yang sama atau lebih rendah.')
+                            ->withInput();
+                    }
+                    return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
+                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah lulus dari {$existing->instansi->nama_instansi}. Silakan lengkapi data untuk mendaftarkan ulang.");
                 }
 
-                return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
-                    ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah lulus dari {$existing->instansi->nama_instansi}. Silakan lengkapi data untuk mendaftarkan ulang.");
+                // Tidak punya registrasi alias → pindah form (fallback)
+                return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
+                    ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) terdaftar di {$existing->instansi->nama_instansi} namun belum memiliki data kelas. Minta sekolah asal untuk mendaftarkan ke kelas dan membuat kode transfer.");
             }
         }
 
@@ -470,21 +575,38 @@ class SiswaController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
 
-        abort_if($siswa->instansi_id === $instansi->id_instansi, 403, 'Siswa sudah terdaftar di sekolah ini.');
+        // Hanya blokir jika siswa masih punya registrasi AKTIF di sekolah ini
+        $hasActive = $siswa->registrasiAkademik()
+            ->aktif()
+            ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
+            ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $instansi->id_instansi))
+            ->exists();
+        abort_if($hasActive, 403, 'Siswa masih aktif dan harus menggunakan Pindah Masuk.');
 
-        // Jika siswa masih aktif (bukan Keluar), cek registrasi aktif
-        if ($siswa->isAktif()) {
-            $hasActive = $siswa->registrasiAkademik()
-                ->aktif()
-                ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
-                ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $siswa->instansi_id))
-                ->exists();
-            abort_if($hasActive, 403, 'Siswa masih aktif dan harus menggunakan Pindah Masuk.');
+        $currentTk = $instansi->tingkat_min;
+        $studentTk = $siswa->instansi->tingkat_min;
+
+        $isKeluar = !$siswa->isAktif();
+        $isAlumni = !$isKeluar && $siswa->registrasiAkademik()->alumni()->exists();
+
+        if ($isKeluar) {
+            // Keluar: blokir hanya turun jenjang
+            if ($currentTk < $studentTk) {
+                return redirect()->back()->with('error', 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.');
+            }
+        } elseif ($isAlumni) {
+            // Alumni: hanya boleh naik jenjang
+            if ($currentTk <= $studentTk) {
+                return redirect()->back()->with('error', 'Tidak bisa mendaftarkan ulang alumni ke jenjang yang sama atau lebih rendah.');
+            }
+        } else {
+            // Pindah / Aktif dari luar: hanya boleh sama jenjang
+            if ($currentTk !== $studentTk) {
+                return redirect()->back()->with('error', 'Pindahan siswa hanya bisa diterima untuk jenjang yang sama.');
+            }
+            return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $siswa->nisn])
+                ->with('info', 'Siswa ini harus menggunakan Pindah Masuk.');
         }
-
-        // Cegah daftar ulang ke jenjang yang lebih rendah
-        $siswaInstansi = $siswa->instansi;
-        abort_if($instansi->tingkat_min < $siswaInstansi->tingkat_min, 403, 'Tidak bisa mendaftarkan alumni ke jenjang yang lebih rendah.');
 
         $siswa->load(['user', 'orangTua.user', 'instansi']);
 
@@ -720,5 +842,29 @@ class SiswaController extends Controller
             },
             $filename
         );
+    }
+
+    private function blockedResponse(Siswa $siswa, string $message): JsonResponse
+    {
+        return response()->json([
+            'found' => true,
+            'same_instansi' => false,
+            'blocked' => true,
+            'message' => $message,
+            'nama' => $siswa->nama_siswa,
+        ]);
+    }
+
+    private function daftarUlangResponse(Siswa $siswa, string $status): JsonResponse
+    {
+        return response()->json([
+            'found' => true,
+            'same_instansi' => false,
+            'action' => 'daftar-ulang',
+            'status' => $status,
+            'siswa_id' => $siswa->id_siswa,
+            'nama' => $siswa->nama_siswa,
+            'instansi' => $siswa->instansi->nama_instansi,
+        ]);
     }
 }

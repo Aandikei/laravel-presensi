@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
     // Siswa — manage (hanya admin & kasek)
     Route::middleware('permission:manage-siswa')->group(function () {
         Route::get('siswa/cek-email-ortu', [SiswaController::class, 'cekEmailOrtu'])->name('siswa.cek-email-ortu');
+        Route::get('siswa/cek-nisn', [SiswaController::class, 'cekNisn'])->name('siswa.cek-nisn');
         Route::get('siswa/create', [SiswaController::class, 'create'])->name('siswa.create');
         Route::get('siswa/template', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
         Route::get('siswa/daftar-ulang/{siswa}', [SiswaController::class, 'formDaftarUlang'])->name('siswa.daftar-ulang');

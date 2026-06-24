@@ -28,7 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $current  = url()->current();
 
         if ($previous && $previous !== $current && $previous !== url('/')) {
-            return redirect($previous)->with('error', 'Kamu tidak memiliki akses ke halaman tersebut.');
+            $message = $e->getMessage();
+            if (!$message || str_starts_with($message, 'User does not have')) {
+                $message = 'Kamu tidak memiliki akses ke halaman tersebut.';
+            }
+            return redirect($previous)->with('error', $message);
         }
 
         // Kalau tidak ada previous, redirect ke dashboard sesuai role
