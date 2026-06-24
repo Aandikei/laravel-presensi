@@ -39,13 +39,13 @@
                         @if($guru = $jadwal->kurikulum?->guru)
                             {{ $guru->nama_guru }}
                             @if($guru->transfer_token && !$guru->isTransferTokenExpired())
-                                <span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">Mutasi</span>
+                                <span class="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">Mutasi</span>
                             @elseif($guru->instansi_id !== auth()->user()->instansi_id)
-                                <span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Pindah</span>
+                                <span class="px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">Pindah</span>
                             @elseif($guru->status === 'Keluar')
-                                <span class="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">Keluar</span>
+                                <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">Keluar</span>
                             @elseif($guru->status === 'Pensiun')
-                                <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">Pensiun</span>
+                                <span class="px-2 py-0.5 text-xs font-semibold text-gray-700 bg-gray-200 rounded-full dark:bg-gray-600 dark:text-gray-300">Pensiun</span>
                             @endif
                         @else
                             -
@@ -138,6 +138,8 @@
                                     <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $siswa->status_label }}</span>
                                 @elseif($item->registrasi->status === 'Pindah')
                                     <span class="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pindah</span>
+                                @elseif($item->registrasi->status === 'Keluar')
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">Keluar</span>
                                 @endif
                             </td>
                             <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">

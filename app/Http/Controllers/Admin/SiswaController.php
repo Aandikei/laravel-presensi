@@ -56,7 +56,7 @@ class SiswaController extends Controller
                     ->whereHas('registrasiAkademik', fn ($q) => $q
                         ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)))
                     ->whereDoesntHave('registrasiAkademik', fn ($q) => $q
-                        ->where('status', 'Pindah')
+                        ->whereIn('status', ['Pindah', 'Keluar'])
                         ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)));
             } elseif ($request->status === 'belum_terdaftar') {
                 $siswa->whereDoesntHave('registrasiAkademik', fn ($q) => $q
@@ -74,6 +74,11 @@ class SiswaController extends Controller
                     $regPindah = $row->registrasiAkademik->firstWhere('status', 'Pindah');
                     if ($regPindah && $regPindah->kelas) {
                         return $regPindah->kelas->nama_kelas . ' <span class="text-xs text-yellow-600 dark:text-yellow-400">(Pindah)</span>';
+                    }
+
+                    $regKeluar = $row->registrasiAkademik->firstWhere('status', 'Keluar');
+                    if ($regKeluar && $regKeluar->kelas) {
+                        return $regKeluar->kelas->nama_kelas . ' <span class="text-xs text-red-600 dark:text-red-400">(Keluar)</span>';
                     }
 
                     if ($row->registrasiAkademik->isNotEmpty()) {
@@ -208,6 +213,12 @@ class SiswaController extends Controller
         if ($request->nisn) {
             $existing = Siswa::where('nisn', $request->nisn)->with('instansi')->first();
             if ($existing && $existing->instansi_id !== $instansi->id_instansi) {
+                // Jika siswa sudah ditandai Keluar, langsung ke daftar ulang
+                if (!$existing->isAktif()) {
+                    return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
+                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah tidak aktif di {$existing->instansi->nama_instansi}. Silakan daftarkan ulang.");
+                }
+
                 $hasActive = $existing->registrasiAkademik()
                     ->aktif()
                     ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
@@ -355,6 +366,7 @@ class SiswaController extends Controller
         }
 
         DB::transaction(function () use ($siswa) {
+            $siswa->registrasiAktif()?->update(['status' => 'Keluar', 'tanggal_mutasi' => now()]);
             $this->nonaktifkanSiswa($siswa);
             $siswa->markAsKeluar();
         });
@@ -373,6 +385,9 @@ class SiswaController extends Controller
 
         DB::transaction(function () use ($siswa) {
             $siswa->update(['status' => null]);
+            $siswa->registrasiAkademik()
+                ->where('status', 'Keluar')
+                ->update(['status' => 'Aktif', 'tanggal_mutasi' => null]);
             $siswa->user->assignRole('siswa');
         });
 
@@ -457,12 +472,15 @@ class SiswaController extends Controller
 
         abort_if($siswa->instansi_id === $instansi->id_instansi, 403, 'Siswa sudah terdaftar di sekolah ini.');
 
-        $hasActive = $siswa->registrasiAkademik()
-            ->aktif()
-            ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
-            ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $siswa->instansi_id))
-            ->exists();
-        abort_if($hasActive, 403, 'Siswa masih aktif dan harus menggunakan Pindah Masuk.');
+        // Jika siswa masih aktif (bukan Keluar), cek registrasi aktif
+        if ($siswa->isAktif()) {
+            $hasActive = $siswa->registrasiAkademik()
+                ->aktif()
+                ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
+                ->whereHas('kelas', fn ($q) => $q->where('instansi_id', $siswa->instansi_id))
+                ->exists();
+            abort_if($hasActive, 403, 'Siswa masih aktif dan harus menggunakan Pindah Masuk.');
+        }
 
         // Cegah daftar ulang ke jenjang yang lebih rendah
         $siswaInstansi = $siswa->instansi;
@@ -522,6 +540,9 @@ class SiswaController extends Controller
                     'name' => $siswa->nama_siswa,
                     'password' => Hash::make($siswa->nisn),
                 ]);
+                if (!$oldUser->hasRole('siswa')) {
+                    $oldUser->assignRole('siswa');
+                }
                 $userSiswa = $oldUser;
             } else {
                 $userSiswa = User::create([
@@ -538,6 +559,7 @@ class SiswaController extends Controller
             $siswa->update([
                 'user_id' => $userSiswa->id,
                 'instansi_id' => $instansi->id_instansi,
+                'status' => null,
             ]);
 
             $siswa->logPoin()->delete();
