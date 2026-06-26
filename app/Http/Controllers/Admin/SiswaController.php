@@ -253,19 +253,9 @@ class SiswaController extends Controller
         $isKeluar = !$existing->isAktif();
 
         if ($isKeluar) {
-            // Keluar: blokir turun, sama → pindah, naik → daftar-ulang
+            // Keluar: blokir hanya turun jenjang
             if ($currentTk < $studentTk) {
                 return $this->blockedResponse($existing, 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.');
-            }
-            if ($currentTk === $studentTk) {
-                return response()->json([
-                    'found' => true,
-                    'same_instansi' => false,
-                    'action' => 'pindah',
-                    'nama' => $existing->nama_siswa,
-                    'instansi' => $existing->instansi->nama_instansi,
-                    'status' => 'Keluar',
-                ]);
             }
             return $this->daftarUlangResponse($existing, 'Keluar');
         }
@@ -320,18 +310,14 @@ class SiswaController extends Controller
                 $currentTk = $instansi->tingkat_min;
                 $studentTk = $existing->instansi->tingkat_min;
 
-                // Jika siswa sudah ditandai Keluar
+                // Jika siswa sudah ditandai Keluar, langsung ke daftar ulang
                 if (!$existing->isAktif()) {
                     if ($currentTk < $studentTk) {
                         return redirect()->back()->with('error', 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.')
                             ->withInput();
                     }
-                    if ($currentTk === $studentTk) {
-                        return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $request->nisn])
-                            ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) ditandai Keluar di {$existing->instansi->nama_instansi}. Karena jenjang sama, gunakan form Pindah Masuk.");
-                    }
                     return redirect()->route('admin.siswa.daftar-ulang', $existing->id_siswa)
-                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) ditandai Keluar di {$existing->instansi->nama_instansi}. Silakan daftarkan ulang.");
+                        ->with('info', "Siswa dengan NISN {$request->nisn} ({$existing->nama_siswa}) sudah tidak aktif di {$existing->instansi->nama_instansi}. Silakan daftarkan ulang.");
                 }
 
                 $hasActive = $existing->registrasiAkademik()
@@ -613,13 +599,9 @@ class SiswaController extends Controller
         $hasAlumni = $siswa->registrasiAkademik()->alumni()->exists();
 
         if ($isKeluar) {
-            // Keluar: blokir turun, sama → pindah, naik → daftar-ulang
+            // Keluar: blokir hanya turun jenjang
             if ($currentTk < $studentTk) {
                 return redirect()->back()->with('error', 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.');
-            }
-            if ($currentTk === $studentTk) {
-                return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $siswa->nisn])
-                    ->with('info', 'Siswa ini ditandai Keluar di jenjang yang sama. Gunakan Pindah Masuk.');
             }
         } elseif ($hasPindahAny || $hasActiveAny) {
             // Pindah/Aktif dari luar: hanya boleh sama jenjang
@@ -687,10 +669,6 @@ class SiswaController extends Controller
         if ($isKeluar) {
             if ($currentTk < $studentTk) {
                 abort(403, 'Tidak bisa mendaftarkan ulang siswa dari jenjang lebih tinggi ke jenjang yang lebih rendah.');
-            }
-            if ($currentTk === $studentTk) {
-                return redirect()->route('admin.siswa.pindah.form-masuk', ['nisn' => $siswa->nisn])
-                    ->with('info', 'Siswa ini ditandai Keluar di jenjang yang sama. Gunakan Pindah Masuk.');
             }
         } elseif ($hasPindahAny || $hasActiveAny) {
             if ($currentTk !== $studentTk) {

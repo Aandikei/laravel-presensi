@@ -21,7 +21,7 @@
             <label class="block text-sm">
                 <span class="text-gray-700 dark:text-gray-400">NISN</span>
                 <input type="text" id="nisn" value="{{ old('nisn') }}"
-                    class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nisn') border-red-500 @enderror" autocomplete="off" autofocus />
+                    class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nisn') border-red-500 @enderror" autocomplete="off" autofocus/>
                 <span id="nisn-loading" class="hidden text-xs text-blue-600 dark:text-blue-400 mt-1">Mengecek...</span>
                 @error('nisn')
                     <span class="text-xs text-red-500">{{ $message }}</span>
@@ -61,7 +61,7 @@
 
             <div id="result-pindah" class="hidden p-6 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800">
                 <div class="px-4 py-3 text-sm text-yellow-700 bg-yellow-100 rounded-lg dark:bg-yellow-900/30 dark:text-yellow-300">
-                    Siswa <strong id="pindah-nama"></strong> <span id="pindah-label">masih terdaftar di</span> <strong id="pindah-instansi"></strong>.
+                    Siswa <strong id="pindah-nama"></strong> masih terdaftar di <strong id="pindah-instansi"></strong>.
                     <a id="pindah-link" href="{{ route('admin.siswa.pindah.form-masuk') }}" class="block mt-2 text-purple-600 hover:underline font-medium">Terima Pindahan →</a>
                 </div>
             </div>
@@ -310,7 +310,6 @@
 
                         if (data.action === 'pindah') {
                             document.getElementById('pindah-nama').textContent = data.nama;
-                            document.getElementById('pindah-label').textContent = data.status === 'Keluar' ? 'ditandai Keluar dari' : 'masih terdaftar di';
                             document.getElementById('pindah-instansi').textContent = data.instansi;
                             document.getElementById('pindah-link').href = '{{ route("admin.siswa.pindah.form-masuk") }}?nisn=' + encodeURIComponent(nisn);
                             resultPindah.classList.remove('hidden');
