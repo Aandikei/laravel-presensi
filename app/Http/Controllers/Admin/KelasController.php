@@ -126,6 +126,16 @@ class KelasController extends Controller
 
         $validated['nama_kelas'] = strtoupper($validated['nama_kelas']);
 
+        $exists = Kelas::where('nama_kelas', $validated['nama_kelas'])
+            ->where('tingkat', $validated['tingkat'])
+            ->where('instansi_id', $instansi->id_instansi)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Kelas ' . $validated['nama_kelas'] . ' (Tingkat ' . $validated['tingkat'] . ') sudah ada!')
+                ->withInput();
+        }
+
         Kelas::create([
             ...$validated,
             'instansi_id' => $instansi->id_instansi,
@@ -168,6 +178,17 @@ class KelasController extends Controller
         ]);
 
         $validated['nama_kelas'] = strtoupper($validated['nama_kelas']);
+
+        $exists = Kelas::where('nama_kelas', $validated['nama_kelas'])
+            ->where('tingkat', $validated['tingkat'])
+            ->where('instansi_id', $kelas->instansi_id)
+            ->where('id_kelas', '!=', $kelas->id_kelas)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Kelas ' . $validated['nama_kelas'] . ' (Tingkat ' . $validated['tingkat'] . ') sudah ada!')
+                ->withInput();
+        }
 
         $kelas->update($validated);
 

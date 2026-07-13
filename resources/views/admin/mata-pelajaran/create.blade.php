@@ -27,10 +27,13 @@
                 </label>
 
                 <label class="block text-sm mb-4">
-                    <span class="text-gray-700 dark:text-gray-400">Kode Mapel <span class="text-gray-400">(opsional)</span></span>
+                    <span class="text-gray-700 dark:text-gray-400">Kode Mapel</span>
                     <input type="text" name="kode_mapel" value="{{ old('kode_mapel') }}"
                         placeholder="contoh: MTK"
-                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
+                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('kode_mapel') border-red-500 @enderror" />
+                    @error('kode_mapel')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
                 </label>
 
                 <label class="block text-sm mb-4">

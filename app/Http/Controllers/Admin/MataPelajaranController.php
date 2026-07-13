@@ -75,7 +75,7 @@ class MataPelajaranController extends Controller
 
         $validated = $request->validate([
             'nama_mapel'  => 'required|string|max:255',
-            'kode_mapel'  => 'nullable|string|max:20',
+            'kode_mapel'  => 'required|string|max:20|unique:mata_pelajaran,kode_mapel,NULL,id_mapel,instansi_id,'.$instansi->id_instansi,
             'kelompok'    => $kelompokRule,
         ]);
 
@@ -105,7 +105,7 @@ class MataPelajaranController extends Controller
 
         $validated = $request->validate([
             'nama_mapel' => 'required|string|max:255',
-            'kode_mapel' => 'nullable|string|max:20',
+            'kode_mapel' => 'required|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id_mapel.',id_mapel,instansi_id,'.$mataPelajaran->instansi_id,
             'kelompok'   => $kelompokRule,
         ]);
 

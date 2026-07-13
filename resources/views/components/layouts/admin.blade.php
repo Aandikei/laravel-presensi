@@ -98,6 +98,13 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     @stack('scripts')
+
+    <script>
+        document.addEventListener('submit', function(e) {
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn) btn.disabled = true;
+        });
+    </script>
 </body>
 
 </html>

@@ -35,6 +35,10 @@ return new class extends Migration
         Schema::table('kelas', function (Blueprint $table) {
             $table->dropColumn('tahun_id');
         });
+
+        Schema::table('kelas', function (Blueprint $table) {
+            $table->unique(['nama_kelas', 'tingkat', 'instansi_id']);
+        });
     }
 
     /**
@@ -42,6 +46,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('kelas', function (Blueprint $table) {
+            $table->dropUnique(['nama_kelas', 'tingkat', 'instansi_id']);
+        });
+
         Schema::table('kelas', function (Blueprint $table) {
             $table->unsignedBigInteger('tahun_id')->nullable()->after('instansi_id');
             $table->foreign('tahun_id')->references('id_tahun')->on('tahun_ajaran')->cascadeOnDelete();

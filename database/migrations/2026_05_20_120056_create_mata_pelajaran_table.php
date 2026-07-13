@@ -15,12 +15,12 @@ return new class extends Migration
             $table->bigIncrements('id_mapel');
             $table->unsignedBigInteger('instansi_id');
             $table->string('nama_mapel');
-            $table->string('kode_mapel')->nullable();
+            $table->string('kode_mapel', 20);
             $table->enum('kelompok', ['Umum', 'Jurusan', 'Muatan Lokal']);
             $table->timestamps();
 
             $table->foreign('instansi_id')->references('id_instansi')->on('instansi')->cascadeOnDelete();
-            $table->index('instansi_id');
+            $table->unique(['kode_mapel', 'instansi_id']);
         });
     }
 
