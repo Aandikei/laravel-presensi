@@ -240,6 +240,25 @@ class NaikKelasController extends Controller
 
     private function aktivasiTahunAjaran(int $tahunId, int $instansiId): void
     {
+        $target = TahunAjaran::findOrFail($tahunId);
+        $activeNow = TahunAjaran::where('instansi_id', $instansiId)->where('is_aktif', true)->first();
+
+        if ($activeNow && $activeNow->id_tahun !== $target->id_tahun) {
+            $selisih = $activeNow->tahun_mulai - $target->tahun_mulai;
+
+            abort_if($selisih > 1, 422, "Tidak bisa mengaktifkan {$target->nama_tahun} karena {$activeNow->nama_tahun} sudah aktif dan lebih baru 2 tahun atau lebih.");
+
+            if ($selisih === 1) {
+                $hasRegistrasi = $activeNow->registrasiAkademik()->aktif()->exists();
+                abort_if($hasRegistrasi, 422, "Tidak bisa mengaktifkan {$target->nama_tahun} karena {$activeNow->nama_tahun} sudah memiliki data registrasi siswa.");
+            }
+
+            if ($selisih === 0 && $activeNow->semester === 'Genap' && $target->semester === 'Ganjil') {
+                $hasRegistrasi = $activeNow->registrasiAkademik()->aktif()->exists();
+                abort_if($hasRegistrasi, 422, "Tidak bisa mengaktifkan {$target->nama_tahun} Ganjil karena {$activeNow->nama_tahun} Genap sudah memiliki data registrasi siswa.");
+            }
+        }
+
         // Nonaktifkan semua tahun ajaran instansi ini
         TahunAjaran::where('instansi_id', $instansiId)
             ->update(['is_aktif' => false]);

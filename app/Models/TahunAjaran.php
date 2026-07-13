@@ -41,6 +41,21 @@ class TahunAjaran extends Model
         return $this->hasMany(RegistrasiAkademik::class, 'tahun_id', 'id_tahun');
     }
 
+    public function getTahunMulaiAttribute(): int
+    {
+        return (int) explode('/', $this->nama_tahun)[0];
+    }
+
+    public function hasRegistrasiAktif(): bool
+    {
+        return $this->registrasiAkademik()->aktif()->exists();
+    }
+
+    public function scopeAktif($query)
+    {
+        return $query->where('is_aktif', true);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'id_tahun';

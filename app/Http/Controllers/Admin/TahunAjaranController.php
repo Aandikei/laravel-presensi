@@ -12,11 +12,31 @@ class TahunAjaranController extends Controller
     public function index()
     {
         $instansi = Auth::user()->getInstansi();
-        
+
         $tahunAjaran = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->withCount(['registrasiAkademik' => fn ($q) => $q->aktif()])
             ->orderByDesc('is_aktif')
             ->orderByDesc('created_at')
             ->get();
+
+        $activeNow = $tahunAjaran->firstWhere('is_aktif', true);
+        $activeHasRegistrasi = $activeNow ? $activeNow->registrasi_akademik_count > 0 : false;
+
+        $tahunAjaran->each(function ($item) use ($activeNow, $activeHasRegistrasi) {
+            $item->can_activate = true;
+
+            if ($activeNow && $activeNow->id_tahun !== $item->id_tahun) {
+                $selisih = $activeNow->tahun_mulai - $item->tahun_mulai;
+
+                if ($selisih > 1) {
+                    $item->can_activate = false;
+                } elseif ($selisih === 1) {
+                    $item->can_activate = !$activeHasRegistrasi;
+                } elseif ($selisih === 0 && $activeNow->semester === 'Genap' && $item->semester === 'Ganjil') {
+                    $item->can_activate = !$activeHasRegistrasi;
+                }
+            }
+        });
 
         return view('admin.tahun-ajaran.index', compact('tahunAjaran'));
     }
@@ -31,11 +51,18 @@ class TahunAjaranController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         $validated = $request->validate([
-            'nama_tahun'      => 'required|string',
+            'nama_tahun'      => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'],
             'semester'        => 'required|in:Ganjil,Genap',
             'tanggal_mulai'   => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
         ]);
+
+        [$tahun1, $tahun2] = explode('/', $validated['nama_tahun']);
+        if ((int)$tahun2 !== (int)$tahun1 + 1) {
+            return back()->withErrors([
+                'nama_tahun' => 'Format tahun ajaran tidak valid. Contoh: 2026/2027'
+            ])->withInput();
+        }
 
         // Cek duplikat
         $exists = TahunAjaran::where('instansi_id', $instansi->id_instansi)
@@ -49,10 +76,14 @@ class TahunAjaranController extends Controller
             ])->withInput();
         }
 
+        $hasActive = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->where('is_aktif', true)
+            ->exists();
+
         TahunAjaran::create([
             ...$validated,
             'instansi_id' => $instansi->id_instansi,
-            'is_aktif'    => false,
+            'is_aktif'    => !$hasActive,
         ]);
 
         return redirect()->route('admin.tahun-ajaran.index')
@@ -70,11 +101,18 @@ class TahunAjaranController extends Controller
         $this->authorizeInstansi($tahunAjaran);
 
         $validated = $request->validate([
-            'nama_tahun'      => 'required|string',
+            'nama_tahun'      => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'],
             'semester'        => 'required|in:Ganjil,Genap',
             'tanggal_mulai'   => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
         ]);
+
+        [$tahun1, $tahun2] = explode('/', $validated['nama_tahun']);
+        if ((int)$tahun2 !== (int)$tahun1 + 1) {
+            return back()->withErrors([
+                'nama_tahun' => 'Format tahun ajaran tidak valid. Contoh: 2026/2027'
+            ])->withInput();
+        }
 
         $tahunAjaran->update($validated);
 
@@ -100,6 +138,32 @@ class TahunAjaranController extends Controller
     {
         $this->authorizeInstansi($tahunAjaran);
         $instansi = Auth::user()->getInstansi();
+
+        $activeNow = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->where('is_aktif', true)
+            ->first();
+
+        if ($activeNow && $activeNow->id_tahun !== $tahunAjaran->id_tahun) {
+            $selisih = $activeNow->tahun_mulai - $tahunAjaran->tahun_mulai;
+
+            if ($selisih > 1) {
+                return back()->with('error', "Tidak bisa mengaktifkan {$tahunAjaran->nama_tahun} karena {$activeNow->nama_tahun} sudah aktif dan lebih baru 2 tahun atau lebih.");
+            }
+
+            if ($selisih === 1) {
+                $hasRegistrasi = $activeNow->registrasiAkademik()->aktif()->exists();
+                if ($hasRegistrasi) {
+                    return back()->with('error', "Tidak bisa mengaktifkan {$tahunAjaran->nama_tahun} karena {$activeNow->nama_tahun} sudah memiliki data registrasi siswa.");
+                }
+            }
+
+            if ($selisih === 0 && $activeNow->semester === 'Genap' && $tahunAjaran->semester === 'Ganjil') {
+                $hasRegistrasi = $activeNow->registrasiAkademik()->aktif()->exists();
+                if ($hasRegistrasi) {
+                    return back()->with('error', "Tidak bisa mengaktifkan {$tahunAjaran->nama_tahun} Ganjil karena {$activeNow->nama_tahun} Genap sudah memiliki data registrasi siswa.");
+                }
+            }
+        }
 
         // Nonaktifkan semua tahun ajaran instansi ini
         TahunAjaran::where('instansi_id', $instansi->id_instansi)

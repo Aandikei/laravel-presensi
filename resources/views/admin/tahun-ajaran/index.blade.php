@@ -57,7 +57,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
-                                        @if (!$item->is_aktif)
+                                        @if (!$item->is_aktif && $item->can_activate)
                                             <form method="POST"
                                                 action="{{ route('admin.tahun-ajaran.aktivasi', $item) }}">
                                                 @csrf
