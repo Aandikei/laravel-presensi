@@ -14,6 +14,7 @@ use App\Models\RegistrasiAkademik;
 use App\Models\RekapBulanan;
 use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -68,10 +69,36 @@ class AbsensiController extends Controller
             $instansi->id_instansi
         );
 
+        // Cek batas waktu input
+        $graceMinutes = config('absensi.auto_lock_grace_minutes', 30);
+        $batasAkhir = Carbon::parse($jadwal->jam_selesai)->addMinutes($graceMinutes);
+
         $locked = $jadwal->absensi()
             ->where('tanggal', now()->toDateString())
             ->where('is_locked', true)
             ->exists();
+
+        if (now()->greaterThanOrEqualTo($batasAkhir)) {
+            if ($locked) {
+                // Udah terkunci & lewat grace → normal, tolak akses
+                return redirect()->route('guru.absensi.index')
+                    ->with('error', 'Waktu input absensi sudah berakhir.');
+            }
+
+            // Belum terkunci tapi lewat grace
+            // Cek apakah ada data (admin buka kunci) atau kosong (telat input)
+            $hasData = $jadwal->absensi()->where('tanggal', today())->exists();
+            if (!$hasData) {
+                return redirect()->route('guru.absensi.index')
+                    ->with('error', 'Waktu input absensi sudah berakhir.');
+            }
+            // Ada data & ga terkunci → admin baru buka kunci → lanjut ke form
+        }
+
+        if (now()->lessThan(Carbon::parse($jadwal->jam_mulai))) {
+            return redirect()->route('guru.absensi.index')
+                ->with('error', 'Belum waktunya input absensi.');
+        }
 
         // Ambil siswa di kelas ini (tahun ajaran aktif)
         $registrasi = RegistrasiAkademik::with('siswa')
@@ -108,6 +135,9 @@ class AbsensiController extends Controller
                 ->with('error', "Hari ini adalah hari libur: {$namaLibur}. Absensi tidak bisa diinput.");
         }
 
+        $graceMinutes = config('absensi.auto_lock_grace_minutes', 30);
+        $batasAkhir = Carbon::parse($jadwal->jam_selesai)->addMinutes($graceMinutes);
+
         $locked = $jadwal->absensi()
             ->where('tanggal', now()->toDateString())
             ->where('is_locked', true)
@@ -116,6 +146,15 @@ class AbsensiController extends Controller
         if ($locked) {
             return redirect()->route('guru.absensi.index')
                 ->with('error', 'Absensi sudah dikunci oleh admin! Hubungi admin untuk membuka kunci.');
+        }
+
+        // Past grace + tidak ada data sama sekali → tolak (guru telat input)
+        if (now()->greaterThanOrEqualTo($batasAkhir)) {
+            $hasData = $jadwal->absensi()->where('tanggal', today())->exists();
+            if (!$hasData) {
+                return redirect()->route('guru.absensi.index')
+                    ->with('error', 'Waktu input absensi sudah berakhir. Hubungi admin untuk membuka kunci.');
+            }
         }
 
         $request->validate([
@@ -150,6 +189,14 @@ class AbsensiController extends Controller
                 $this->updateRekap($regId, $tanggal);
             }
         });
+
+        // Auto-lock jika sudah lewat jam_selesai + grace period
+        if (now()->greaterThanOrEqualTo($batasAkhir)) {
+            Absensi::where('jadwal_id', $jadwal->id_jadwal)
+                ->where('tanggal', today())
+                ->where('is_locked', false)
+                ->update(['is_locked' => true]);
+        }
 
         return redirect()->route('guru.absensi.index')
             ->with('success', 'Absensi berhasil disimpan!');
