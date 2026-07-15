@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SekolahController;
 use App\Http\Controllers\SuperAdmin\HariLiburController;
+use App\Models\Instansi;
 
 Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', [SuperAdminController::class, 'index'])->name('dashboard');
@@ -14,7 +15,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('superadmin'
     ]);
 
     // Assign admin to sekolah
-    Route::get('sekolah/{instansi}/assign-admin', [SekolahController::class, 'assignAdmin'])->name('sekolah.assign-admin');
+    Route::get('sekolah/{instansi}/assign-admin', fn(Instansi $instansi) => redirect()->route('superadmin.sekolah.show', $instansi))->name('sekolah.assign-admin');
     Route::post('sekolah/{instansi}/assign-admin', [SekolahController::class, 'storeAdmin'])->name('sekolah.store-admin');
     Route::get('sekolah/{instansi}/edit-admin/{user}', [SekolahController::class, 'editAdmin'])->name('sekolah.edit-admin');
     Route::put('sekolah/{instansi}/edit-admin/{user}', [SekolahController::class, 'updateAdmin'])->name('sekolah.update-admin');

@@ -44,10 +44,12 @@
                     </p>
                 @endif
                 @if($statusPindah)
-                    <form method="POST" action="{{ route('admin.siswa.batal-pindah', $siswa) }}" class="inline"
-                        onsubmit="return confirm('Batalkan status pindah? Siswa akan kembali aktif.')">
+                    <form method="POST" action="{{ route('admin.siswa.batal-pindah', $siswa) }}" class="inline">
                         @csrf
-                        <button type="submit" class="text-xs px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                        <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                            'Batalkan status pindah? Siswa akan kembali aktif.',
+                            'Ya, Batalkan')"
+                            class="text-xs px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">
                             Batalkan Pindah
                         </button>
                     </form>

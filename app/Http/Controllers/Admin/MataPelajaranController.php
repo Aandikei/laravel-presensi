@@ -45,7 +45,7 @@ class MataPelajaranController extends Controller
                     $delete = '<form method="POST" action="' . route('admin.mata-pelajaran.destroy', $row->id_mapel) . '" class="inline">
                         <input type="hidden" name="_token" value="' . csrf_token() . '">
                         <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" title="Hapus" class="text-red-600 hover:text-red-800" onclick="return confirm(\'Yakin hapus mata pelajaran ini?\')">
+                        <button type="button" title="Hapus" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Yakin hapus mata pelajaran ini?\')">
                             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -79,6 +79,9 @@ class MataPelajaranController extends Controller
             'kelompok'    => $kelompokRule,
         ]);
 
+        $validated['kode_mapel'] = strtoupper($validated['kode_mapel']);
+        $validated['nama_mapel'] = ucwords(strtolower($validated['nama_mapel']));
+
         MataPelajaran::create([
             ...$validated,
             'instansi_id' => $instansi->id_instansi,
@@ -108,6 +111,9 @@ class MataPelajaranController extends Controller
             'kode_mapel' => 'required|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id_mapel.',id_mapel,instansi_id,'.$mataPelajaran->instansi_id,
             'kelompok'   => $kelompokRule,
         ]);
+
+        $validated['kode_mapel'] = strtoupper($validated['kode_mapel']);
+        $validated['nama_mapel'] = ucwords(strtolower($validated['nama_mapel']));
 
         $mataPelajaran->update($validated);
 

@@ -68,9 +68,10 @@
                     <form method="POST" action="{{ route('admin.absensi.unlock', $jadwal->id_jadwal) }}">
                         @csrf @method('PATCH')
                         <input type="hidden" name="tanggal" value="{{ $tanggal }}">
-                        <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
-                            onclick="return confirm('Buka kunci absensi ini?')">
+                        <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                            'Buka kunci absensi ini?',
+                            'Ya, Buka')"
+                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
                             Buka Kunci
                         </button>
                     </form>
@@ -78,9 +79,10 @@
                     <form method="POST" action="{{ route('admin.absensi.lock', $jadwal->id_jadwal) }}">
                         @csrf @method('PATCH')
                         <input type="hidden" name="tanggal" value="{{ $tanggal }}">
-                        <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-                            onclick="return confirm('Kunci absensi ini?')">
+                        <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                            'Kunci absensi ini?',
+                            'Ya, Kunci')"
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
                             Kunci Absensi
                         </button>
                     </form>

@@ -64,7 +64,7 @@
                         <select name="jurusan" class="filter-select w-24 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
                             <option value="">Semua</option>
                             @foreach($jurusanList as $j)
-                                <option value="{{ $j }}" {{ $jurusan === $j ? 'selected' : '' }}>{{ $j }}</option>
+                                <option value="{{ $j->id_jurusan }}" {{ (string)$jurusan === (string)$j->id_jurusan ? 'selected' : '' }}>{{ $j->kode_jurusan }}</option>
                             @endforeach
                         </select>
                     </div>

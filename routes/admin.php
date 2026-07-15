@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\HariLiburController;
 use App\Http\Controllers\Admin\JadwalController;
+use App\Http\Controllers\Admin\JurusanController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\KurikulumKelasController;
 use App\Http\Controllers\Admin\LaporanController;
@@ -103,12 +104,22 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
         Route::get('kelas/{kelas}/edit', [KelasController::class, 'edit'])->name('kelas.edit');
         Route::put('kelas/{kelas}', [KelasController::class, 'update'])->name('kelas.update');
         Route::delete('kelas/{kelas}', [KelasController::class, 'destroy'])->name('kelas.destroy');
+        Route::get('kelas/next-nomor', [KelasController::class, 'nextNomor'])->name('kelas.next-nomor');
         // Naik Kelas
         Route::prefix('naik-kelas')->name('naik-kelas.')->group(function () {
             Route::get('/', [NaikKelasController::class, 'index'])->name('index');
             Route::get('/preview', [NaikKelasController::class, 'preview'])->name('preview');
             Route::post('/proses', [NaikKelasController::class, 'proses'])->name('proses');
             Route::post('/salin-semester', [NaikKelasController::class, 'salinSemester'])->name('salin-semester');
+        });
+        // Jurusan
+        Route::prefix('jurusan')->name('jurusan.')->group(function () {
+            Route::get('/', [JurusanController::class, 'index'])->name('index');
+            Route::get('/create', [JurusanController::class, 'create'])->name('create');
+            Route::post('/', [JurusanController::class, 'store'])->name('store');
+            Route::get('/{jurusan}/edit', [JurusanController::class, 'edit'])->name('edit');
+            Route::put('/{jurusan}', [JurusanController::class, 'update'])->name('update');
+            Route::delete('/{jurusan}', [JurusanController::class, 'destroy'])->name('destroy');
         });
     });
 

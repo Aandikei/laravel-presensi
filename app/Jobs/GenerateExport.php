@@ -171,7 +171,7 @@ class GenerateExport implements ShouldQueue
                 (int) $filters['tahun'],
                 isset($filters['mapel_id']) ? (int) $filters['mapel_id'] : null,
                 $filters['tingkat'] ?? null,
-                $filters['jurusan'] ?? null
+                isset($filters['jurusan']) && $filters['jurusan'] !== '' ? (int) $filters['jurusan'] : null
             ),
             $filepath,
             'local'

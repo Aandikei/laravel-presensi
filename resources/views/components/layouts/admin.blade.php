@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('/assets/css/tailwind.output.css') }}" />
     @vite(['resources/css/app.css'])
+    <style>[x-cloak] { display: none !important; }</style>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <script src="{{ asset('/assets/js/init-alpine.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
@@ -95,6 +96,113 @@
             </main>
         </div>
     </div>
+    {{-- Confirm Modal --}}
+    <div x-data="confirmModal()" x-init="init()" x-cloak>
+            <div x-show="open"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-30 flex items-end bg-black bg-opacity-50 sm:items-center sm:justify-center"
+                @click.self="open = false"
+                @keydown.escape.window="open = false">
+                <div x-show="open"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="w-full px-6 py-4 overflow-hidden bg-white rounded-t-lg dark:bg-gray-800 sm:rounded-lg sm:m-4 sm:max-w-xl"
+                    @keydown.enter.prevent="confirm">
+                <h3 class="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-200" x-text="title"></h3>
+                <p class="mb-4 text-sm text-gray-600 dark:text-gray-400" x-text="message"></p>
+                <div x-show="requirePassword" class="mb-4">
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Masukkan password untuk konfirmasi</span>
+                        <input type="password" x-model="password" placeholder="***************"
+                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300"
+                            x-bind:class="{ 'border-red-500': passwordError }" />
+                            <span x-show="passwordError" class="text-xs text-red-500 mt-1" x-text="passwordError"></span>
+                    </label>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" @click="open = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+                        Batal
+                    </button>
+                    <button type="button" @click="confirm" id="confirm-btn"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                        x-text="confirmText">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmAction(formEl, message, confirmText = 'Ya, Hapus', title = 'Konfirmasi', requirePassword = false) {
+            if (!formEl) return;
+            window.dispatchEvent(new CustomEvent('confirm-action', {
+                detail: { title, message, confirmText, formEl, requirePassword }
+            }));
+        }
+
+        function confirmModal() {
+            return {
+                open: false,
+                title: 'Konfirmasi',
+                message: '',
+                confirmText: 'Ya, Hapus',
+                requirePassword: false,
+                password: '',
+                passwordError: '',
+                sourceForm: null,
+                init() {
+                    window.addEventListener('confirm-action', (e) => {
+                        this.title = e.detail.title || 'Konfirmasi';
+                        this.message = e.detail.message;
+                        this.confirmText = e.detail.confirmText || 'Ya, Hapus';
+                        this.requirePassword = e.detail.requirePassword || false;
+                        this.password = '';
+                        this.passwordError = '';
+                        this.sourceForm = e.detail.formEl;
+                        this.open = true;
+                        this.$nextTick(() => {
+                            if (this.requirePassword) {
+                                this.$el.querySelector('input[type="password"]')?.focus();
+                            } else {
+                                document.getElementById('confirm-btn')?.focus();
+                            }
+                        });
+                    });
+                },
+                confirm() {
+                    if (this.requirePassword && !this.password) {
+                        this.passwordError = 'Password wajib diisi.';
+                        return;
+                    }
+                    this.open = false;
+                    if (this.sourceForm) {
+                        if (this.requirePassword) {
+                            let pwField = this.sourceForm.querySelector('input[name="password"]');
+                            if (!pwField) {
+                                pwField = document.createElement('input');
+                                pwField.type = 'hidden';
+                                pwField.name = 'password';
+                                this.sourceForm.appendChild(pwField);
+                            }
+                            pwField.value = this.password;
+                        }
+                        this.sourceForm.submit();
+                    }
+                }
+            };
+        }
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     @stack('scripts')

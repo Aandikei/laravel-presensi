@@ -36,10 +36,12 @@
                     </p>
                 @endif
                 @if($sedangMutasi)
-                    <form method="POST" action="{{ route('admin.guru.mutasi.batal', $guru) }}" class="inline"
-                        onsubmit="return confirm('Batalkan mutasi? Guru akan kembali aktif.')">
+                    <form method="POST" action="{{ route('admin.guru.mutasi.batal', $guru) }}" class="inline">
                         @csrf
-                        <button type="submit" class="text-xs px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                        <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                            'Batalkan mutasi? Guru akan kembali aktif.',
+                            'Ya, Batalkan')"
+                            class="text-xs px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">
                             Batalkan Mutasi
                         </button>
                     </form>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
+use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\RegistrasiAkademik;
 use App\Models\TahunAjaran;
@@ -34,15 +35,13 @@ class KelasController extends Controller
 
         $jurusanList = collect();
         if ($instansi->jenjang === 'SMA') {
-            $jurusanList = Kelas::where('instansi_id', $instansi->id_instansi)
-                ->selectRaw('DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(nama_kelas, " ", 2), " ", -1) as jurusan')
-                ->pluck('jurusan')
-                ->sort()
-                ->values();
+            $jurusanList = Jurusan::where('instansi_id', $instansi->id_instansi)
+                ->orderBy('kode_jurusan')
+                ->get(['id_jurusan', 'kode_jurusan', 'nama_jurusan']);
         }
 
         if ($request->ajax()) {
-            $kelas = Kelas::with(['waliKelas'])
+            $kelas = Kelas::with(['waliKelas', 'jurusan'])
                 ->where('instansi_id', $instansi->id_instansi)
                 ->withCount(['registrasiAkademik as jumlah_siswa' => fn ($q) => $q
                     ->aktif()
@@ -56,7 +55,7 @@ class KelasController extends Controller
             }
 
             if ($request->jurusan) {
-                $kelas->where('nama_kelas', 'like', '% ' . $request->jurusan . ' %');
+                $kelas->where('jurusan_id', $request->jurusan);
             }
 
             return DataTables::of($kelas)
@@ -83,7 +82,7 @@ class KelasController extends Controller
                         $html .= ' <form method="POST" action="'.route('admin.kelas.destroy', $row->id_kelas).'" class="inline">
                             <input type="hidden" name="_token" value="'.csrf_token().'">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" title="Hapus" class="text-red-600 hover:text-red-800" onclick="return confirm(\'Yakin hapus kelas ini?\')">
+                            <button type="button" title="Hapus" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Yakin hapus kelas ini?\')">
                                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
@@ -104,6 +103,15 @@ class KelasController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
 
+        $daftarTingkat = range($instansi->tingkat_min, $instansi->tingkat_maks);
+
+        $jurusanList = collect();
+        if ($instansi->jenjang === 'SMA') {
+            $jurusanList = Jurusan::where('instansi_id', $instansi->id_instansi)
+                ->orderBy('kode_jurusan')
+                ->get(['id_jurusan', 'kode_jurusan', 'nama_jurusan']);
+        }
+
         $guru = Guru::where('instansi_id', $instansi->id_instansi)
             ->whereNull('status')
             ->whereDoesntHave('kelasWali')
@@ -111,38 +119,100 @@ class KelasController extends Controller
             ->orderBy('nama_guru')
             ->get();
 
-        return view('admin.kelas.create', compact('guru', 'instansi'));
+        return view('admin.kelas.create', compact('guru', 'instansi', 'daftarTingkat', 'jurusanList'));
     }
 
     public function store(Request $request)
     {
         $instansi = Auth::user()->getInstansi();
 
-        $validated = $request->validate([
-            'nama_kelas' => 'required|string|max:255',
-            'tingkat' => 'required|integer|min:1|max:12',
+        $rules = [
+            'tingkat' => 'required|integer|min:' . $instansi->tingkat_min . '|max:' . $instansi->tingkat_maks,
             'guru_wali_id' => 'nullable|exists:guru,id_guru',
-        ]);
+            'nomor_kelas' => 'nullable|string|max:10',
+        ];
 
-        $validated['nama_kelas'] = strtoupper($validated['nama_kelas']);
+        if ($instansi->jenjang === 'SMA') {
+            $rules['jurusan_id'] = 'required|exists:jurusan,id_jurusan';
+        } else {
+            $rules['jurusan_id'] = 'nullable|exists:jurusan,id_jurusan';
+        }
 
-        $exists = Kelas::where('nama_kelas', $validated['nama_kelas'])
+        $validated = $request->validate($rules);
+
+        if (!empty($validated['nomor_kelas'])) {
+            $validated['nomor_kelas'] = strtoupper($validated['nomor_kelas']);
+        }
+
+        $validated['instansi_id'] = $instansi->id_instansi;
+
+        $jurusanId = $validated['jurusan_id'] ?? null;
+        $isNumeric = $instansi->jenjang === 'SMA';
+
+        $existingQuery = Kelas::where('instansi_id', $instansi->id_instansi)
             ->where('tingkat', $validated['tingkat'])
-            ->where('instansi_id', $instansi->id_instansi)
+            ->when(!empty($jurusanId), fn ($q) => $q->where('jurusan_id', $jurusanId))
+            ->when(empty($jurusanId), fn ($q) => $q->whereNull('jurusan_id'));
+
+        $total = $existingQuery->count();
+        $note = null;
+
+        if ($total === 0) {
+            if (!empty($validated['nomor_kelas'])) {
+                $first = $isNumeric ? '1' : 'A';
+                if ($validated['nomor_kelas'] !== $first) {
+                    return back()->with('error', "Nomor kelas pertama harus $first atau dikosongkan.")->withInput();
+                }
+            }
+        } else {
+            $expected = $this->expectedNextNomor($existingQuery, $isNumeric);
+            $hasNull = $existingQuery->clone()->whereNull('nomor_kelas')->exists();
+
+            if ($hasNull) {
+                if (empty($validated['nomor_kelas'])) {
+                    return back()->with('error', "Silakan isi nomor kelas. Selanjutnya: $expected.")->withInput();
+                }
+
+                if ($validated['nomor_kelas'] !== $expected) {
+                    return back()->with('error', "Nomor kelas tidak valid. Selanjutnya harus $expected.")->withInput();
+                }
+
+                $nullClass = $existingQuery->clone()->whereNull('nomor_kelas')->first();
+                $nullClass->update(['nomor_kelas' => $validated['nomor_kelas']]);
+
+                $validated['nomor_kelas'] = $isNumeric
+                    ? (string)((int)$validated['nomor_kelas'] + 1)
+                    : chr(ord($validated['nomor_kelas']) + 1);
+
+                $note = "Kelas sebelumnya otomatis diisi {$nullClass->fresh()->nomor_kelas}, kelas ini menjadi {$validated['nomor_kelas']}.";
+            } else {
+                if (empty($validated['nomor_kelas'])) {
+                    return back()->with('error', "Tambahkan nomor kelas. Selanjutnya: $expected.")->withInput();
+                }
+
+                if ($validated['nomor_kelas'] !== $expected) {
+                    return back()->with('error', "Nomor kelas tidak valid. Selanjutnya harus $expected.")->withInput();
+                }
+            }
+        }
+
+        $exists = $existingQuery->clone()
+            ->when(
+                !empty($validated['nomor_kelas']),
+                fn ($q) => $q->where('nomor_kelas', $validated['nomor_kelas']),
+                fn ($q) => $q->whereNull('nomor_kelas')
+            )
             ->exists();
 
         if ($exists) {
-            return back()->with('error', 'Kelas ' . $validated['nama_kelas'] . ' (Tingkat ' . $validated['tingkat'] . ') sudah ada!')
+            return back()->with('error', 'Kelas dengan kombinasi tingkat, jurusan, dan nomor kelas tersebut sudah ada!')
                 ->withInput();
         }
 
-        Kelas::create([
-            ...$validated,
-            'instansi_id' => $instansi->id_instansi,
-        ]);
+        Kelas::create($validated);
 
         return redirect()->route('admin.kelas.index')
-            ->with('success', 'Kelas berhasil ditambahkan!');
+            ->with('success', $note ?: 'Kelas berhasil ditambahkan!');
     }
 
     public function edit(Kelas $kelas)
@@ -151,7 +221,16 @@ class KelasController extends Controller
 
         $instansi = Auth::user()->getInstansi();
 
-        abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+        $kelas->load('jurusan');
+
+        $daftarTingkat = range($instansi->tingkat_min, $instansi->tingkat_maks);
+
+        $jurusanList = collect();
+        if ($instansi->jenjang === 'SMA') {
+            $jurusanList = Jurusan::where('instansi_id', $instansi->id_instansi)
+                ->orderBy('kode_jurusan')
+                ->get(['id_jurusan', 'kode_jurusan', 'nama_jurusan']);
+        }
 
         $guru = Guru::where('instansi_id', $instansi->id_instansi)
             ->whereNull('status')
@@ -164,29 +243,50 @@ class KelasController extends Controller
             ->orderBy('nama_guru')
             ->get();
 
-        return view('admin.kelas.edit', compact('kelas', 'guru', 'instansi'));
+        return view('admin.kelas.edit', compact('kelas', 'guru', 'instansi', 'daftarTingkat', 'jurusanList'));
     }
 
     public function update(Request $request, Kelas $kelas)
     {
         $this->authorizeInstansi($kelas);
 
-        $validated = $request->validate([
-            'nama_kelas' => 'required|string|max:255',
-            'tingkat' => 'required|integer|min:1|max:12',
+        $instansi = Auth::user()->getInstansi();
+
+        $rules = [
+            'tingkat' => 'required|integer|min:' . $instansi->tingkat_min . '|max:' . $instansi->tingkat_maks,
             'guru_wali_id' => 'nullable|exists:guru,id_guru',
-        ]);
+            'nomor_kelas' => 'nullable|string|max:10',
+        ];
 
-        $validated['nama_kelas'] = strtoupper($validated['nama_kelas']);
+        if ($instansi->jenjang === 'SMA') {
+            $rules['jurusan_id'] = 'required|exists:jurusan,id_jurusan';
+        } else {
+            $rules['jurusan_id'] = 'nullable|exists:jurusan,id_jurusan';
+        }
 
-        $exists = Kelas::where('nama_kelas', $validated['nama_kelas'])
+        $validated = $request->validate($rules);
+
+        if (isset($validated['nomor_kelas'])) {
+            $validated['nomor_kelas'] = strtoupper($validated['nomor_kelas']);
+        }
+
+        $exists = Kelas::where('instansi_id', $kelas->instansi_id)
             ->where('tingkat', $validated['tingkat'])
-            ->where('instansi_id', $kelas->instansi_id)
             ->where('id_kelas', '!=', $kelas->id_kelas)
+            ->when(
+                !empty($validated['jurusan_id']),
+                fn ($q) => $q->where('jurusan_id', $validated['jurusan_id']),
+                fn ($q) => $q->whereNull('jurusan_id')
+            )
+            ->when(
+                !empty($validated['nomor_kelas']),
+                fn ($q) => $q->where('nomor_kelas', $validated['nomor_kelas']),
+                fn ($q) => $q->whereNull('nomor_kelas')
+            )
             ->exists();
 
         if ($exists) {
-            return back()->with('error', 'Kelas ' . $validated['nama_kelas'] . ' (Tingkat ' . $validated['tingkat'] . ') sudah ada!')
+            return back()->with('error', 'Kelas dengan kombinasi tingkat, jurusan, dan nomor kelas tersebut sudah ada!')
                 ->withInput();
         }
 
@@ -214,6 +314,46 @@ class KelasController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+    }
+
+    public function nextNomor(Request $request)
+    {
+        $instansi = Auth::user()->getInstansi();
+
+        $tingkat = $request->integer('tingkat');
+        $jurusanId = $request->integer('jurusan_id');
+
+        if (!$tingkat) {
+            return response()->json(['next_nomor' => null]);
+        }
+
+        $query = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->where('tingkat', $tingkat)
+            ->when($jurusanId, fn ($q) => $q->where('jurusan_id', $jurusanId))
+            ->when(!$jurusanId, fn ($q) => $q->whereNull('jurusan_id'));
+
+        $total = $query->count();
+
+        if ($total === 0) {
+            return response()->json(['next_nomor' => null]);
+        }
+
+        $next = $this->expectedNextNomor($query, $instansi->jenjang === 'SMA');
+
+        return response()->json(['next_nomor' => $next]);
+    }
+
+    private function expectedNextNomor($query, bool $isNumeric): ?string
+    {
+        $max = $query->clone()->whereNotNull('nomor_kelas')->max('nomor_kelas');
+
+        if ($max === null) {
+            return $isNumeric ? '1' : 'A';
+        }
+
+        return $isNumeric
+            ? (string)((int)$max + 1)
+            : chr(ord($max) + 1);
     }
 
     public function detail(Request $request, Kelas $kelas)

@@ -8,6 +8,7 @@ use App\Models\Absensi;
 use App\Models\ExportJob;
 use App\Models\HariLibur;
 use App\Models\Jadwal;
+use App\Models\Jurusan;
 use App\Models\KurikulumKelas;
 use App\Models\Kelas;
 use App\Models\RegistrasiAkademik;
@@ -231,9 +232,9 @@ class AbsensiController extends Controller
 
         $jurusanList = collect();
         if ($instansi->jenjang === 'SMA') {
-            $jurusanList = Kelas::where('instansi_id', $instansi->id_instansi)
-                ->selectRaw('DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(nama_kelas, " ", 2), " ", -1) as jurusan')
-                ->pluck('jurusan')->sort()->values();
+            $jurusanList = Jurusan::where('instansi_id', $instansi->id_instansi)
+                ->orderBy('kode_jurusan')
+                ->get(['id_jurusan', 'kode_jurusan', 'nama_jurusan']);
         }
 
         if ($myCombos->isEmpty()) {
@@ -275,7 +276,7 @@ class AbsensiController extends Controller
             ->whereYear('tanggal', $tahun)
             ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
             ->when($tingkat, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('tingkat', $tingkat)))
-            ->when($jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('nama_kelas', 'like', '% ' . $jurusan . ' %')))
+            ->when($jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('jurusan_id', $jurusan)))
             ->groupBy('jadwal_id', 'tanggal')
             ->orderBy('tanggal', 'desc')
             ->orderBy('jadwal_id')

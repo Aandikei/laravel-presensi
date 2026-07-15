@@ -38,7 +38,7 @@
                 <select id="filter-jurusan" class="text-sm dark:bg-gray-700 dark:text-gray-300">
                     <option value="">Semua Jurusan</option>
                     @foreach($jurusanList as $j)
-                        <option value="{{ $j }}">{{ $j }}</option>
+                        <option value="{{ $j->id_jurusan }}">{{ $j->kode_jurusan }}</option>
                     @endforeach
                 </select>
             @endif

@@ -31,9 +31,10 @@
                     Riwayat absensi tetap tersimpan. Guru akan pindah ke {{ $instansiTujuan->nama_instansi }}.
                 </div>
 
-                <button type="submit"
-                    class="w-full px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700"
-                    onclick="return confirm('Yakin menerima mutasi {{ $guru->nama_guru }} ke sekolah ini?')">
+                <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                    'Yakin menerima mutasi {{ $guru->nama_guru }} ke sekolah ini?',
+                    'Ya, Terima')"
+                    class="w-full px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700">
                     Konfirmasi Terima Mutasi
                 </button>
             </form>

@@ -43,10 +43,10 @@ class ExportController extends Controller
                     } else {
                         $btn .= '<span class="text-gray-400 mr-3">Proses...</span>';
                     }
-                    $btn .= '<form method="POST" action="' . route('guru.export-destroy', $row) . '" class="inline" onsubmit="return confirm(\'Hapus export ini?\')">
+                    $btn .= '<form method="POST" action="' . route('guru.export-destroy', $row) . '" class="inline">
                         <input type="hidden" name="_token" value="' . csrf_token() . '">
                         <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="text-red-600 hover:text-red-800" title="Hapus">
+                        <button type="button" class="text-red-600 hover:text-red-800" title="Hapus" onclick="confirmAction(this.closest(\'form\'), \'Hapus export ini?\')">
                             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>

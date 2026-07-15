@@ -18,8 +18,8 @@
         <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 flex items-center gap-4 flex-wrap">
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Status:</label>
             <select id="filter-status" class="text-sm dark:bg-gray-700 dark:text-gray-300">
-                <option value="">Aktif</option>
                 <option value="semua">Semua</option>
+                <option value="">Aktif</option>
                 <option value="mutasi">Mutasi</option>
                 <option value="keluar">Keluar</option>
                 <option value="pensiun">Pensiun</option>

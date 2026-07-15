@@ -19,19 +19,10 @@
 
                 <h3 class="text-md font-semibold text-gray-700 dark:text-gray-200 mb-4 border-b pb-2">Data Sekolah</h3>
 
-                <label class="block text-sm mb-4">
-                    <span class="text-gray-700 dark:text-gray-400">Nama Sekolah</span>
-                    <input type="text" name="nama_instansi" value="{{ old('nama_instansi') }}"
-                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nama_instansi') border-red-500 @enderror" />
-                    @error('nama_instansi')
-                        <span class="text-xs text-red-500">{{ $message }}</span>
-                    @enderror
-                </label>
-
                 <div class="grid grid-cols-2 gap-4">
                     <label class="block text-sm mb-4">
                         <span class="text-gray-700 dark:text-gray-400">Jenjang</span>
-                        <select name="jenjang"
+                        <select name="jenjang" id="jenjang"
                             class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('jenjang') border-red-500 @enderror">
                             <option value="">-- Pilih --</option>
                             @foreach (['SD', 'SMP', 'SMA'] as $j)
@@ -53,10 +44,20 @@
                     </label>
                 </div>
 
+                <input type="hidden" name="nama_instansi" id="nama_instansi" value="{{ old('nama_instansi') }}" />
+
                 <label class="block text-sm mb-4">
-                    <span class="text-gray-700 dark:text-gray-400">Alamat <span class="text-gray-400">(opsional)</span></span>
-                    <textarea name="alamat" rows="2"
-                        class="block w-full mt-1 text-sm form-textarea dark:bg-gray-700 dark:text-gray-300">{{ old('alamat') }}</textarea>
+                    <span class="text-gray-700 dark:text-gray-400">Nama Sekolah</span>
+                    <div class="flex mt-1">
+                        <span id="jenjang-prefix"
+                            class="inline-flex items-center px-3 text-sm rounded-l-lg border border-r-0 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 {{ old('jenjang') ? '' : 'hidden' }}">{{ old('jenjang') }}</span>
+                        <input type="text" id="nama_sekolah" value="{{ old('nama_sekolah') }}"
+                            class="flex-1 min-w-0 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('nama_instansi') border-red-500 @enderror {{ old('jenjang') ? 'rounded-r-lg' : 'rounded-lg' }}"
+                            placeholder="{{ old('jenjang') ? 'Nama sekolah...' : 'Pilih jenjang terlebih dahulu' }}" {{ old('jenjang') ? '' : 'readonly' }} />
+                    </div>
+                    @error('nama_instansi')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
                 </label>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -72,6 +73,12 @@
                             class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300" />
                     </label>
                 </div>
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">Alamat <span class="text-gray-400">(opsional)</span></span>
+                    <textarea name="alamat" rows="2"
+                        class="block w-full mt-1 text-sm form-textarea dark:bg-gray-700 dark:text-gray-300">{{ old('alamat') }}</textarea>
+                </label>
 
                 <h3 class="text-md font-semibold text-gray-700 dark:text-gray-200 mb-4 mt-6 border-b pb-2">Admin Sekolah</h3>
 
@@ -109,6 +116,40 @@
                     Simpan
                 </button>
             </form>
+            @push('scripts')
+            <script>
+                const jenjangEl = document.getElementById('jenjang');
+                const prefixEl = document.getElementById('jenjang-prefix');
+                const namaEl = document.getElementById('nama_sekolah');
+                const hiddenEl = document.getElementById('nama_instansi');
+
+                function updateNama() {
+                    if (jenjangEl.value) {
+                        prefixEl.textContent = jenjangEl.value;
+                        prefixEl.classList.remove('hidden');
+                        namaEl.classList.remove('rounded-lg');
+                        namaEl.classList.add('rounded-r-lg');
+                        namaEl.removeAttribute('readonly');
+                        namaEl.placeholder = 'Nama sekolah...';
+                    } else {
+                        prefixEl.classList.add('hidden');
+                        namaEl.classList.remove('rounded-r-lg');
+                        namaEl.classList.add('rounded-lg');
+                        namaEl.setAttribute('readonly', true);
+                        namaEl.placeholder = 'Pilih jenjang terlebih dahulu';
+                    }
+                    hiddenEl.value = jenjangEl.value ? jenjangEl.value + ' ' + namaEl.value : namaEl.value;
+                }
+
+                jenjangEl.addEventListener('change', function() {
+                    namaEl.value = '';
+                    updateNama();
+                    namaEl.focus();
+                });
+
+                namaEl.addEventListener('input', updateNama);
+            </script>
+            @endpush
         </div>
     </div>
 </x-layouts.admin>

@@ -93,7 +93,7 @@ class GuruController extends Controller
                             $html .= '<span class="text-xs text-orange-600 ml-2">⏳</span>
                                 <form method="POST" action="' . route('admin.guru.mutasi.batal', $row->id_guru) . '" class="inline ml-1">
                                     <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                    <button type="submit" title="Batal Mutasi" class="text-red-600 hover:text-red-800 text-xs" onclick="return confirm(\'Batalkan mutasi?\')">✕</button>
+                                    <button type="button" title="Batal Mutasi" class="text-red-600 hover:text-red-800 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Batalkan mutasi?\')">✕</button>
                                 </form>';
                         } elseif ($row->isAktif()) {
                             $html .= '<a href="' . route('admin.guru.mutasi', $row->id_guru) . '" title="Mutasi" class="text-orange-600 hover:text-orange-800 ml-2">
@@ -107,11 +107,11 @@ class GuruController extends Controller
                         if (!$row->transfer_token && $row->isAktif()) {
                             $html .= '<form method="POST" action="' . route('admin.guru.tandai-keluar', $row->id_guru) . '" class="inline ml-1">
                                 <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                <button type="submit" title="Tandai Keluar" class="text-red-500 hover:text-red-700 text-xs" onclick="return confirm(\'Tandai guru ini sebagai KELUAR?\')">🚪</button>
+                                <button type="button" title="Tandai Keluar" class="text-red-500 hover:text-red-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai KELUAR?\', \'Ya, Keluarkan\')">🚪</button>
                             </form>';
                             $html .= '<form method="POST" action="' . route('admin.guru.tandai-pensiun', $row->id_guru) . '" class="inline ml-1">
                                 <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                <button type="submit" title="Tandai Pensiun" class="text-gray-500 hover:text-gray-700 text-xs" onclick="return confirm(\'Tandai guru ini sebagai PENSIUN?\')">🎓</button>
+                                <button type="button" title="Tandai Pensiun" class="text-gray-500 hover:text-gray-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai PENSIUN?\', \'Ya, Pensiunkan\')">🎓</button>
                             </form>';
                         }
 
@@ -119,7 +119,7 @@ class GuruController extends Controller
                         if (!$row->isAktif()) {
                             $html .= '<form method="POST" action="' . route('admin.guru.batalkan-status', $row->id_guru) . '" class="inline ml-1">
                                 <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                <button type="submit" title="Batalkan Status" class="text-green-500 hover:text-green-700 text-xs" onclick="return confirm(\'Kembalikan guru ini ke status Aktif?\')">↩</button>
+                                <button type="button" title="Batalkan Status" class="text-green-500 hover:text-green-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Kembalikan guru ini ke status Aktif?\', \'Ya, Aktifkan\')">↩</button>
                             </form>';
                         }
 
@@ -127,7 +127,7 @@ class GuruController extends Controller
                         $html .= '<form method="POST" action="' . route('admin.guru.destroy', $row->id_guru) . '" class="inline ml-1">
                             <input type="hidden" name="_token" value="' . csrf_token() . '">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" title="Hapus" class="text-red-600 hover:text-red-800" onclick="return confirm(\'Yakin hapus guru ini?\')">
+                            <button type="button" title="Hapus" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Yakin hapus guru ini?\')">
                                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>

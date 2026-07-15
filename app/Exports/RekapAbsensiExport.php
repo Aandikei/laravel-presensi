@@ -24,7 +24,7 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
     protected $tingkat;
     protected $jurusan;
 
-    public function __construct(int $guruId, int $instansiId, int $bulan, int $tahun, ?int $mapelId = null, ?string $tingkat = null, ?string $jurusan = null)
+    public function __construct(int $guruId, int $instansiId, int $bulan, int $tahun, ?int $mapelId = null, ?string $tingkat = null, ?int $jurusan = null)
     {
         $this->guruId      = $guruId;
         $this->instansiId  = $instansiId;
@@ -50,7 +50,7 @@ class RekapAbsensiExport implements FromCollection, WithHeadings, WithStyles, Wi
             ->whereYear('tanggal', $this->tahun)
             ->when($this->mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $this->mapelId)))
             ->when($this->tingkat, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('tingkat', $this->tingkat)))
-            ->when($this->jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('nama_kelas', 'like', '% ' . $this->jurusan . ' %')))
+            ->when($this->jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('jurusan_id', $this->jurusan)))
             ->orderBy('tanggal', 'desc')
             ->orderBy('jadwal_id')
             ->get();

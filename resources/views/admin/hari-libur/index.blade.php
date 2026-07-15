@@ -72,9 +72,10 @@
                     @if($liburNasional->isNotEmpty() && Auth::user()->can('manage-settings'))
                         <form method="POST" action="{{ route('admin.hari-libur.adopt-all') }}">
                             @csrf
-                            <button type="submit"
-                                class="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
-                                onclick="return confirm('Ikut semua libur nasional?')">
+                            <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                                'Ikut semua libur nasional?',
+                                'Ya, Ikutkan')"
+                                class="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700">
                                 Ikut Semua
                             </button>
                         </form>

@@ -31,11 +31,11 @@
                                 </svg>
                             </a>
                             @if(!in_array($role->name, ['super_admin', 'admin', 'guru', 'wali_kelas', 'siswa', 'orang_tua', 'user']))
-                                <form method="POST" action="{{ route('superadmin.roles.destroy', $role->id) }}" class="inline"
-                                    onsubmit="return confirm('Yakin hapus role ini?')">
+                                <form method="POST" action="{{ route('superadmin.roles.destroy', $role->id) }}" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
+                                    <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                                        'Yakin hapus role ini?')"
                                         title="Hapus"
                                         class="text-red-600 hover:text-red-800">
                                         <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">

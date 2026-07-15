@@ -203,8 +203,9 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     Pastikan semua siswa sudah dipilih status dan kelas tujuannya.
                 </p>
-                <button type="submit"
-                    onclick="return confirm('Yakin proses naik kelas? Aksi ini tidak bisa dibatalkan.')"
+                <button type="button" @click="confirmAction($event.currentTarget.closest('form'),
+                    'Yakin proses naik kelas? Aksi ini tidak bisa dibatalkan.',
+                    'Ya, Proses')"
                     class="px-6 py-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
                     Proses Naik Kelas
                 </button>

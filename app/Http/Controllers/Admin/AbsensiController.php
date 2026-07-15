@@ -82,7 +82,7 @@ class AbsensiController extends Controller
                         ]) . '" class="inline">
                 <input type="hidden" name="_token" value="' . csrf_token() . '">
                 <input type="hidden" name="_method" value="PATCH">
-                <button type="submit" title="Buka Kunci" class="text-green-600 hover:text-green-800" onclick="return confirm(\'Buka kunci?\')">
+                <button type="button" title="Buka Kunci" class="text-green-600 hover:text-green-800" onclick="confirmAction(this.closest(\'form\'), \'Buka kunci?\', \'Ya, Buka\')">
                     <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
                     </svg>
@@ -95,7 +95,7 @@ class AbsensiController extends Controller
                         ]) . '" class="inline">
                 <input type="hidden" name="_token" value="' . csrf_token() . '">
                 <input type="hidden" name="_method" value="PATCH">
-                <button type="submit" title="Kunci" class="text-red-600 hover:text-red-800" onclick="return confirm(\'Kunci absensi?\')">
+                <button type="button" title="Kunci" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Kunci absensi?\')">
                     <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
