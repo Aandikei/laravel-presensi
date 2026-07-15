@@ -30,8 +30,7 @@ class AbsensiController extends Controller
                 ])
                 ->whereHas('kurikulum.kelas', fn ($q) => $q->where('instansi_id', $instansi->id_instansi))
                 ->whereHas('absensi', fn ($q) => $q->where('tanggal', $tanggal))
-                ->when($request->kelas_id, fn ($q) => $q->whereHas('kurikulum', fn ($q) => $q->where('kelas_id', $request->kelas_id)))
-                ->select('jadwal.*');
+                ->when($request->kelas_id, fn ($q) => $q->whereHas('kurikulum', fn ($q) => $q->where('kelas_id', $request->kelas_id)));
 
             return DataTables::of($jadwalAbsensi)
                 ->addIndexColumn()
