@@ -35,13 +35,16 @@
                     </label>
 
                     <label class="block text-sm mb-4">
-                        <span class="text-gray-700 dark:text-gray-400">NPSN</span>
-                        <input type="text" name="npsn" value="{{ old('npsn') }}"
-                            class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('npsn') border-red-500 @enderror" />
-                        @error('npsn')
+                        <span class="text-gray-700 dark:text-gray-400">Label Jenjang <span class="text-gray-400">(opsional)</span></span>
+                        <select name="label_jenjang" id="label_jenjang"
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
+                            <option value="">— {{ old('jenjang') ?: 'Pilih jenjang dulu' }} —</option>
+                        </select>
+                        @error('label_jenjang')
                             <span class="text-xs text-red-500">{{ $message }}</span>
                         @enderror
                     </label>
+
                 </div>
 
                 <input type="hidden" name="nama_instansi" id="nama_instansi" value="{{ old('nama_instansi') }}" />
@@ -56,6 +59,15 @@
                             placeholder="{{ old('jenjang') ? 'Nama sekolah...' : 'Pilih jenjang terlebih dahulu' }}" {{ old('jenjang') ? '' : 'readonly' }} />
                     </div>
                     @error('nama_instansi')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label class="block text-sm mb-4">
+                    <span class="text-gray-700 dark:text-gray-400">NPSN</span>
+                    <input type="text" name="npsn" value="{{ old('npsn') }}"
+                        class="block w-full mt-1 text-sm form-input dark:bg-gray-700 dark:text-gray-300 @error('npsn') border-red-500 @enderror" />
+                    @error('npsn')
                         <span class="text-xs text-red-500">{{ $message }}</span>
                     @enderror
                 </label>
@@ -122,10 +134,31 @@
                 const prefixEl = document.getElementById('jenjang-prefix');
                 const namaEl = document.getElementById('nama_sekolah');
                 const hiddenEl = document.getElementById('nama_instansi');
+                const labelEl = document.getElementById('label_jenjang');
+
+                const labelMap = {
+                    SD:  ['SD', 'MI'],
+                    SMP: ['SMP', 'MTs'],
+                    SMA: ['SMA', 'MA', 'SMK'],
+                };
+
+                function updateLabelOptions() {
+                    const labels = labelMap[jenjangEl.value] || [];
+                    labelEl.innerHTML = '<option value="">— ' + (jenjangEl.value || 'Pilih jenjang dulu') + ' —</option>';
+                    labels.forEach(function(l) {
+                        const opt = document.createElement('option');
+                        opt.value = l;
+                        opt.textContent = l;
+                        if ('{{ old('label_jenjang') }}' === l) opt.selected = true;
+                        labelEl.appendChild(opt);
+                    });
+                }
+
+                function getPrefix() { return labelEl.value || jenjangEl.value; }
 
                 function updateNama() {
                     if (jenjangEl.value) {
-                        prefixEl.textContent = jenjangEl.value;
+                        prefixEl.textContent = getPrefix();
                         prefixEl.classList.remove('hidden');
                         namaEl.classList.remove('rounded-lg');
                         namaEl.classList.add('rounded-r-lg');
@@ -138,16 +171,21 @@
                         namaEl.setAttribute('readonly', true);
                         namaEl.placeholder = 'Pilih jenjang terlebih dahulu';
                     }
-                    hiddenEl.value = jenjangEl.value ? jenjangEl.value + ' ' + namaEl.value : namaEl.value;
+                    var p = getPrefix();
+                    hiddenEl.value = p ? p + ' ' + namaEl.value : namaEl.value;
                 }
 
                 jenjangEl.addEventListener('change', function() {
                     namaEl.value = '';
+                    updateLabelOptions();
                     updateNama();
                     namaEl.focus();
                 });
 
+                labelEl.addEventListener('change', updateNama);
                 namaEl.addEventListener('input', updateNama);
+
+                updateLabelOptions();
             </script>
             @endpush
         </div>

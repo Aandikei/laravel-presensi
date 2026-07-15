@@ -30,7 +30,7 @@
                                 <div>
                                     <p class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ $kelasSaya->nama_kelas }}</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        Tingkat {{ $kelasSaya->tingkat }} • {{ $kelasSaya->instansi->jenjang }}
+                                        Tingkat {{ $kelasSaya->tingkat }} • {{ $kelasSaya->instansi->label_jenjang }}
                                     </p>
                                 </div>
                             </div>

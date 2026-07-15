@@ -61,7 +61,7 @@ class PindahSiswaController extends Controller
         if ($siswa->instansi->tingkat_min !== $instansi->tingkat_min) {
             return back()
                 ->withInput()
-                ->with('error', "Tidak bisa memindahkan siswa dari jenjang {$siswa->instansi->jenjang} ke {$instansi->jenjang}. Pindah hanya untuk jenjang yang sama.");
+                ->with('error', "Tidak bisa memindahkan siswa dari jenjang {$siswa->instansi->label_jenjang} ke {$instansi->label_jenjang}. Pindah hanya untuk jenjang yang sama.");
         }
 
         if ($siswa->transfer_token !== strtoupper($request->token)) {
@@ -112,7 +112,7 @@ class PindahSiswaController extends Controller
             }
 
             if ($siswa->instansi->tingkat_min !== $instansi->tingkat_min) {
-                abort(422, "Tidak bisa memindahkan siswa dari jenjang {$siswa->instansi->jenjang} ke {$instansi->jenjang}.");
+                abort(422, "Tidak bisa memindahkan siswa dari jenjang {$siswa->instansi->label_jenjang} ke {$instansi->label_jenjang}.");
             }
 
             $registrasiLama = RegistrasiAkademik::where('siswa_id', $siswa->id_siswa)

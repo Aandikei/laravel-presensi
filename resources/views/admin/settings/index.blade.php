@@ -27,7 +27,7 @@
                 @endif
                 <div>
                     <p class="font-semibold text-gray-700 dark:text-gray-200">{{ $instansi->nama_instansi }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $instansi->jenjang }} • NPSN: {{ $instansi->npsn }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $instansi->label_jenjang }} • NPSN: {{ $instansi->npsn }}</p>
                 </div>
             </div>
 
@@ -58,13 +58,21 @@
 
                     <label class="block text-sm">
                         <span class="text-gray-700 dark:text-gray-400">Jenjang</span>
-                        <select name="jenjang"
+                        <select name="jenjang" id="jenjang"
                             class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
                             @foreach(['SD','SMP','SMA'] as $j)
                                 <option value="{{ $j }}" {{ old('jenjang', $instansi->jenjang) == $j ? 'selected' : '' }}>
                                     {{ $j }}
                                 </option>
                             @endforeach
+                        </select>
+                    </label>
+
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Label Jenjang <span class="text-gray-400">(opsional)</span></span>
+                        <select name="label_jenjang" id="label_jenjang"
+                            class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
+                            <option value="">— {{ $instansi->label_jenjang }} —</option>
                         </select>
                     </label>
 
@@ -113,6 +121,29 @@
                         @enderror
                     </label>
                 </div>
+
+                @push('scripts')
+                <script>
+                    const sJenjang = document.getElementById('jenjang');
+                    const sLabel = document.getElementById('label_jenjang');
+                    const sLabelMap = { SD: ['SD', 'MI'], SMP: ['SMP', 'MTs'], SMA: ['SMA', 'MA', 'SMK'] };
+
+                    function updateSLabel() {
+                        const labels = sLabelMap[sJenjang.value] || [];
+                        const oldVal = sLabel.value;
+                        sLabel.innerHTML = '<option value="">— ' + sJenjang.value + ' —</option>';
+                        labels.forEach(function(l) {
+                            const opt = document.createElement('option');
+                            opt.value = l; opt.textContent = l;
+                            sLabel.appendChild(opt);
+                        });
+                        if (oldVal) sLabel.value = oldVal;
+                        else sLabel.value = '{{ $instansi->label_jenjang }}';
+                    }
+                    sJenjang.addEventListener('change', updateSLabel);
+                    updateSLabel();
+                </script>
+                @endpush
 
                 <button type="submit"
                     class="mt-6 w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">

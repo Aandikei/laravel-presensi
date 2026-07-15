@@ -12,12 +12,18 @@ class Instansi extends Model
     protected $fillable = [
         'nama_instansi',
         'jenjang',
+        'label_jenjang',
         'npsn',
         'alamat',
         'telepon',
         'email',
         'logo',
     ];
+
+    public function getLabelJenjangAttribute()
+    {
+        return $this->attributes['label_jenjang'] ?? $this->attributes['jenjang'];
+    }
 
     // Relasi
     public function tahunAjaran()

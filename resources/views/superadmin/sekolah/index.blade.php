@@ -43,7 +43,7 @@
                 columns: [
                     { data: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'nama_instansi' },
-                    { data: 'jenjang' },
+                    { data: 'label_jenjang_display', name: 'jenjang' },
                     { data: 'npsn' },
                     { data: 'guru_count', searchable: false },
                     { data: 'siswa_count', searchable: false },

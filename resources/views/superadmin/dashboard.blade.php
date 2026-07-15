@@ -131,7 +131,7 @@
                         @foreach($sekolahTerbaru as $s)
                             <tr class="text-gray-700 dark:text-gray-400">
                                 <td class="px-4 py-3 font-medium">{{ $s->nama_instansi }}</td>
-                                <td class="px-4 py-3">{{ $s->jenjang }}</td>
+                                <td class="px-4 py-3">{{ $s->label_jenjang }}</td>
                                 <td class="px-4 py-3">{{ $s->npsn ?: '-' }}</td>
                                 <td class="px-4 py-3" data-order="{{ $s->created_at->timestamp }}">{{ $s->created_at->diffForHumans() }}</td>
                             </tr>

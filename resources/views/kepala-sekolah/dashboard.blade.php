@@ -7,7 +7,7 @@
                 Selamat datang, {{ $guru->nama_guru }}!
             </h2>
             <p class="text-gray-500 dark:text-gray-400 mt-1">
-                {{ $instansi->nama_instansi }} — {{ $instansi->jenjang }}
+                {{ $instansi->nama_instansi }} — {{ $instansi->label_jenjang }}
             </p>
         </div>
 

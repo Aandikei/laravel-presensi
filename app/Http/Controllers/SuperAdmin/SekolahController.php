@@ -32,6 +32,7 @@ class SekolahController extends Controller
 
         return DataTables::of($sekolah)
             ->addIndexColumn()
+            ->addColumn('label_jenjang_display', fn ($row) => $row->label_jenjang)
             ->addColumn('aksi', function ($row) {
                 $show = '<a href="' . route('superadmin.sekolah.show', $row->id_instansi) . '" title="Detail" class="text-green-600 hover:text-green-800">
                     <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,6 +70,7 @@ class SekolahController extends Controller
         $validated = $request->validate([
             'nama_instansi' => 'required|string|max:255',
             'jenjang'       => 'required|in:SD,SMP,SMA',
+            'label_jenjang' => 'nullable|string|in:' . implode(',', $this->allowedLabels($request->jenjang)),
             'npsn'          => 'required|string|unique:instansi,npsn',
             'alamat'        => 'nullable|string',
             'telepon'       => 'nullable|string|max:20',
@@ -78,20 +80,22 @@ class SekolahController extends Controller
             'admin_password' => 'required|min:8',
         ]);
 
-        $nama = $validated['nama_instansi'];
-        foreach (['SD', 'SMP', 'SMA'] as $j) {
-            if (str_starts_with($nama, $j . ' ') || $nama === $j) {
-                $rest = trim(substr($nama, strlen($j)));
-                $nama = $j . ($rest ? ' ' . ucwords(strtolower($rest)) : '');
+        $prefix = $validated['label_jenjang'] ?? $validated['jenjang'];
+        $rest = $validated['nama_instansi'];
+        $allPrefixes = ['SD', 'SMP', 'SMA', 'MI', 'MTs', 'MA', 'SMK'];
+        foreach ($allPrefixes as $p) {
+            if (str_starts_with($rest, $p . ' ') || $rest === $p) {
+                $rest = trim(substr($rest, strlen($p)));
                 break;
             }
         }
-        $validated['nama_instansi'] = $nama;
+        $validated['nama_instansi'] = $prefix . ($rest ? ' ' . ucwords(strtolower($rest)) : '');
 
         DB::transaction(function () use ($validated) {
             $instansi = Instansi::create([
                 'nama_instansi' => $validated['nama_instansi'],
                 'jenjang'       => $validated['jenjang'],
+                'label_jenjang' => $validated['label_jenjang'] ?? null,
                 'npsn'          => $validated['npsn'],
                 'alamat'        => $validated['alamat'] ?? null,
                 'telepon'       => $validated['telepon'] ?? null,
@@ -135,21 +139,23 @@ class SekolahController extends Controller
         $validated = $request->validate([
             'nama_instansi' => 'required|string|max:255',
             'jenjang'       => 'required|in:SD,SMP,SMA',
+            'label_jenjang' => 'nullable|string|in:' . implode(',', $this->allowedLabels($request->jenjang)),
             'npsn'          => 'required|string|unique:instansi,npsn,' . $instansi->id_instansi . ',id_instansi',
             'alamat'        => 'nullable|string',
             'telepon'       => 'nullable|string|max:20',
             'email'         => 'nullable|email|max:255',
         ]);
 
-        $nama = $validated['nama_instansi'];
-        foreach (['SD', 'SMP', 'SMA'] as $j) {
-            if (str_starts_with($nama, $j . ' ') || $nama === $j) {
-                $rest = trim(substr($nama, strlen($j)));
-                $nama = $j . ($rest ? ' ' . ucwords(strtolower($rest)) : '');
+        $prefix = $validated['label_jenjang'] ?? $validated['jenjang'];
+        $rest = $validated['nama_instansi'];
+        $allPrefixes = ['SD', 'SMP', 'SMA', 'MI', 'MTs', 'MA', 'SMK'];
+        foreach ($allPrefixes as $p) {
+            if (str_starts_with($rest, $p . ' ') || $rest === $p) {
+                $rest = trim(substr($rest, strlen($p)));
                 break;
             }
         }
-        $validated['nama_instansi'] = $nama;
+        $validated['nama_instansi'] = $prefix . ($rest ? ' ' . ucwords(strtolower($rest)) : '');
 
         $instansi->update($validated);
 
@@ -200,6 +206,16 @@ class SekolahController extends Controller
             ->get(['id', 'name', 'email']);
 
         return view('superadmin.sekolah.assign-admin', compact('instansi', 'currentAdmins'));
+    }
+
+    private function allowedLabels(?string $jenjang): array
+    {
+        return match ($jenjang) {
+            'SD'  => ['SD', 'MI'],
+            'SMP' => ['SMP', 'MTs'],
+            'SMA' => ['SMA', 'MA', 'SMK'],
+            default => [],
+        };
     }
 
     public function storeAdmin(Request $request, Instansi $instansi)

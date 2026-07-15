@@ -34,7 +34,7 @@
                         <option value="">-- Pilih Sekolah --</option>
                         @foreach($sekolahTujuan as $s)
                             <option value="{{ $s->id_instansi }}" {{ old('instansi_tujuan') == $s->id_instansi ? 'selected' : '' }}>
-                                {{ $s->nama_instansi }} ({{ $s->jenjang }})
+                                {{ $s->nama_instansi }} ({{ $s->label_jenjang }})
                             </option>
                         @endforeach
                     </select>

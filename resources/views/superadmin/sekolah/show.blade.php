@@ -64,7 +64,7 @@
                     <tr class="border-b dark:border-gray-700">
                         <td class="py-3 font-medium text-gray-600 dark:text-gray-400">Jenjang</td>
                         <td class="py-3">
-                            <span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">{{ $instansi->jenjang }}</span>
+                            <span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">{{ $instansi->label_jenjang }}</span>
                         </td>
                     </tr>
                     <tr class="border-b dark:border-gray-700">

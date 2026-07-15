@@ -17,8 +17,8 @@
             <div class="mb-6 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ $guru->nama_guru }}</p>
                 <p class="text-xs text-gray-500">NIP: {{ $guru->nip ?? '-' }}</p>
-                <p class="text-xs text-gray-500">Sekolah asal: {{ $instansiAsal->nama_instansi }} ({{ $instansiAsal->jenjang }})</p>
-                <p class="text-xs text-gray-500">Sekolah tujuan: {{ $instansiTujuan->nama_instansi }} ({{ $instansiTujuan->jenjang }})</p>
+                <p class="text-xs text-gray-500">Sekolah asal: {{ $instansiAsal->nama_instansi }} ({{ $instansiAsal->label_jenjang }})</p>
+                <p class="text-xs text-gray-500">Sekolah tujuan: {{ $instansiTujuan->nama_instansi }} ({{ $instansiTujuan->label_jenjang }})</p>
             </div>
 
             <form method="POST" action="{{ route('admin.guru.mutasi.terima.proses') }}">
