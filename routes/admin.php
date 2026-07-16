@@ -217,6 +217,11 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
         Route::post('/export-absensi-pdf', [LaporanController::class, 'exportAbsensiPdf'])->name('export-absensi-pdf');
         Route::post('/export-poin-excel', [LaporanController::class, 'exportPoinExcel'])->name('export-poin-excel');
         Route::post('/export-poin-pdf', [LaporanController::class, 'exportPoinPdf'])->name('export-poin-pdf');
+        Route::post('/export-siswa-excel', [LaporanController::class, 'exportSiswaExcel'])->name('export-siswa-excel');
+        Route::post('/export-guru-excel', [LaporanController::class, 'exportGuruExcel'])->name('export-guru-excel');
+        Route::post('/export-kelas-excel', [LaporanController::class, 'exportKelasExcel'])->name('export-kelas-excel');
+        Route::post('/export-log-poin-excel', [LaporanController::class, 'exportLogPoinExcel'])->name('export-log-poin-excel');
+        Route::post('/export-jadwal-excel', [LaporanController::class, 'exportJadwalExcel'])->name('export-jadwal-excel');
 
         // Daftar, download & hapus export
         Route::get('/exports', [LaporanController::class, 'exports'])->name('exports');

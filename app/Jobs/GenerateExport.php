@@ -3,10 +3,18 @@
 namespace App\Jobs;
 
 use App\Exports\AbsensiExport;
+use App\Exports\GuruExport;
+use App\Exports\JadwalExport;
+use App\Exports\KelasExport;
+use App\Exports\LogPoinExport;
 use App\Exports\PoinExport;
 use App\Exports\RekapAbsensiExport;
+use App\Exports\SiswaExport;
 use App\Models\ExportJob;
+use App\Models\Guru;
+use App\Models\Jurusan;
 use App\Models\Kelas;
+use App\Models\LogPoinSiswa;
 use App\Models\RegistrasiAkademik;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
@@ -38,11 +46,16 @@ class GenerateExport implements ShouldQueue
             $filepath = 'exports/' . $filename;
 
             match ($this->exportJob->type) {
-                'absensi-excel'   => $this->generateAbsensiExcel($filepath, $filters),
-                'absensi-pdf'     => $this->generateAbsensiPdf($filepath, $filters),
-                'poin-excel'      => $this->generatePoinExcel($filepath, $filters),
-                'poin-pdf'        => $this->generatePoinPdf($filepath, $filters),
+                'absensi-excel'    => $this->generateAbsensiExcel($filepath, $filters),
+                'absensi-pdf'      => $this->generateAbsensiPdf($filepath, $filters),
+                'poin-excel'       => $this->generatePoinExcel($filepath, $filters),
+                'poin-pdf'         => $this->generatePoinPdf($filepath, $filters),
                 'guru-rekap-excel' => $this->generateGuruRekapExcel($filepath, $filters),
+                'siswa-excel'      => $this->generateSiswaExcel($filepath, $filters),
+                'guru-excel'       => $this->generateGuruExcel($filepath, $filters),
+                'kelas-excel'      => $this->generateKelasExcel($filepath, $filters),
+                'log-poin-excel'   => $this->generateLogPoinExcel($filepath, $filters),
+                'jadwal-excel'     => $this->generateJadwalExcel($filepath, $filters),
             };
 
             $this->exportJob->update([
@@ -61,9 +74,105 @@ class GenerateExport implements ShouldQueue
 
     protected function generateFilename(): string
     {
-        $ts = now()->format('Ymd_His');
-        $ext = str_contains($this->exportJob->type, 'pdf') ? 'pdf' : 'xlsx';
-        return str_replace('-', '_', $this->exportJob->type) . "_{$ts}.{$ext}";
+        $type = $this->exportJob->type;
+        $filters = $this->exportJob->filters;
+        $parts = [];
+
+        $label = match ($type) {
+            'absensi-excel', 'absensi-pdf' => 'Absensi',
+            'poin-excel', 'poin-pdf' => 'Poin',
+            'guru-rekap-excel' => 'Rekap_Absensi_Guru',
+            'siswa-excel' => 'Data_Siswa',
+            'guru-excel' => 'Data_Guru',
+            'kelas-excel' => 'Data_Kelas',
+            'log-poin-excel' => 'Log_Poin',
+            'jadwal-excel' => 'Jadwal',
+            default => str_replace('-', '_', $type),
+        };
+        $parts[] = $label;
+
+        switch ($type) {
+            case 'absensi-excel':
+            case 'absensi-pdf':
+                $parts[] = Kelas::find((int) $filters['kelas_id'])?->nama_kelas;
+                $parts[] = \Carbon\Carbon::create()->month((int) $filters['bulan'])->locale('id')->monthName;
+                $parts[] = (string) $filters['tahun'];
+                break;
+
+            case 'poin-excel':
+            case 'poin-pdf':
+                if (!empty($filters['kelas_id'])) {
+                    $parts[] = Kelas::find((int) $filters['kelas_id'])?->nama_kelas;
+                }
+                $parts[] = \Carbon\Carbon::create()->month((int) $filters['bulan'])->locale('id')->monthName;
+                $parts[] = (string) $filters['tahun'];
+                break;
+
+            case 'guru-rekap-excel':
+                $parts[] = Guru::find((int) $filters['guru_id'])?->nama_guru;
+                $parts[] = \Carbon\Carbon::create()->month((int) $filters['bulan'])->locale('id')->monthName;
+                $parts[] = (string) $filters['tahun'];
+                break;
+
+            case 'siswa-excel':
+                if (!empty($filters['kelas_id'])) {
+                    $parts[] = Kelas::find((int) $filters['kelas_id'])?->nama_kelas;
+                }
+                if (!empty($filters['tahun_id'])) {
+                    $t = TahunAjaran::find((int) $filters['tahun_id']);
+                    if ($t) $parts[] = str_replace('/', '-', $t->nama_tahun) . '_' . $t->semester;
+                }
+                if (!empty($filters['status'])) {
+                    $parts[] = $filters['status'];
+                }
+                break;
+
+            case 'guru-excel':
+                if (!empty($filters['status'])) {
+                    $parts[] = $filters['status'];
+                }
+                break;
+
+            case 'kelas-excel':
+                if (!empty($filters['tahun_id'])) {
+                    $t = TahunAjaran::find((int) $filters['tahun_id']);
+                    if ($t) $parts[] = str_replace('/', '-', $t->nama_tahun) . '_' . $t->semester;
+                }
+                if (!empty($filters['tingkat'])) {
+                    $parts[] = 'Kelas_' . $filters['tingkat'];
+                }
+                if (!empty($filters['jurusan_id'])) {
+                    $j = Jurusan::find((int) $filters['jurusan_id']);
+                    if ($j) $parts[] = $j->kode_jurusan;
+                }
+                break;
+
+            case 'log-poin-excel':
+                if (!empty($filters['kelas_id'])) {
+                    $parts[] = Kelas::find((int) $filters['kelas_id'])?->nama_kelas;
+                }
+                if (!empty($filters['tanggal_mulai'])) {
+                    $parts[] = $filters['tanggal_mulai'];
+                }
+                if (!empty($filters['tanggal_selesai'])) {
+                    $parts[] = $filters['tanggal_selesai'];
+                }
+                break;
+
+            case 'jadwal-excel':
+                if (!empty($filters['kelas_id'])) {
+                    $parts[] = Kelas::find((int) $filters['kelas_id'])?->nama_kelas;
+                }
+                if (!empty($filters['tahun_id'])) {
+                    $t = TahunAjaran::find((int) $filters['tahun_id']);
+                    if ($t) $parts[] = str_replace('/', '-', $t->nama_tahun) . '_' . $t->semester;
+                }
+                break;
+        }
+
+        $ext = str_contains($type, 'pdf') ? 'pdf' : 'xlsx';
+        $parts = array_filter($parts);
+        return implode('_', $parts) . ".{$ext}";
     }
 
     protected function generateAbsensiExcel(string $filepath, array $filters): void
@@ -172,6 +281,75 @@ class GenerateExport implements ShouldQueue
                 isset($filters['mapel_id']) ? (int) $filters['mapel_id'] : null,
                 $filters['tingkat'] ?? null,
                 isset($filters['jurusan']) && $filters['jurusan'] !== '' ? (int) $filters['jurusan'] : null
+            ),
+            $filepath,
+            'local'
+        );
+    }
+
+    protected function generateSiswaExcel(string $filepath, array $filters): void
+    {
+        $instansi = $this->exportJob->user->getInstansi();
+        Excel::store(
+            new SiswaExport(
+                $instansi->id_instansi,
+                isset($filters['kelas_id']) ? (int) $filters['kelas_id'] : null,
+                isset($filters['tahun_id']) ? (int) $filters['tahun_id'] : null,
+                $filters['status'] ?? null,
+            ),
+            $filepath,
+            'local'
+        );
+    }
+
+    protected function generateGuruExcel(string $filepath, array $filters): void
+    {
+        $instansi = $this->exportJob->user->getInstansi();
+        Excel::store(
+            new GuruExport($instansi->id_instansi, $filters['status'] ?? null),
+            $filepath,
+            'local'
+        );
+    }
+
+    protected function generateKelasExcel(string $filepath, array $filters): void
+    {
+        $instansi = $this->exportJob->user->getInstansi();
+        Excel::store(
+            new KelasExport(
+                $instansi->id_instansi,
+                isset($filters['tahun_id']) ? (int) $filters['tahun_id'] : null,
+                isset($filters['tingkat']) ? (int) $filters['tingkat'] : null,
+                isset($filters['jurusan_id']) ? (int) $filters['jurusan_id'] : null,
+            ),
+            $filepath,
+            'local'
+        );
+    }
+
+    protected function generateLogPoinExcel(string $filepath, array $filters): void
+    {
+        $instansi = $this->exportJob->user->getInstansi();
+        Excel::store(
+            new LogPoinExport(
+                $instansi->id_instansi,
+                isset($filters['kelas_id']) ? (int) $filters['kelas_id'] : null,
+                $filters['tanggal_mulai'] ?? null,
+                $filters['tanggal_selesai'] ?? null,
+            ),
+            $filepath,
+            'local'
+        );
+    }
+
+    protected function generateJadwalExcel(string $filepath, array $filters): void
+    {
+        $instansi = $this->exportJob->user->getInstansi();
+        Excel::store(
+            new JadwalExport(
+                $instansi->id_instansi,
+                isset($filters['kelas_id']) ? (int) $filters['kelas_id'] : null,
+                isset($filters['tahun_id']) ? (int) $filters['tahun_id'] : null,
             ),
             $filepath,
             'local'

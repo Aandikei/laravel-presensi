@@ -3,10 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Exports\GuruExport;
+use App\Exports\JadwalExport;
+use App\Exports\KelasExport;
+use App\Exports\LogPoinExport;
+use App\Exports\SiswaExport;
 use App\Jobs\GenerateExport;
 use App\Models\Absensi;
 use App\Models\ExportJob;
+use App\Models\Guru;
+use App\Models\Instansi;
 use App\Models\Jadwal;
+use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
@@ -32,7 +40,18 @@ class LaporanController extends Controller
             ->orderBy('nama_mapel')
             ->get();
 
-        return view('admin.laporan.index', compact('kelas', 'mapel'));
+        $daftarTahun = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_tahun', 'desc')
+            ->orderByRaw("FIELD(semester, 'Ganjil', 'Genap')")
+            ->get();
+
+        $tingkatList = range(max($instansi->tingkat_min, 1), $instansi->tingkat_maks);
+
+        $jurusanList = $instansi->jenjang === 'SMA'
+            ? Jurusan::where('instansi_id', $instansi->id_instansi)->orderBy('kode_jurusan')->get()
+            : collect();
+
+        return view('admin.laporan.index', compact('kelas', 'mapel', 'daftarTahun', 'tingkatList', 'jurusanList'));
     }
 
     // ── Preview Rekap Absensi ──────────────────
@@ -258,6 +277,117 @@ class LaporanController extends Controller
 
         return redirect()->route('admin.laporan.index')
             ->with('info', 'Export PDF Poin sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
+    }
+
+    // ── Export Data Siswa ─────────────────────
+    public function exportSiswaExcel(Request $request)
+    {
+        $instansi = Auth::user()->getInstansi();
+
+        if ($request->kelas_id) {
+            $kelas = Kelas::findOrFail($request->kelas_id);
+            abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+        }
+
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'siswa-excel',
+            'source'  => 'admin',
+            'filters' => $request->only(['kelas_id', 'tahun_id', 'status']),
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export Data Siswa sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
+    }
+
+    // ── Export Data Guru ──────────────────────
+    public function exportGuruExcel(Request $request)
+    {
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'guru-excel',
+            'source'  => 'admin',
+            'filters' => $request->only(['status']),
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export Data Guru sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
+    }
+
+    // ── Export Data Kelas ─────────────────────
+    public function exportKelasExcel(Request $request)
+    {
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'kelas-excel',
+            'source'  => 'admin',
+            'filters' => $request->only(['tahun_id', 'tingkat', 'jurusan_id']),
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export Data Kelas sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
+    }
+
+    // ── Export Log Poin ───────────────────────
+    public function exportLogPoinExcel(Request $request)
+    {
+        $request->validate([
+            'tanggal_mulai'   => 'nullable|date',
+            'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
+        ]);
+
+        $instansi = Auth::user()->getInstansi();
+
+        if ($request->kelas_id) {
+            $kelas = Kelas::findOrFail($request->kelas_id);
+            abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+        }
+
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'log-poin-excel',
+            'source'  => 'admin',
+            'filters' => $request->only(['kelas_id', 'tanggal_mulai', 'tanggal_selesai']),
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export Log Poin sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
+    }
+
+    // ── Export Jadwal ─────────────────────────
+    public function exportJadwalExcel(Request $request)
+    {
+        $instansi = Auth::user()->getInstansi();
+
+        if ($request->kelas_id) {
+            $kelas = Kelas::findOrFail($request->kelas_id);
+            abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+        }
+
+        $exportJob = ExportJob::create([
+            'user_id' => Auth::id(),
+            'type'    => 'jadwal-excel',
+            'source'  => 'admin',
+            'filters' => $request->only(['kelas_id', 'tahun_id']),
+            'status'  => 'pending',
+        ]);
+
+        GenerateExport::dispatch($exportJob);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('info', 'Export Jadwal sedang diproses. Silakan cek tab "Export Saya" beberapa saat lagi.');
     }
 
     // ── Daftar Export Saya ────────────────────

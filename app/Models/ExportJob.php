@@ -40,12 +40,17 @@ class ExportJob extends Model
     public function getTypeLabelAttribute(): string
     {
         return match ($this->type) {
-            'absensi-excel'   => 'Excel Absensi',
-            'absensi-pdf'     => 'PDF Absensi',
-            'poin-excel'      => 'Excel Poin',
-            'poin-pdf'        => 'PDF Poin',
+            'absensi-excel'    => 'Excel Absensi',
+            'absensi-pdf'      => 'PDF Absensi',
+            'poin-excel'       => 'Excel Poin',
+            'poin-pdf'         => 'PDF Poin',
             'guru-rekap-excel' => 'Excel Rekap Guru',
-            default           => ucfirst($this->type),
+            'siswa-excel'      => 'Excel Data Siswa',
+            'guru-excel'       => 'Excel Data Guru',
+            'kelas-excel'      => 'Excel Data Kelas',
+            'log-poin-excel'   => 'Excel Log Poin',
+            'jadwal-excel'     => 'Excel Jadwal',
+            default            => ucfirst($this->type),
         };
     }
 }
