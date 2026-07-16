@@ -43,7 +43,35 @@ class TahunAjaranController extends Controller
 
     public function create()
     {
-        return view('admin.tahun-ajaran.create');
+        $instansi = Auth::user()->getInstansi();
+
+        $existing = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->get(['nama_tahun', 'semester']);
+
+        $existingData = $existing->map(fn ($ta) => [
+            'nama_tahun' => $ta->nama_tahun,
+            'semester' => $ta->semester,
+        ])->values()->all();
+
+        // Build lookup: [nama_tahun => [semester, ...]]
+        $lookup = [];
+        foreach ($existingData as $d) {
+            $lookup[$d['nama_tahun']][] = $d['semester'];
+        }
+
+        $now = now();
+        $tahunMulai = ((int) $now->format('n') >= 7)
+            ? (int) $now->format('Y')
+            : (int) $now->format('Y') - 1;
+
+        for ($i = 0; $i < 20; $i++) {
+            $nama = "{$tahunMulai}/" . ($tahunMulai + 1);
+            $s = $lookup[$nama] ?? [];
+            if (!in_array('Ganjil', $s) || !in_array('Genap', $s)) break;
+            $tahunMulai++;
+        }
+
+        return view('admin.tahun-ajaran.create', compact('existingData', 'tahunMulai'));
     }
 
     public function store(Request $request)
@@ -61,6 +89,35 @@ class TahunAjaranController extends Controller
         if ((int)$tahun2 !== (int)$tahun1 + 1) {
             return back()->withErrors([
                 'nama_tahun' => 'Format tahun ajaran tidak valid. Contoh: 2026/2027'
+            ])->withInput();
+        }
+
+        // Cek urutan semester
+        $existsGanjil = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->where('nama_tahun', $validated['nama_tahun'])
+            ->where('semester', 'Ganjil')
+            ->exists();
+
+        if ($validated['semester'] === 'Genap' && !$existsGanjil) {
+            return back()->withErrors([
+                'semester' => 'Isi semester Ganjil terlebih dahulu.'
+            ])->withInput();
+        }
+
+        if ($validated['semester'] === 'Ganjil' && $existsGanjil) {
+            return back()->withErrors([
+                'semester' => 'Semester Ganjil untuk tahun ini sudah ada.'
+            ])->withInput();
+        }
+
+        // Validasi tahun tanggal harus sesuai semester
+        $tahunTarget = $validated['semester'] === 'Ganjil' ? (int)$tahun1 : (int)$tahun2;
+        $tahunMulai = (int) date('Y', strtotime($validated['tanggal_mulai']));
+        $tahunSelesai = (int) date('Y', strtotime($validated['tanggal_selesai']));
+
+        if ($tahunMulai !== $tahunTarget || $tahunSelesai !== $tahunTarget) {
+            return back()->withErrors([
+                'tanggal_mulai' => "Tanggal harus berada di tahun {$tahunTarget} untuk semester {$validated['semester']}.",
             ])->withInput();
         }
 
@@ -111,6 +168,17 @@ class TahunAjaranController extends Controller
         if ((int)$tahun2 !== (int)$tahun1 + 1) {
             return back()->withErrors([
                 'nama_tahun' => 'Format tahun ajaran tidak valid. Contoh: 2026/2027'
+            ])->withInput();
+        }
+
+        // Validasi tahun tanggal harus sesuai semester
+        $tahunTarget = $validated['semester'] === 'Ganjil' ? (int)$tahun1 : (int)$tahun2;
+        $tahunMulai = (int) date('Y', strtotime($validated['tanggal_mulai']));
+        $tahunSelesai = (int) date('Y', strtotime($validated['tanggal_selesai']));
+
+        if ($tahunMulai !== $tahunTarget || $tahunSelesai !== $tahunTarget) {
+            return back()->withErrors([
+                'tanggal_mulai' => "Tanggal harus berada di tahun {$tahunTarget} untuk semester {$validated['semester']}.",
             ])->withInput();
         }
 
