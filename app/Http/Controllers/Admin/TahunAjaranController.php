@@ -150,12 +150,14 @@ class TahunAjaranController extends Controller
     public function edit(TahunAjaran $tahunAjaran)
     {
         $this->authorizeInstansi($tahunAjaran);
+
         return view('admin.tahun-ajaran.edit', compact('tahunAjaran'));
     }
 
     public function update(Request $request, TahunAjaran $tahunAjaran)
     {
         $this->authorizeInstansi($tahunAjaran);
+        $instansi = Auth::user()->getInstansi();
 
         $validated = $request->validate([
             'nama_tahun'      => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'],
@@ -168,6 +170,25 @@ class TahunAjaranController extends Controller
         if ((int)$tahun2 !== (int)$tahun1 + 1) {
             return back()->withErrors([
                 'nama_tahun' => 'Format tahun ajaran tidak valid. Contoh: 2026/2027'
+            ])->withInput();
+        }
+
+        // Cek urutan semester (exclude record sendiri)
+        $existsGanjil = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->where('nama_tahun', $validated['nama_tahun'])
+            ->where('semester', 'Ganjil')
+            ->where('id_tahun', '!=', $tahunAjaran->id_tahun)
+            ->exists();
+
+        if ($validated['semester'] === 'Genap' && !$existsGanjil) {
+            return back()->withErrors([
+                'semester' => 'Isi semester Ganjil terlebih dahulu.'
+            ])->withInput();
+        }
+
+        if ($validated['semester'] === 'Ganjil' && $existsGanjil) {
+            return back()->withErrors([
+                'semester' => 'Semester Ganjil untuk tahun ini sudah ada.'
             ])->withInput();
         }
 
