@@ -20,7 +20,7 @@
             <select id="filter-tahun" class="text-sm dark:bg-gray-700 dark:text-gray-300">
                 @foreach($daftarTahun as $tahun)
                     <option value="{{ $tahun->id_tahun }}" {{ $tahun->id_tahun == $tahunDipilih?->id_tahun ? 'selected' : '' }}>
-                        {{ $tahun->nama_tahun }} - {{ $tahun->semester }}
+                        {{ $tahun->nama_tahun }} - {{ $tahun->semester }}@if($tahun->is_aktif) (Aktif)@endif
                     </option>
                 @endforeach
             </select>

@@ -74,6 +74,8 @@
                     Semester Ganjil dan Genap untuk tahun ini sudah ada.
                 </div>
 
+                <div id="tanggal-warning" class="hidden mb-4 text-sm text-red-600 bg-red-100 rounded-lg p-3"></div>
+
                 <button type="submit" id="btn-submit"
                     class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
                     Simpan
@@ -135,22 +137,61 @@
                 var mulai = document.getElementById('tanggal-mulai');
                 var selesai = document.getElementById('tanggal-selesai');
 
+                // Reset min/max
+                mulai.min = '';
+                mulai.max = '';
+                selesai.min = '';
+                selesai.max = '';
+
+                function addDays(dateStr, days) {
+                    var parts = dateStr.split('-');
+                    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+                    d.setDate(d.getDate() + days);
+                    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                }
+
                 if (semester === 'Ganjil') {
-                    mulai.value = tahun1 + '-07-01';
-                    selesai.value = tahun1 + '-12-31';
-                    mulai.min = tahun1 + '-01-01';
-                    mulai.max = tahun1 + '-12-31';
-                    selesai.min = tahun1 + '-01-01';
-                    selesai.max = tahun1 + '-12-31';
+                    var tahunStr = String(tahun1);
+                    selesai.value = tahunStr + '-12-31';
+                    selesai.max = tahunStr + '-12-31';
+                    mulai.max = tahunStr + '-12-31';
+
+                    var prevNama = (tahun1 - 1) + '/' + tahun1;
+                    var prevGenap = existingData.find(function(d) {
+                        return d.nama_tahun === prevNama && d.semester === 'Genap';
+                    });
+
+                    if (prevGenap) {
+                        var defaultVal = addDays(prevGenap.tanggal_selesai, 1);
+                        mulai.value = defaultVal;
+                        mulai.min = defaultVal;
+                    } else {
+                        mulai.value = tahunStr + '-07-01';
+                        mulai.min = tahunStr + '-01-01';
+                    }
                 } else if (semester === 'Genap') {
                     var tahun2 = tahun1 + 1;
-                    mulai.value = tahun2 + '-01-01';
-                    selesai.value = tahun2 + '-06-30';
-                    mulai.min = tahun2 + '-01-01';
-                    mulai.max = tahun2 + '-12-31';
-                    selesai.min = tahun2 + '-01-01';
-                    selesai.max = tahun2 + '-12-31';
+                    var tahun2Str = String(tahun2);
+                    selesai.value = tahun2Str + '-06-30';
+                    mulai.max = tahun2Str + '-12-31';
+                    selesai.max = tahun2Str + '-12-31';
+
+                    var currentNama = tahun1 + '/' + tahun2;
+                    var currentGanjil = existingData.find(function(d) {
+                        return d.nama_tahun === currentNama && d.semester === 'Ganjil';
+                    });
+
+                    if (currentGanjil) {
+                        var defaultVal = addDays(currentGanjil.tanggal_selesai, 1);
+                        mulai.value = defaultVal;
+                        mulai.min = defaultVal;
+                    } else {
+                        mulai.value = tahun2Str + '-01-01';
+                        mulai.min = tahun2Str + '-01-01';
+                    }
                 }
+
+                selesai.min = mulai.value;
             }
 
             function findAvailableYear(startTahun) {
@@ -223,6 +264,32 @@
                     }
                     var semester = updateSemester(t1);
                     if (semester) setDates(t1, semester);
+                });
+
+                // Warning when tanggal_mulai < min
+                var tanggalMulai = document.getElementById('tanggal-mulai');
+                var tanggalWarning = document.getElementById('tanggal-warning');
+
+                tanggalMulai.addEventListener('change', function() {
+                    var min = this.min;
+                    var val = this.value;
+                    var selesai = document.getElementById('tanggal-selesai');
+
+                    if (min && val < min) {
+                        this.value = min;
+                    }
+                    if (val < min) {
+                        tanggalWarning.textContent = 'Tanggal mulai tidak boleh sebelum ' + min;
+                        tanggalWarning.classList.remove('hidden');
+                    } else {
+                        tanggalWarning.classList.add('hidden');
+                    }
+
+                    // Update selesai min
+                    if (val && selesai) {
+                        selesai.min = val;
+                        if (selesai.value < val) selesai.value = val;
+                    }
                 });
             });
         })();

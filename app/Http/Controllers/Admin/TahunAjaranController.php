@@ -46,11 +46,13 @@ class TahunAjaranController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         $existing = TahunAjaran::where('instansi_id', $instansi->id_instansi)
-            ->get(['nama_tahun', 'semester']);
+            ->get(['nama_tahun', 'semester', 'tanggal_mulai', 'tanggal_selesai']);
 
         $existingData = $existing->map(fn ($ta) => [
             'nama_tahun' => $ta->nama_tahun,
             'semester' => $ta->semester,
+            'tanggal_mulai' => $ta->tanggal_mulai->format('Y-m-d'),
+            'tanggal_selesai' => $ta->tanggal_selesai->format('Y-m-d'),
         ])->values()->all();
 
         // Build lookup: [nama_tahun => [semester, ...]]
@@ -121,6 +123,32 @@ class TahunAjaranController extends Controller
             ])->withInput();
         }
 
+        // Validasi tanggal mulai tidak boleh sebelum prev semester berakhir
+        if ($validated['semester'] === 'Ganjil') {
+            $prevNama = ((int)$tahun1 - 1) . '/' . $tahun1;
+            $prev = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+                ->where('nama_tahun', $prevNama)
+                ->where('semester', 'Genap')
+                ->first();
+
+            if ($prev && $validated['tanggal_mulai'] <= $prev->tanggal_selesai->format('Y-m-d')) {
+                return back()->withErrors([
+                    'tanggal_mulai' => 'Tanggal mulai tidak boleh sebelum atau sama dengan tanggal selesai Genap ' . $prevNama . ' (' . $prev->tanggal_selesai->format('Y-m-d') . ').'
+                ])->withInput();
+            }
+        } elseif ($validated['semester'] === 'Genap') {
+            $prev = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+                ->where('nama_tahun', $validated['nama_tahun'])
+                ->where('semester', 'Ganjil')
+                ->first();
+
+            if ($prev && $validated['tanggal_mulai'] <= $prev->tanggal_selesai->format('Y-m-d')) {
+                return back()->withErrors([
+                    'tanggal_mulai' => 'Tanggal mulai tidak boleh sebelum atau sama dengan tanggal selesai Ganjil ' . $validated['nama_tahun'] . ' (' . $prev->tanggal_selesai->format('Y-m-d') . ').'
+                ])->withInput();
+            }
+        }
+
         // Cek duplikat
         $exists = TahunAjaran::where('instansi_id', $instansi->id_instansi)
             ->where('nama_tahun', $validated['nama_tahun'])
@@ -150,8 +178,19 @@ class TahunAjaranController extends Controller
     public function edit(TahunAjaran $tahunAjaran)
     {
         $this->authorizeInstansi($tahunAjaran);
+        $instansi = Auth::user()->getInstansi();
 
-        return view('admin.tahun-ajaran.edit', compact('tahunAjaran'));
+        $existing = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+            ->get(['nama_tahun', 'semester', 'tanggal_mulai', 'tanggal_selesai']);
+
+        $existingData = $existing->map(fn ($ta) => [
+            'nama_tahun' => $ta->nama_tahun,
+            'semester' => $ta->semester,
+            'tanggal_mulai' => $ta->tanggal_mulai->format('Y-m-d'),
+            'tanggal_selesai' => $ta->tanggal_selesai->format('Y-m-d'),
+        ])->values()->all();
+
+        return view('admin.tahun-ajaran.edit', compact('tahunAjaran', 'existingData'));
     }
 
     public function update(Request $request, TahunAjaran $tahunAjaran)
@@ -201,6 +240,32 @@ class TahunAjaranController extends Controller
             return back()->withErrors([
                 'tanggal_mulai' => "Tanggal harus berada di tahun {$tahunTarget} untuk semester {$validated['semester']}.",
             ])->withInput();
+        }
+
+        // Validasi tanggal mulai tidak boleh sebelum prev semester berakhir
+        if ($validated['semester'] === 'Ganjil') {
+            $prevNama = ((int)$tahun1 - 1) . '/' . $tahun1;
+            $prev = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+                ->where('nama_tahun', $prevNama)
+                ->where('semester', 'Genap')
+                ->first();
+
+            if ($prev && $validated['tanggal_mulai'] <= $prev->tanggal_selesai->format('Y-m-d')) {
+                return back()->withErrors([
+                    'tanggal_mulai' => 'Tanggal mulai tidak boleh sebelum atau sama dengan tanggal selesai Genap ' . $prevNama . ' (' . $prev->tanggal_selesai->format('Y-m-d') . ').'
+                ])->withInput();
+            }
+        } elseif ($validated['semester'] === 'Genap') {
+            $prev = TahunAjaran::where('instansi_id', $instansi->id_instansi)
+                ->where('nama_tahun', $validated['nama_tahun'])
+                ->where('semester', 'Ganjil')
+                ->first();
+
+            if ($prev && $validated['tanggal_mulai'] <= $prev->tanggal_selesai->format('Y-m-d')) {
+                return back()->withErrors([
+                    'tanggal_mulai' => 'Tanggal mulai tidak boleh sebelum atau sama dengan tanggal selesai Ganjil ' . $validated['nama_tahun'] . ' (' . $prev->tanggal_selesai->format('Y-m-d') . ').'
+                ])->withInput();
+            }
         }
 
         $tahunAjaran->update($validated);

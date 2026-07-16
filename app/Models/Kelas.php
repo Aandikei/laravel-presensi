@@ -107,6 +107,10 @@ class Kelas extends Model
     // Jumlah siswa aktif di kelas ini
     public function getJumlahSiswaAttribute(): int
     {
+        if (isset($this->attributes['jumlah_siswa'])) {
+            return (int) $this->attributes['jumlah_siswa'];
+        }
+
         $tahunAktif = TahunAjaran::where('instansi_id', $this->instansi_id)
             ->where('is_aktif', true)
             ->first();

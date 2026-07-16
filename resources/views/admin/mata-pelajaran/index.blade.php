@@ -14,6 +14,16 @@
             @endcan
         </div>
 
+        <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 flex items-center gap-4">
+            <label class="text-sm text-gray-700 dark:text-gray-400">Kelompok:</label>
+            <select id="filter-kelompok" class="text-sm dark:bg-gray-700 dark:text-gray-300">
+                <option value="">Semua Kelompok</option>
+                @foreach($kelompokList as $k)
+                    <option value="{{ $k }}">{{ $k }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">
                 <table id="tabel-mapel" class="w-full whitespace-nowrap">
@@ -40,7 +50,12 @@
             $('#tabel-mapel').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.mata-pelajaran.index') }}',
+                ajax: {
+                    url: '{{ route('admin.mata-pelajaran.index') }}',
+                    data: function(d) {
+                        d.kelompok = $('#filter-kelompok').val();
+                    }
+                },
                 columns: [
                     { data: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'nama_mapel' },
@@ -52,6 +67,10 @@
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
                 }
+            });
+
+            $('#filter-kelompok').on('change', function() {
+                $('#tabel-mapel').DataTable().ajax.reload();
             });
         });
     </script>

@@ -157,7 +157,7 @@
     <div class="h-full overflow-y-auto py-4 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 sidebar-scroll">
 
     {{-- Logo --}}
-    <a class="ml-6 text-lg font-bold text-gray-800 dark:text-white" href="#">
+    <a class="block px-6 text-center text-lg font-bold text-gray-800 dark:text-white" href="#">
       {{ optional(Auth::user()->getInstansi())->nama_instansi ?? 'Presensi' }}
     </a>
 

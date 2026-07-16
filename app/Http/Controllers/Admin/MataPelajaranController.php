@@ -14,9 +14,18 @@ class MataPelajaranController extends Controller
     {
         $instansi = Auth::user()->getInstansi();
 
+        $kelompokList = $instansi->jenjang === 'SMA'
+            ? ['Umum', 'Jurusan', 'Muatan Lokal']
+            : ['Umum', 'Muatan Lokal'];
+
         if ($request->ajax()) {
             $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
-                ->select('mata_pelajaran.*');
+                ->select('mata_pelajaran.*')
+                ->withCount('kurikulum as jumlah_kelas');
+
+            if ($request->kelompok) {
+                $mapel->where('kelompok', $request->kelompok);
+            }
 
             return DataTables::of($mapel)
                 ->addIndexColumn()
@@ -30,9 +39,7 @@ class MataPelajaranController extends Controller
                     return '<span class="px-2 py-1 text-xs font-medium text-' . $color . '-700 bg-' . $color . '-100 rounded-full dark:bg-' . $color . '-800 dark:text-' . $color . '-200">'
                         . $row->kelompok . '</span>';
                 })
-                ->addColumn('jumlah_kelas', function ($row) {
-                    return $row->kurikulum()->count();
-                })
+                ->addColumn('jumlah_kelas', fn ($row) => $row->jumlah_kelas)
                 ->addColumn('aksi', function ($row) {
                     if (!Auth::user()->can('manage-settings')) {
                         return '';
@@ -57,7 +64,7 @@ class MataPelajaranController extends Controller
                 ->make(true);
         }
 
-        return view('admin.mata-pelajaran.index');
+        return view('admin.mata-pelajaran.index', compact('kelompokList'));
     }
 
     public function create()
