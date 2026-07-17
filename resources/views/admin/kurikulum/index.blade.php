@@ -42,7 +42,6 @@
                         <option value="Aktif">Aktif</option>
                         <option value="Keluar">Keluar</option>
                         <option value="Pensiun">Pensiun</option>
-                        <option value="Pindah">Pindah</option>
                         <option value="Mutasi">Mutasi</option>
                     </select>
                 </div>

@@ -101,24 +101,26 @@ class AbsensiController extends Controller
                 ->with('error', 'Belum waktunya input absensi.');
         }
 
-        // Ambil siswa di kelas ini (tahun ajaran aktif)
+        // Ambil semua siswa di kelas ini (tahun ajaran aktif) + absensi hari ini
+        $absensiHariIni = $jadwal->absensi()
+            ->where('tanggal', now()->toDateString())
+            ->pluck('status', 'reg_id');
+
         $registrasi = RegistrasiAkademik::with('siswa')
-            ->aktif()
             ->where('kelas_id', $jadwal->kurikulum->kelas_id)
             ->whereHas('tahunAjaran', fn ($q) => $q->where('is_aktif', true))
             ->orderBy('id_registrasi');
 
-        // Mode edit: hanya siswa aktif. Mode locked (histori): tampilkan semua
         if (!$locked) {
-            $registrasi->whereHas('siswa', fn ($q) => $q->whereNull('status'));
+            $absensiRegIds = $absensiHariIni->keys();
+            // Edit mode: siswa Aktif + Pindah/Keluar yg sudah di-absen hari ini
+            $registrasi->where(fn ($q) => $q
+                ->where('status', 'Aktif')
+                ->orWhereIn('id_registrasi', $absensiRegIds)
+            );
         }
 
         $registrasi = $registrasi->get();
-
-        // Ambil absensi yang sudah ada hari ini
-        $absensiHariIni = $jadwal->absensi()
-            ->where('tanggal', now()->toDateString())
-            ->pluck('status', 'reg_id');
 
         return view('guru.absensi.input', compact('jadwal', 'registrasi', 'absensiHariIni', 'namaLibur', 'locked'));
     }

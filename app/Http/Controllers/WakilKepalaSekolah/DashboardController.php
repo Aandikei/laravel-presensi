@@ -17,7 +17,7 @@ class DashboardController extends Controller
         $guru = $user->guru;
         $instansi = $user->getInstansi();
 
-        $totalGuru = Guru::where('instansi_id', $instansi->id_instansi)->count();
+        $totalGuru = Guru::where('instansi_id', $instansi->id_instansi)->whereNull('status')->count();
         $totalKelas = Kelas::where('instansi_id', $instansi->id_instansi)->count();
         $totalSiswaAktif = RegistrasiAkademik::aktif()
             ->whereHas('kelas', fn($q) => $q->where('instansi_id', $instansi->id_instansi))

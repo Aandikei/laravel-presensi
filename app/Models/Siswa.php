@@ -16,6 +16,7 @@ class Siswa extends Model
     protected $fillable = [
         'user_id',
         'instansi_id',
+        'asal_instansi_id',
         'nisn',
         'nama_siswa',
         'jenis_kelamin',
@@ -39,6 +40,11 @@ class Siswa extends Model
     public function instansi()
     {
         return $this->belongsTo(Instansi::class, 'instansi_id', 'id_instansi');
+    }
+
+    public function asalInstansi()
+    {
+        return $this->belongsTo(Instansi::class, 'asal_instansi_id', 'id_instansi');
     }
 
     public function orangTua()
@@ -156,5 +162,15 @@ class Siswa extends Model
     public function isTransferTokenExpired(): bool
     {
         return $this->transfer_token_expires_at && $this->transfer_token_expires_at->isPast();
+    }
+
+    public function isMutasi(): bool
+    {
+        return !is_null($this->asal_instansi_id) && $this->instansi_id !== $this->asal_instansi_id;
+    }
+
+    public function clearAsalInstansi(): void
+    {
+        $this->update(['asal_instansi_id' => null]);
     }
 }

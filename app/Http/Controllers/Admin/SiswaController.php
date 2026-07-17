@@ -29,6 +29,8 @@ class SiswaController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         if ($request->ajax()) {
+            $statusFilter = $request->status;
+
             $siswa = Siswa::with([
                 'user',
                 'registrasiAktif.kelas',
@@ -36,37 +38,53 @@ class SiswaController extends Controller
                     ->with('kelas')
                     ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)),
             ])
-                ->where('instansi_id', '=', $instansi->id_instansi)
                 ->select('siswa.*')
                 ->addSelect(['total_poin' => LogPoinSiswa::selectRaw('COALESCE(SUM(master_poin.jumlah_poin), 0)')
                     ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
                     ->whereColumn('log_poin_siswa.siswa_id', 'siswa.id_siswa')
                 ]);
 
-            // Filter per kelas
-            if ($request->kelas_id) {
-                $siswa->whereHas('registrasiAktif', fn ($q) => $q->where('kelas_id', '=', $request->kelas_id));
-            }
-
-            // Filter status
-            if ($request->status === 'Keluar') {
-                $siswa->where('status', 'Keluar');
-            } elseif ($request->status === 'Aktif') {
-                $siswa->whereNull('status')->has('registrasiAktif');
-            } elseif ($request->status === 'Pindah') {
+            if ($statusFilter === 'Pindah') {
                 $siswa->whereHas('registrasiAkademik', fn ($q) => $q
                     ->where('status', 'Pindah')
-                    ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)));
-            } elseif ($request->status === 'Alumni') {
-                $siswa->whereDoesntHave('registrasiAktif')
-                    ->whereHas('registrasiAkademik', fn ($q) => $q
-                        ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)))
-                    ->whereDoesntHave('registrasiAkademik', fn ($q) => $q
-                        ->whereIn('status', ['Pindah', 'Keluar'])
+                    ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi))
+                );
+            } else {
+                $siswa->where(fn ($q) => $q
+                    ->where('instansi_id', $instansi->id_instansi)
+                    ->orWhere('asal_instansi_id', $instansi->id_instansi)
+                );
+            }
+
+            // Filter per kelas (termasuk siswa Pindah yg kelasnya ini)
+            if ($request->kelas_id) {
+                $siswa->where(fn ($q) => $q
+                    ->whereHas('registrasiAktif', fn ($qq) => $qq->where('kelas_id', $request->kelas_id))
+                    ->orWhereHas('registrasiAkademik', fn ($qq) => $qq
+                        ->where('status', 'Pindah')
+                        ->where('kelas_id', $request->kelas_id)
+                        ->whereHas('kelas', fn ($qqq) => $qqq->where('instansi_id', $instansi->id_instansi))
+                    )
+                );
+            }
+
+            // Filter status (non-Pindah)
+            if ($statusFilter !== 'Pindah') {
+                if ($statusFilter === 'Keluar') {
+                    $siswa->where('status', 'Keluar');
+                } elseif ($statusFilter === 'Aktif') {
+                    $siswa->whereNull('status')->has('registrasiAktif');
+                } elseif ($statusFilter === 'Alumni') {
+                    $siswa->whereDoesntHave('registrasiAktif')
+                        ->whereHas('registrasiAkademik', fn ($q) => $q
+                            ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)))
+                        ->whereDoesntHave('registrasiAkademik', fn ($q) => $q
+                            ->whereIn('status', ['Pindah', 'Keluar'])
+                            ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)));
+                } elseif ($statusFilter === 'belum_terdaftar') {
+                    $siswa->whereDoesntHave('registrasiAkademik', fn ($q) => $q
                         ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)));
-            } elseif ($request->status === 'belum_terdaftar') {
-                $siswa->whereDoesntHave('registrasiAkademik', fn ($q) => $q
-                    ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)));
+                }
             }
 
             return DataTables::of($siswa)
@@ -101,14 +119,22 @@ class SiswaController extends Controller
                     if ($row->registrasiAktif) {
                         return '<span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">Aktif</span>';
                     }
-                    if ($row->registrasiAkademik->firstWhere('status', 'Pindah')) {
+                    $regPindah = $row->registrasiAkademik->firstWhere('status', 'Pindah');
+                    if ($regPindah) {
+                        if ($row->transfer_token) {
+                            return '<span class="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">Pending</span>';
+                        }
                         return '<span class="px-2 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pindah</span>';
                     }
                     return '<span class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-400">-</span>';
                 })
                 ->addColumn('total_poin', fn($row) => (int) $row->total_poin)
-                ->addColumn('aksi', function ($row) {
+                ->addColumn('aksi', function ($row) use ($instansi) {
                     $canManage = Auth::user()->can('manage-siswa');
+
+                    if ($row->instansi_id !== $instansi->id_instansi) {
+                        return '<span class="text-xs text-gray-500 italic">Read-only</span>';
+                    }
 
                     if ($canManage) {
                         $edit = '<a href="'.route('admin.siswa.edit', $row->id_siswa).'" title="Edit" class="text-blue-600 hover:text-blue-800">

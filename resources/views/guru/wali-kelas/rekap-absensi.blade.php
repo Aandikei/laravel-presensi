@@ -122,10 +122,8 @@
                             <td class="px-4 py-3 text-sm">{{ $r->jam }}</td>
                             <td class="px-4 py-3 text-sm">
                                 {{ $r->guru_nama }}
-                                @if($r->guru && $r->guru->transfer_token && !$r->guru->isTransferTokenExpired())
+                                @if($r->guru && $r->guru->instansi_id !== $kelasSaya->instansi_id)
                                     <span class="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">Mutasi</span>
-                                @elseif($r->guru && $r->guru->instansi_id !== $kelasSaya->instansi_id)
-                                    <span class="px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">Pindah</span>
                                 @elseif($r->guru && $r->guru->status_label)
                                     <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $r->guru->status_label }}</span>
                                 @endif

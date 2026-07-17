@@ -38,6 +38,16 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm text-gray-700 dark:text-gray-400">Status:</label>
+                    <select id="filter-status" class="text-sm dark:bg-gray-700 dark:text-gray-300">
+                        <option value="semua" selected>Semua</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Pindah">Pindah</option>
+                        <option value="Alumni">Alumni</option>
+                        <option value="Keluar">Keluar</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -72,6 +82,7 @@
                     data: function(d) {
                         d.tahun_id = $('#filter-tahun').val();
                         d.kelas_id = $('#filter-kelas').val();
+                        d.status = $('#filter-status').val();
                     }
                 },
                 columns: [
@@ -88,7 +99,7 @@
                 }
             });
 
-            $('#filter-tahun, #filter-kelas').on('change', function() {
+            $('#filter-tahun, #filter-kelas, #filter-status').on('change', function() {
                 table.draw();
             });
 

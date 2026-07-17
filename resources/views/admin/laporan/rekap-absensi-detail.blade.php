@@ -37,10 +37,8 @@
                     <p class="font-medium text-gray-700 dark:text-gray-200">
                         @if($guru = $jadwal->kurikulum?->guru)
                             {{ $guru->nama_guru }}
-                            @if($guru->transfer_token && !$guru->isTransferTokenExpired())
+                            @if($guru->instansi_id !== auth()->user()->instansi_id)
                                 <span class="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">Mutasi</span>
-                            @elseif($guru->instansi_id !== auth()->user()->instansi_id)
-                                <span class="px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">Pindah</span>
                             @elseif($guru->status === 'Keluar')
                                 <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">Keluar</span>
                             @elseif($guru->status === 'Pensiun')

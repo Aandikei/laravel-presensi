@@ -16,6 +16,7 @@ class Guru extends Model
     protected $fillable = [
         'user_id',
         'instansi_id',
+        'asal_instansi_id',
         'instansi_tujuan_id',
         'transfer_token',
         'transfer_token_expires_at',
@@ -44,6 +45,16 @@ class Guru extends Model
     public function instansiTujuan()
     {
         return $this->belongsTo(Instansi::class, 'instansi_tujuan_id', 'id_instansi');
+    }
+
+    public function asalInstansi()
+    {
+        return $this->belongsTo(Instansi::class, 'asal_instansi_id', 'id_instansi');
+    }
+
+    public function isMutasi(): bool
+    {
+        return !is_null($this->asal_instansi_id) && $this->instansi_id !== $this->asal_instansi_id;
     }
 
     public function kelasWali()
@@ -96,6 +107,11 @@ class Guru extends Model
             'transfer_token_expires_at' => null,
             'instansi_tujuan_id' => null,
         ]);
+    }
+
+    public function clearAsalInstansi(): void
+    {
+        $this->update(['asal_instansi_id' => null]);
     }
 
     public function isTransferTokenExpired(): bool

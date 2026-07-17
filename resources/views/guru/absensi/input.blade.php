@@ -68,6 +68,10 @@
                                 {{ $reg->siswa->nama_siswa }}
                                 @if($reg->siswa && !$reg->siswa->isAktif())
                                     <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $reg->siswa->status_label }}</span>
+                                @elseif($reg->status === 'Pindah')
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pindah</span>
+                                @elseif($reg->status === 'Alumni')
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">Alumni</span>
                                 @endif
                             </td>
                             <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $reg->siswa->nisn }}</td>
@@ -132,43 +136,63 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y dark:divide-gray-700">
+                        @php $isLocked = isset($locked) && $locked; @endphp
                         @foreach($registrasi as $i => $reg)
+                            @php
+                                $isNonAktif = !$isLocked && $reg->status !== 'Aktif';
+                            @endphp
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70">
                                 <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $i + 1 }}</td>
                                 <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-200">
                                     {{ $reg->siswa->nama_siswa }}
                                     @if($reg->siswa && !$reg->siswa->isAktif())
                                         <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $reg->siswa->status_label }}</span>
+                                    @elseif($reg->status === 'Pindah')
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pindah</span>
+                                    @elseif($reg->status === 'Alumni')
+                                        <span class="px-2 py-0.5 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">Alumni</span>
                                     @endif
                                 </td>
                                 <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
                                     {{ $reg->siswa->nisn }}
                                 </td>
-                                <td class="px-5 py-3">
-                                    <select name="absensi[{{ $reg->id_registrasi }}][status]"
-                                        class="status-select text-sm dark:bg-gray-700 dark:text-gray-300 py-1"
-                                        onchange="toggleDurasi(this);">
-                                        @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Bolos'] as $status)
-                                            <option value="{{ $status }}"
-                                                {{ ($absensiHariIni[$reg->id_registrasi] ?? 'Hadir') == $status ? 'selected' : '' }}>
-                                                {{ $status }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td class="px-5 py-3">
-                                    <input type="number"
-                                        name="absensi[{{ $reg->id_registrasi }}][durasi_terlambat]"
-                                        placeholder="mnt"
-                                        class="durasi-input text-sm form-input dark:bg-gray-700 dark:text-gray-300 py-1 w-20 hidden"
-                                        min="0" max="999" />
-                                </td>
-                                <td class="px-5 py-3">
-                                    <input type="text"
-                                        name="absensi[{{ $reg->id_registrasi }}][keterangan]"
-                                        placeholder="Opsional..."
-                                        class="text-sm form-input dark:bg-gray-700 dark:text-gray-300 py-1 w-full" />
-                                </td>
+                                @if($isNonAktif)
+                                    <td class="px-5 py-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                                        {{ $absensiHariIni[$reg->id_registrasi] ?? '-' }}
+                                    </td>
+                                    <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $reg->durasi_terlambat ?? '-' }}
+                                    </td>
+                                    <td class="px-5 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $reg->keterangan ?? '-' }}
+                                    </td>
+                                @else
+                                    <td class="px-5 py-3">
+                                        <select name="absensi[{{ $reg->id_registrasi }}][status]"
+                                            class="status-select text-sm dark:bg-gray-700 dark:text-gray-300 py-1"
+                                            onchange="toggleDurasi(this);">
+                                            @foreach(['Hadir','Sakit','Izin','Alpa','Terlambat','Bolos'] as $status)
+                                                <option value="{{ $status }}"
+                                                    {{ ($absensiHariIni[$reg->id_registrasi] ?? 'Hadir') == $status ? 'selected' : '' }}>
+                                                    {{ $status }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td class="px-5 py-3">
+                                        <input type="number"
+                                            name="absensi[{{ $reg->id_registrasi }}][durasi_terlambat]"
+                                            placeholder="mnt"
+                                            class="durasi-input text-sm form-input dark:bg-gray-700 dark:text-gray-300 py-1 w-20 hidden"
+                                            min="0" max="999" />
+                                    </td>
+                                    <td class="px-5 py-3">
+                                        <input type="text"
+                                            name="absensi[{{ $reg->id_registrasi }}][keterangan]"
+                                            placeholder="Opsional..."
+                                            class="text-sm form-input dark:bg-gray-700 dark:text-gray-300 py-1 w-full" />
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>

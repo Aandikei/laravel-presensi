@@ -185,6 +185,7 @@ class PindahSiswaController extends Controller
                 'alasan_mutasi' => $request->alasan,
             ]);
 
+            $siswa->update(['asal_instansi_id' => $siswa->asal_instansi_id ?? $siswa->instansi_id]);
             $siswa->generateTransferToken();
         });
 
@@ -217,6 +218,7 @@ class PindahSiswaController extends Controller
             }
 
             $siswa->clearTransferToken();
+            $siswa->clearAsalInstansi();
         });
 
         return redirect()->route('admin.siswa.index')

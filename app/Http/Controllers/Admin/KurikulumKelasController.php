@@ -31,8 +31,7 @@ class KurikulumKelasController extends Controller
                         'Aktif'   => $q->whereHas('guru', fn($qq) => $qq->where('instansi_id', $instansi->id_instansi)->whereNull('status')),
                         'Keluar'  => $q->whereHas('guru', fn($qq) => $qq->where('status', 'Keluar')),
                         'Pensiun' => $q->whereHas('guru', fn($qq) => $qq->where('status', 'Pensiun')),
-                        'Pindah'  => $q->whereHas('guru', fn($qq) => $qq->where('instansi_id', '!=', $instansi->id_instansi)->whereNull('status')),
-                        'Mutasi'  => $q->whereHas('guru', fn($qq) => $qq->whereNotNull('transfer_token')->whereRaw('transfer_token_expires_at > NOW()')),
+                        'Mutasi'  => $q->whereHas('guru', fn($qq) => $qq->where('instansi_id', '!=', $instansi->id_instansi)->whereNull('status')),
                         default   => $q,
                     };
                 })
@@ -46,11 +45,8 @@ class KurikulumKelasController extends Controller
                     $guru = $row->guru;
                     if (!$guru) return '-';
                     $name = $guru->nama_guru;
-                    if ($guru->transfer_token && !$guru->isTransferTokenExpired()) {
-                        return $name . ' <span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">Mutasi</span>';
-                    }
                     if ($guru->instansi_id !== $instansi->id_instansi) {
-                        return $name . ' <span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Pindah</span>';
+                        return $name . ' <span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">Mutasi</span>';
                     }
                     if ($guru->status === 'Keluar') {
                         return $name . ' <span class="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">Keluar</span>';

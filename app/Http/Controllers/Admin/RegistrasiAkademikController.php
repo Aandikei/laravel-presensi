@@ -29,6 +29,10 @@ class RegistrasiAkademikController extends Controller
                 $registrasi->where('kelas_id', $request->kelas_id);
             }
 
+            if ($request->status && $request->status !== 'semua') {
+                $registrasi->where('status', $request->status);
+            }
+
             return DataTables::of($registrasi)
                 ->addIndexColumn()
                 ->addColumn('nama_siswa', fn($row) => $row->siswa->nama_siswa)

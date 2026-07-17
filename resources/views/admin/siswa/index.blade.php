@@ -76,8 +76,7 @@
 
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Status:</label>
             <select id="filter-status" class="text-sm dark:bg-gray-700 dark:text-gray-300">
-                <option value="">Semua Status</option>
-                <option value="Aktif">Aktif</option>
+                <option value="Aktif" selected>Aktif</option>
                 <option value="Keluar">Keluar</option>
                 <option value="Pindah">Pindah</option>
                 <option value="Alumni">Alumni</option>

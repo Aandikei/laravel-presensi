@@ -17,7 +17,7 @@ class AdminController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         // Stats
-        $totalGuru   = Guru::where('instansi_id', $instansi->id_instansi)->count();
+        $totalGuru   = Guru::where('instansi_id', $instansi->id_instansi)->whereNull('status')->count();
         $totalSiswa  = Siswa::where('instansi_id', $instansi->id_instansi)->whereNull('status')->count();
         $totalKelas  = Kelas::where('instansi_id', $instansi->id_instansi)->count();
 

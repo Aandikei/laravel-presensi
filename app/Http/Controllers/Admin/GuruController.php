@@ -20,28 +20,26 @@ class GuruController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         if ($request->ajax()) {
-            $guru = Guru::with(['user.roles', 'instansiTujuan', 'kelasWali'])
-                ->where('instansi_id', $instansi->id_instansi)
+            $statusFilter = $request->query('status_filter');
+
+            $guru = Guru::with(['user.roles', 'instansiTujuan', 'asalInstansi', 'instansi', 'kelasWali'])
                 ->select('guru.*');
 
-            // Filter status dropdown
-            if ($statusFilter = $request->query('status_filter')) {
+            if ($statusFilter === 'mutasi') {
+                $guru->where('asal_instansi_id', $instansi->id_instansi)
+                    ->where('instansi_id', '!=', $instansi->id_instansi);
+            } else {
+                $guru->where('instansi_id', $instansi->id_instansi);
+
                 if ($statusFilter === 'aktif') {
                     $guru->whereNull('status');
-                } elseif ($statusFilter === 'mutasi') {
-                    $guru->whereNotNull('transfer_token')
-                        ->where('transfer_token_expires_at', '>=', now());
                 } elseif ($statusFilter === 'keluar') {
                     $guru->where('status', 'Keluar');
                 } elseif ($statusFilter === 'pensiun') {
                     $guru->where('status', 'Pensiun');
+                } else {
+                    $guru->whereNull('status');
                 }
-            } else {
-                $guru->whereNull('status')
-                    ->where(function ($q) {
-                        $q->whereNull('transfer_token')
-                          ->orWhere('transfer_token_expires_at', '<', now());
-                    });
             }
 
             return DataTables::of($guru)
@@ -63,24 +61,26 @@ class GuruController extends Controller
                     }
                     return '-';
                 })
-                ->addColumn('status_guru', function ($row) {
-                    if ($row->transfer_token && !$row->isTransferTokenExpired()) {
-                        $tujuan = optional($row->instansiTujuan)->nama_instansi ?? '?';
-                        return '<span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">⏳ Mutasi ke ' . e($tujuan) . '</span>';
-                    }
+                ->addColumn('status_guru', function ($row) use ($instansi) {
                     if ($row->status === 'Keluar') {
                         return '<span class="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">Keluar</span>';
                     }
                     if ($row->status === 'Pensiun') {
                         return '<span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">Pensiun</span>';
                     }
+                    if ($row->instansi_id !== $instansi->id_instansi) {
+                        $sekolah = $row->instansi?->nama_instansi ?? '?';
+                        return '<span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">Mutasi ke ' . e($sekolah) . '</span>';
+                    }
                     return '<span class="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">Aktif</span>';
                 })
-                ->addColumn('aksi', function ($row) {
+                ->addColumn('aksi', function ($row) use ($instansi) {
                     $canManage = Auth::user()->can('manage-guru');
                     $html = '<div class="flex items-center gap-1">';
 
-                    if ($canManage) {
+                    if ($row->instansi_id !== $instansi->id_instansi) {
+                        $html .= '<span class="text-xs text-gray-500 italic">Read-only</span>';
+                    } elseif ($canManage) {
                         // Edit
                         $html .= '<a href="' . route('admin.guru.edit', $row->id_guru) . '" title="Edit" class="text-blue-600 hover:text-blue-800">
                             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,31 +111,20 @@ class GuruController extends Controller
                             </form>';
                             $html .= '<form method="POST" action="' . route('admin.guru.tandai-pensiun', $row->id_guru) . '" class="inline ml-1">
                                 <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                <button type="button" title="Tandai Pensiun" class="text-gray-500 hover:text-gray-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai PENSIUN?\', \'Ya, Pensiunkan\')">🎓</button>
+                                <button type="button" title="Tandai Pensiun" class="text-gray-500 hover:text-gray-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai PENSIUN?\', \'Ya, Pensiunkan\')">👴</button>
                             </form>';
                         }
 
-                        // Batalkan Keluar/Pensiun
-                        if (!$row->isAktif()) {
-                            $html .= '<form method="POST" action="' . route('admin.guru.batalkan-status', $row->id_guru) . '" class="inline ml-1">
-                                <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                <button type="button" title="Batalkan Status" class="text-green-500 hover:text-green-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Kembalikan guru ini ke status Aktif?\', \'Ya, Aktifkan\')">↩</button>
-                            </form>';
-                        }
-
-                        // Delete
-                        $html .= '<form method="POST" action="' . route('admin.guru.destroy', $row->id_guru) . '" class="inline ml-1">
+                        // Hapus
+                        $html .= '<form method="POST" action="' . route('admin.guru.destroy', $row->id_guru) . '" class="inline ml-2">
                             <input type="hidden" name="_token" value="' . csrf_token() . '">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="button" title="Hapus" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Yakin hapus guru ini?\')">
-                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                            </form>';
+                            <button type="button" title="Hapus" class="text-gray-400 hover:text-red-600 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Yakin hapus data guru ini?\')">🗑️</button>
+                        </form>';
+
+                        $html .= '</div>';
                     }
 
-                    $html .= '</div>';
                     return $html;
                 })
                 ->rawColumns(['wali_kelas', 'jabatan', 'status_guru', 'aksi'])
@@ -381,7 +370,10 @@ class GuruController extends Controller
         $instansiTujuan = Instansi::findOrFail($validated['instansi_tujuan']);
 
         // Simpan tujuan & generate token
-        $guru->update(['instansi_tujuan_id' => $instansiTujuan->id_instansi]);
+        $guru->update([
+            'instansi_tujuan_id' => $instansiTujuan->id_instansi,
+            'asal_instansi_id' => $guru->instansi_id,
+        ]);
         $guru->generateTransferToken();
 
         return redirect()->route('admin.guru.index')
@@ -474,6 +466,7 @@ class GuruController extends Controller
         $this->authorizeInstansi($guru);
 
         $guru->clearTransferToken();
+        $guru->clearAsalInstansi();
 
         return redirect()->route('admin.guru.index')
             ->with('success', "Mutasi {$guru->nama_guru} dibatalkan.");

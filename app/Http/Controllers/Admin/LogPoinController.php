@@ -73,7 +73,6 @@ class LogPoinController extends Controller
 
         $instansi = Auth::user()->getInstansi();
         $siswa = Siswa::where('instansi_id', $instansi->id_instansi)
-            ->whereNull('status')
             ->orderBy('nama_siswa')
             ->get();
         $masterPoin = MasterPoin::where('instansi_id', $instansi->id_instansi)

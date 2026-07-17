@@ -108,7 +108,6 @@ class WaliKelasController extends Controller
         abort_if(!$kelasSaya, 403);
 
         $siswaIds = RegistrasiAkademik::where('kelas_id', $kelasSaya->id_kelas)
-            ->aktif()
             ->whereRaw('tahun_id = (SELECT MAX(r2.tahun_id) FROM registrasi_akademik r2 WHERE r2.siswa_id = registrasi_akademik.siswa_id AND r2.status = ?)', ['Aktif'])
             ->whereHas('siswa', fn($q) => $q->where('instansi_id', $kelasSaya->instansi_id))
             ->pluck('siswa_id');
