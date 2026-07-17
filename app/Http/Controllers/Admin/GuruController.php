@@ -20,7 +20,7 @@ class GuruController extends Controller
         $instansi = Auth::user()->getInstansi();
 
         if ($request->ajax()) {
-            $guru = Guru::with(['user', 'instansiTujuan', 'kelasWali'])
+            $guru = Guru::with(['user.roles', 'instansiTujuan', 'kelasWali'])
                 ->where('instansi_id', $instansi->id_instansi)
                 ->select('guru.*');
 

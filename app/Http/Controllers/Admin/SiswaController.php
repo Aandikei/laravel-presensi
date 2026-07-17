@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Imports\SiswaImport;
 use App\Models\Kelas;
+use App\Models\LogPoinSiswa;
 use App\Models\OrangTua;
 use App\Models\OrtuSiswa;
 use App\Models\RegistrasiAkademik;
@@ -36,7 +37,11 @@ class SiswaController extends Controller
                     ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $instansi->id_instansi)),
             ])
                 ->where('instansi_id', '=', $instansi->id_instansi)
-                ->select('siswa.*');
+                ->select('siswa.*')
+                ->addSelect(['total_poin' => LogPoinSiswa::selectRaw('COALESCE(SUM(master_poin.jumlah_poin), 0)')
+                    ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
+                    ->whereColumn('log_poin_siswa.siswa_id', 'siswa.id_siswa')
+                ]);
 
             // Filter per kelas
             if ($request->kelas_id) {
@@ -101,11 +106,7 @@ class SiswaController extends Controller
                     }
                     return '<span class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-400">-</span>';
                 })
-                ->addColumn('total_poin', function ($row) {
-                    return $row->logPoin()
-                        ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
-                        ->sum('master_poin.jumlah_poin') ?? 0;
-                })
+                ->addColumn('total_poin', fn($row) => (int) $row->total_poin)
                 ->addColumn('aksi', function ($row) {
                     $canManage = Auth::user()->can('manage-siswa');
 

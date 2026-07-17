@@ -128,6 +128,7 @@ class AbsensiController extends Controller
     public function detail(Request $request, Jadwal $jadwal)
     {
         $instansi = Auth::user()->getInstansi();
+        $jadwal->load('kurikulum.kelas');
         abort_if($jadwal->kurikulum->kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $tanggal = $request->tanggal ?? now()->toDateString();
@@ -145,6 +146,7 @@ class AbsensiController extends Controller
     public function lock(Request $request, Jadwal $jadwal)
     {
         $instansi = Auth::user()->getInstansi();
+        $jadwal->load('kurikulum.kelas');
         abort_if($jadwal->kurikulum->kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $tanggal = $request->tanggal ?? now()->toDateString();
@@ -160,6 +162,7 @@ class AbsensiController extends Controller
     public function unlock(Request $request, Jadwal $jadwal)
     {
         $instansi = Auth::user()->getInstansi();
+        $jadwal->load('kurikulum.kelas');
         abort_if($jadwal->kurikulum->kelas->instansi_id !== $instansi->id_instansi, 403);
 
         $tanggal = $request->tanggal ?? now()->toDateString();
