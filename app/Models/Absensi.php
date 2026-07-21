@@ -19,6 +19,7 @@ class Absensi extends Model
         'durasi_terlambat',
         'waktu_input',
         'is_locked',
+        'cakupan',
         'created_by',
         'updated_by',
     ];
@@ -28,6 +29,7 @@ class Absensi extends Model
         'waktu_input' => 'datetime',
         'durasi_terlambat' => 'integer',
         'is_locked' => 'boolean',
+        'cakupan' => 'string',
     ];
 
     public function registrasi()

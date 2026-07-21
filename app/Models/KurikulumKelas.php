@@ -14,6 +14,7 @@ class KurikulumKelas extends Model
         'kelas_id',
         'mapel_id',
         'guru_id',
+        'jenis_pengajar',
     ];
 
     public function kelas()

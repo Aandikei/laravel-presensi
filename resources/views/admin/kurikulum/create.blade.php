@@ -53,7 +53,7 @@
 
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Guru Pengampu</span>
-                    <select name="guru_id"
+                    <select name="guru_id" id="guru_id"
                         class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('guru_id') border-red-500 @enderror">
                         <option value="">-- Pilih Guru --</option>
                         @foreach($guru as $g)
@@ -68,6 +68,12 @@
                     @enderror
                 </label>
 
+                @if(optional(Auth::user()->getInstansi())->jenjang === 'SD')
+                <div id="jenis-pengajar-info" class="hidden mb-4 p-3 rounded-lg text-sm">
+                    <span id="info-text"></span>
+                </div>
+                @endif
+
                 <button type="submit"
                     class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
                     Simpan
@@ -75,4 +81,35 @@
             </form>
         </div>
     </div>
+@if(isset($waliKelasMap))
+@push('scripts')
+<script>
+const waliKelasMap = @json($waliKelasMap);
+const kelasSelect = document.getElementById('kelas_id');
+const guruSelect = document.getElementById('guru_id');
+const info = document.getElementById('jenis-pengajar-info');
+const infoText = document.getElementById('info-text');
+
+function updateInfo() {
+    const kelasId = kelasSelect.value;
+    const guruId = guruSelect.value;
+    if (!kelasId || !guruId) { info.classList.add('hidden'); return; }
+    const waliGuruId = waliKelasMap[kelasId];
+    const isWali = waliGuruId && String(waliGuruId) === String(guruId);
+    if (isWali) {
+        info.className = 'mb-4 p-3 rounded-lg text-sm bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300';
+        infoText.textContent = 'Guru ini adalah Wali Kelas, akan dicatat sebagai absen harian.';
+    } else {
+        info.className = 'mb-4 p-3 rounded-lg text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300';
+        infoText.textContent = 'Guru ini bukan Wali Kelas, akan dicatat sebagai absen per jam.';
+    }
+    info.classList.remove('hidden');
+}
+
+kelasSelect.addEventListener('change', updateInfo);
+guruSelect.addEventListener('change', updateInfo);
+updateInfo();
+</script>
+@endpush
+@endif
 </x-layouts.admin>

@@ -56,6 +56,12 @@ class KurikulumKelasController extends Controller
                     }
                     return $name;
                 })
+                ->addColumn('jenis_pengajar', function ($row) {
+                    if ($row->jenis_pengajar === 'guru_kelas') {
+                        return '<span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">Guru Kelas</span>';
+                    }
+                    return '<span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">Guru Mapel</span>';
+                })
                 ->addColumn('aksi', function ($row) {
                     if (!Auth::user()->can('manage-settings')) {
                         return '';
@@ -77,7 +83,7 @@ class KurikulumKelasController extends Controller
 
                     return $edit.' '.$delete;
                 })
-                ->rawColumns(['guru', 'aksi'])
+                ->rawColumns(['guru', 'jenis_pengajar', 'aksi'])
                 ->make(true);
         }
 
@@ -89,7 +95,7 @@ class KurikulumKelasController extends Controller
             ->orderBy('nama_mapel')
             ->get();
 
-        return view('admin.kurikulum.index', compact('kelas', 'mapel'));
+        return view('admin.kurikulum.index', compact('kelas', 'mapel', 'instansi'));
     }
 
     public function create()
@@ -114,24 +120,35 @@ class KurikulumKelasController extends Controller
             ->orderBy('nama_mapel')
             ->get();
 
-        return view('admin.kurikulum.create', compact('tahunAjaran', 'kelas', 'guru', 'mapel'));
+        $waliKelasMap = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->whereNotNull('guru_wali_id')
+            ->pluck('guru_wali_id', 'id_kelas');
+
+        return view('admin.kurikulum.create', compact('tahunAjaran', 'kelas', 'guru', 'mapel', 'waliKelasMap'));
     }
 
     public function store(Request $request)
     {
         $instansi = Auth::user()->getInstansi();
 
-        $validated = $request->validate([
+        $rules = [
             'kelas_id' => 'required|exists:kelas,id_kelas',
             'mapel_id' => 'required|exists:mata_pelajaran,id_mapel',
             'guru_id' => 'required|exists:guru,id_guru',
-        ]);
+        ];
+        $validated = $request->validate($rules);
 
-        // Pastiin kelas milik instansi ini
         $kelas = Kelas::findOrFail($validated['kelas_id']);
         abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
 
-        // Cek duplikat — tolak hanya jika guru lama masih aktif
+        if ($instansi->jenjang === 'SD') {
+            $validated['jenis_pengajar'] = (int) $kelas->guru_wali_id === (int) $validated['guru_id']
+                ? 'guru_kelas'
+                : 'guru_mapel';
+        } else {
+            $validated['jenis_pengajar'] = 'guru_mapel';
+        }
+
         $existing = KurikulumKelas::with('guru')
             ->where('kelas_id', $validated['kelas_id'])
             ->where('mapel_id', $validated['mapel_id'])
@@ -144,7 +161,6 @@ class KurikulumKelasController extends Controller
                     'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut dengan guru yang masih aktif!',
                 ])->withInput();
             }
-            // Guru lama non-aktif — insert baru + copy jadwal
             $kurikulumBaru = KurikulumKelas::create($validated);
 
             $jadwalLama = Jadwal::where('kurikulum_id', $existing->id_kurikulum)->get();
@@ -192,7 +208,11 @@ class KurikulumKelasController extends Controller
             ->orderBy('nama_mapel')
             ->get();
 
-        return view('admin.kurikulum.edit', compact('kurikulum', 'kelas', 'guru', 'mapel'));
+        $waliKelasMap = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->whereNotNull('guru_wali_id')
+            ->pluck('guru_wali_id', 'id_kelas');
+
+        return view('admin.kurikulum.edit', compact('kurikulum', 'kelas', 'guru', 'mapel', 'waliKelasMap'));
     }
 
     public function update(Request $request, KurikulumKelas $kurikulum)
@@ -200,13 +220,24 @@ class KurikulumKelasController extends Controller
         $instansi = Auth::user()->getInstansi();
         $this->authorizeInstansi($kurikulum);
 
-        $validated = $request->validate([
+        $rules = [
             'kelas_id' => 'required|exists:kelas,id_kelas',
             'mapel_id' => 'required|exists:mata_pelajaran,id_mapel',
             'guru_id' => 'required|exists:guru,id_guru',
-        ]);
+        ];
+        $validated = $request->validate($rules);
 
-        // Cek duplikat — tolak hanya jika guru lama masih aktif
+        $kelas = Kelas::findOrFail($validated['kelas_id']);
+        abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+
+        if ($instansi->jenjang === 'SD') {
+            $validated['jenis_pengajar'] = (int) $kelas->guru_wali_id === (int) $validated['guru_id']
+                ? 'guru_kelas'
+                : 'guru_mapel';
+        } else {
+            $validated['jenis_pengajar'] = 'guru_mapel';
+        }
+
         $existing = KurikulumKelas::with('guru')
             ->where('kelas_id', $validated['kelas_id'])
             ->where('mapel_id', $validated['mapel_id'])
@@ -220,7 +251,6 @@ class KurikulumKelasController extends Controller
                     'mapel_id' => 'Mata pelajaran ini sudah ada di kelas tersebut dengan guru yang masih aktif!',
                 ])->withInput();
             }
-            // Guru lama non-aktif — biarkan duplikat, data historis tetap tersimpan
         }
 
         $kurikulum->update($validated);
@@ -241,6 +271,70 @@ class KurikulumKelasController extends Controller
 
         return redirect()->route('admin.kurikulum.index')
             ->with('success', 'Kurikulum berhasil dihapus!');
+    }
+
+    public function batchGuruKelas()
+    {
+        $instansi = Auth::user()->getInstansi();
+        abort_if($instansi->jenjang !== 'SD', 403);
+
+        $kelas = Kelas::where('instansi_id', $instansi->id_instansi)
+            ->whereNotNull('guru_wali_id')
+            ->with('waliKelas')
+            ->orderBy('tingkat')
+            ->orderBy('nama_kelas')
+            ->get();
+
+        $mapel = MataPelajaran::where('instansi_id', $instansi->id_instansi)
+            ->orderBy('nama_mapel')
+            ->get();
+
+        $existingGuruKelas = KurikulumKelas::whereIn('kelas_id', $kelas->pluck('id_kelas'))
+            ->where('jenis_pengajar', 'guru_kelas')
+            ->select('kelas_id', 'mapel_id')
+            ->get()
+            ->groupBy('kelas_id')
+            ->map(fn($items) => $items->pluck('mapel_id')->toArray());
+
+        return view('admin.kurikulum.batch-guru-kelas', compact('kelas', 'mapel', 'existingGuruKelas'));
+    }
+
+    public function batchGuruKelasStore(Request $request)
+    {
+        $instansi = Auth::user()->getInstansi();
+        abort_if($instansi->jenjang !== 'SD', 403);
+
+        $validated = $request->validate([
+            'kelas_id'  => 'required|exists:kelas,id_kelas',
+            'mapel_ids' => 'required|array|min:1',
+            'mapel_ids.*' => 'exists:mata_pelajaran,id_mapel',
+        ]);
+
+        $kelas = Kelas::with('waliKelas')->findOrFail($validated['kelas_id']);
+        abort_if($kelas->instansi_id !== $instansi->id_instansi, 403);
+        abort_if(!$kelas->guru_wali_id, 400, 'Kelas ini belum punya wali kelas!');
+
+        $existing = KurikulumKelas::where('kelas_id', $kelas->id_kelas)
+            ->whereIn('mapel_id', $validated['mapel_ids'])
+            ->pluck('mapel_id');
+
+        $newCount = 0;
+        foreach ($validated['mapel_ids'] as $mapelId) {
+            if ($existing->contains($mapelId)) {
+                continue;
+            }
+
+            KurikulumKelas::create([
+                'kelas_id'       => $kelas->id_kelas,
+                'mapel_id'       => $mapelId,
+                'guru_id'        => $kelas->guru_wali_id,
+                'jenis_pengajar' => 'guru_kelas',
+            ]);
+            $newCount++;
+        }
+
+        return redirect()->route('admin.kurikulum.index')
+            ->with('success', "{$newCount} kurikulum guru kelas berhasil ditambahkan untuk {$kelas->nama_kelas}.");
     }
 
     private function authorizeInstansi(KurikulumKelas $kurikulum): void

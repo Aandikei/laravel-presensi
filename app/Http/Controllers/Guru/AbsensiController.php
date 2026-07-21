@@ -36,23 +36,52 @@ class AbsensiController extends Controller
         ];
         $hariIni = $hariMap[now()->format('l')] ?? null;
 
-        $jadwalHariIni = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
+        $semuaJadwal = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
             ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
                 ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $guru->instansi_id))
             )
             ->where('hari', $hariIni)
             ->orderBy('jam_mulai')
-            ->get()
+            ->get();
+
+        // Regular per-jam (guru_mapel)
+        $jadwalHariIni = $semuaJadwal->filter(fn ($j) => ($j->kurikulum->jenis_pengajar ?? 'guru_mapel') === 'guru_mapel')
             ->map(function ($jadwal) {
                 $sudahInput = $jadwal->absensi()
                     ->where('tanggal', now()->toDateString())
                     ->exists();
                 $jadwal->sudah_input = $sudahInput;
-
                 return $jadwal;
-            });
+            })->values();
 
-        return view('guru.absensi.index', compact('jadwalHariIni', 'hariIni'));
+        // Harian (guru_kelas) — grouped by kelas
+        $kelasGuruKelas = collect();
+        $instansi = Auth::user()->getInstansi();
+        if ($instansi->jenjang === 'SD') {
+            $harianJadwal = $semuaJadwal->filter(fn ($j) => ($j->kurikulum->jenis_pengajar ?? 'guru_mapel') === 'guru_kelas');
+            $harianIds = $harianJadwal->pluck('id_jadwal');
+
+            $harianExists = $harianIds->isNotEmpty()
+                ? Absensi::whereIn('jadwal_id', $harianIds)
+                    ->where('tanggal', today())
+                    ->where('cakupan', 'harian')
+                    ->exists()
+                : false;
+
+            $grouped = $harianJadwal->groupBy(fn ($j) => $j->kurikulum->kelas_id);
+            $kelasIds = $grouped->keys();
+            $kelasMap = Kelas::whereIn('id_kelas', $kelasIds)->get()->keyBy('id_kelas');
+
+            foreach ($grouped as $kelasId => $jadwals) {
+                $kelas = $kelasMap->get($kelasId);
+                if (!$kelas) continue;
+                $kelas->mapel_list = $jadwals->pluck('kurikulum.mataPelajaran.nama_mapel')->unique()->values();
+                $kelas->sudah_absen_harian = $harianExists;
+                $kelasGuruKelas->push($kelas);
+            }
+        }
+
+        return view('guru.absensi.index', compact('jadwalHariIni', 'kelasGuruKelas', 'hariIni'));
     }
 
     public function input(Jadwal $jadwal)
@@ -264,6 +293,7 @@ class AbsensiController extends Controller
         $riwayat = Absensi::selectRaw('
                 jadwal_id,
                 tanggal,
+                cakupan,
                 COUNT(*) as total_siswa,
                 SUM(status = "Hadir") as hadir,
                 SUM(status = "Sakit") as sakit,
@@ -279,7 +309,7 @@ class AbsensiController extends Controller
             ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
             ->when($tingkat, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('tingkat', $tingkat)))
             ->when($jurusan, fn ($q) => $q->whereHas('jadwal.kurikulum.kelas', fn ($qq) => $qq->where('jurusan_id', $jurusan)))
-            ->groupBy('jadwal_id', 'tanggal')
+            ->groupBy('jadwal_id', 'tanggal', 'cakupan')
             ->orderBy('tanggal', 'desc')
             ->orderBy('jadwal_id')
             ->get();

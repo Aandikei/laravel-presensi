@@ -156,9 +156,10 @@ class WaliKelasController extends Controller
         $tahun = $request->input('tahun', now()->year);
         $mapelId = $request->input('mapel_id');
 
-        $riwayat = Absensi::selectRaw('
+            $riwayat = Absensi::selectRaw('
                 absensi.jadwal_id,
                 absensi.tanggal,
+                absensi.cakupan,
                 COUNT(*) as total_siswa,
                 SUM(absensi.status = "Hadir") as hadir,
                 SUM(absensi.status = "Sakit") as sakit,
@@ -173,7 +174,7 @@ class WaliKelasController extends Controller
             ->when($mapelId, fn ($q) => $q->whereHas('jadwal.kurikulum', fn ($qq) => $qq->where('mapel_id', $mapelId)))
             ->whereMonth('absensi.tanggal', $bulan)
             ->whereYear('absensi.tanggal', $tahun)
-            ->groupBy('absensi.jadwal_id', 'absensi.tanggal')
+            ->groupBy('absensi.jadwal_id', 'absensi.tanggal', 'absensi.cakupan')
             ->orderBy('absensi.tanggal', 'desc')
             ->orderBy('absensi.jadwal_id')
             ->get();

@@ -37,6 +37,14 @@ Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('wali-ke
     Route::post('/rekap-poin/export-pdf', [WaliKelasController::class, 'exportPoinPdf'])->name('rekap-poin.export-pdf');
 });
 
+// Absen Harian (khusus SD — guru kelas)
+Route::middleware(['auth', 'verified', 'role:guru|wali_kelas'])->prefix('guru')->name('guru.')->group(function () {
+    Route::prefix('absen-harian')->name('absen-harian.')->group(function () {
+        Route::get('/input/{kelas}', [\App\Http\Controllers\Guru\AbsenHarianController::class, 'input'])->name('input');
+        Route::post('/input/{kelas}', [\App\Http\Controllers\Guru\AbsenHarianController::class, 'store'])->name('store');
+    });
+});
+
 // Export Saya (for guru, wali kelas, etc.)
 Route::middleware(['auth', 'verified', 'role:guru|wali_kelas|kepala_sekolah|wakil_kepala_sekolah'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/exports', [ExportController::class, 'exports'])->name('exports');

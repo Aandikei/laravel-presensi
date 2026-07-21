@@ -85,6 +85,14 @@ class Guru extends Model
         return $this->kelasWali()->exists();
     }
 
+    // Cek apakah guru adalah guru kelas SD (wali kelas di jenjang SD)
+    public function isGuruKelasSd(): bool
+    {
+        return $this->kelasWali()
+            ->whereHas('instansi', fn($q) => $q->where('jenjang', 'SD'))
+            ->exists();
+    }
+
     public function getRouteKeyName(): string 
     {
         return 'id_guru';

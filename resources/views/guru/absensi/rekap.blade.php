@@ -106,6 +106,7 @@
                             <th class="px-4 py-3">Mapel</th>
                             <th class="px-4 py-3">Jam</th>
                             <th class="px-4 py-3">Guru</th>
+                            <th class="px-4 py-3 text-center">Jenis</th>
                             <th class="px-4 py-3 text-center">Siswa</th>
                             <th class="px-4 py-3 text-center text-green-600">H</th>
                             <th class="px-4 py-3 text-center text-blue-600">S</th>
@@ -129,6 +130,13 @@
                                     <span class="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">Mutasi</span>
                                 @elseif($r->guru && $r->guru->status_label)
                                     <span class="px-2 py-0.5 text-xs font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900/30 dark:text-red-400">{{ $r->guru->status_label }}</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-sm text-center">
+                                @if($r->cakupan === 'harian')
+                                    <span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">Harian</span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Per Jam</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-sm text-center">{{ $r->total_siswa }}</td>

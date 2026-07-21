@@ -7,10 +7,18 @@
                 Kurikulum Kelas
             </h2>
             @can('manage-settings')
-                <a href="{{ route('admin.kurikulum.create') }}"
-                    class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
-                    + Tambah Kurikulum
-                </a>
+                <div class="flex gap-2">
+                    @if($instansi->jenjang === 'SD')
+                    <a href="{{ route('admin.kurikulum.batch-guru-kelas') }}"
+                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                        Atur Guru Kelas
+                    </a>
+                    @endif
+                    <a href="{{ route('admin.kurikulum.create') }}"
+                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                        + Tambah Kurikulum
+                    </a>
+                </div>
             @endcan
         </div>
 
@@ -58,6 +66,7 @@
                             <th class="px-4 py-3">Kelas</th>
                             <th class="px-4 py-3">Mata Pelajaran</th>
                             <th class="px-4 py-3">Guru</th>
+                            <th class="px-4 py-3">Jenis</th>
                             <th class="px-4 py-3">Aksi</th>
                         </tr>
                     </thead>
@@ -95,6 +104,11 @@
                         },
                         {
                             data: 'guru'
+                        },
+                        {
+                            data: 'jenis_pengajar',
+                            orderable: false,
+                            searchable: false
                         },
                         {
                             data: 'aksi',

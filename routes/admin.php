@@ -141,6 +141,8 @@ Route::middleware(['auth', 'verified', 'role:admin|kepala_sekolah|wakil_kepala_s
         Route::get('kurikulum/{kurikulum}/edit', [KurikulumKelasController::class, 'edit'])->name('kurikulum.edit');
         Route::put('kurikulum/{kurikulum}', [KurikulumKelasController::class, 'update'])->name('kurikulum.update');
         Route::delete('kurikulum/{kurikulum}', [KurikulumKelasController::class, 'destroy'])->name('kurikulum.destroy');
+        Route::get('kurikulum/batch-guru-kelas', [KurikulumKelasController::class, 'batchGuruKelas'])->name('kurikulum.batch-guru-kelas');
+        Route::post('kurikulum/batch-guru-kelas', [KurikulumKelasController::class, 'batchGuruKelasStore'])->name('kurikulum.batch-guru-kelas.store');
     });
 
     // Helper untuk load kurikulum by kelas (dipakai di form jadwal)

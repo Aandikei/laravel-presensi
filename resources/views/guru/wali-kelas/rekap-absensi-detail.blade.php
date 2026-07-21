@@ -53,6 +53,16 @@
                     <p class="font-medium text-gray-700 dark:text-gray-200">{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</p>
                 </div>
                 <div>
+                    <span class="text-gray-500 dark:text-gray-400">Jenis</span>
+                    <p class="font-medium text-gray-700 dark:text-gray-200">
+                        @if(optional($absensi->first())->cakupan === 'harian')
+                            <span class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">Harian</span>
+                        @else
+                            <span class="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">Per Jam</span>
+                        @endif
+                    </p>
+                </div>
+                <div>
                     <span class="text-gray-500 dark:text-gray-400">Tanggal</span>
                     <p class="font-medium text-gray-700 dark:text-gray-200">{{ \Carbon\Carbon::parse(request('tanggal'))->locale('id')->isoFormat('D MMM YYYY') }}</p>
                 </div>

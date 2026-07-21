@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
 use App\Models\HariLibur;
 use App\Models\Jadwal;
 use App\Models\LogPoinSiswa;
@@ -25,8 +26,10 @@ class GuruController extends Controller
         ];
         $hariIni = $hariMap[now()->format('l')] ?? null;
 
+        // ── Per-jam jadwal: hanya guru_mapel ──
         $jadwalHariIni = Jadwal::with(['kurikulum.kelas', 'kurikulum.mataPelajaran'])
             ->whereHas('kurikulum', fn ($q) => $q->where('guru_id', $guru->id_guru)
+                ->where('jenis_pengajar', 'guru_mapel')
                 ->whereHas('kelas', fn ($qq) => $qq->where('instansi_id', $guru->instansi_id))
             )
             ->where('hari', $hariIni)
@@ -42,8 +45,44 @@ class GuruController extends Controller
         $instansi = Auth::user()->getInstansi();
         $namaLibur = HariLibur::getNamaLibur(now()->toDateString(), $instansi->id_instansi);
 
+        // ── Absen Harian SD: data untuk dashboard card ──
+        $kelasGuruKelas = collect();
+        if ($instansi->jenjang === 'SD' && $guru->isWaliKelas()) {
+            $kelasList = $guru->kelasWali()->with('instansi')->get();
+            $kelasIds = $kelasList->pluck('id_kelas');
+
+            $semuaJadwalHarian = Jadwal::with('kurikulum.mataPelajaran')
+                ->whereHas('kurikulum', fn($q) => $q
+                    ->whereIn('kelas_id', $kelasIds)
+                    ->where('guru_id', $guru->id_guru)
+                    ->where('jenis_pengajar', 'guru_kelas'))
+                ->where('hari', $hariIni)
+                ->orderBy('jam_mulai')
+                ->get()
+                ->groupBy(fn($j) => $j->kurikulum->kelas_id);
+
+            $semuaJadwalIds = $semuaJadwalHarian->flatten()->pluck('id_jadwal');
+
+            $harianExists = $semuaJadwalIds->isNotEmpty()
+                ? Absensi::whereIn('jadwal_id', $semuaJadwalIds)
+                    ->where('tanggal', now()->toDateString())
+                    ->where('cakupan', 'harian')
+                    ->exists()
+                : false;
+
+            foreach ($kelasList as $kelas) {
+                $jadwals = $semuaJadwalHarian->get($kelas->id_kelas);
+                if (!$jadwals || $jadwals->isEmpty()) continue;
+
+                $kelas->mapel_list = $jadwals->pluck('kurikulum.mataPelajaran.nama_mapel')->unique()->values();
+                $kelas->sudah_absen_harian = $harianExists;
+                $kelasGuruKelas->push($kelas);
+            }
+        }
+
+        // ── Wali kelas stuff (existing) ──
         $isWaliKelas = Auth::user()->hasRole('wali_kelas') || $guru->isWaliKelas();
-        $viewData = compact('guru', 'jadwalHariIni', 'hariIni', 'namaLibur', 'isWaliKelas');
+        $viewData = compact('guru', 'jadwalHariIni', 'hariIni', 'namaLibur', 'isWaliKelas', 'kelasGuruKelas');
         if ($isWaliKelas) {
             $kelasSaya = $guru->kelasWali()->with(['instansi'])->first();
             if ($kelasSaya) {
