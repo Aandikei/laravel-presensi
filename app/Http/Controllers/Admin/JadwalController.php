@@ -108,12 +108,8 @@ class JadwalController extends Controller
         $konflik = Jadwal::whereHas('kurikulum', fn($q) => $q->where('kelas_id', $kurikulum->kelas_id))
             ->where('hari', $validated['hari'])
             ->where(fn($q) => $q
-                ->whereBetween('jam_mulai', [$validated['jam_mulai'], $validated['jam_selesai']])
-                ->orWhereBetween('jam_selesai', [$validated['jam_mulai'], $validated['jam_selesai']])
-                ->orWhere(fn($q) => $q
-                    ->where('jam_mulai', '<=', $validated['jam_mulai'])
-                    ->where('jam_selesai', '>=', $validated['jam_selesai'])
-                )
+                ->where('jam_mulai', '<', $validated['jam_selesai'])
+                ->where('jam_selesai', '>', $validated['jam_mulai'])
             )->exists();
 
         if ($konflik) {
@@ -132,6 +128,20 @@ class JadwalController extends Controller
         if ($mapelSama) {
             return back()->withErrors([
                 'hari' => 'Mata pelajaran ini sudah dijadwalkan di kelas yang sama pada hari yang sama!'
+            ])->withInput();
+        }
+
+        // Cek 3: guru bentrok di jam & hari yang sama (beda kelas)
+        $guruKonflik = Jadwal::whereHas('kurikulum', fn($q) => $q->where('guru_id', $kurikulum->guru_id))
+            ->where('hari', $validated['hari'])
+            ->where(fn($q) => $q
+                ->where('jam_mulai', '<', $validated['jam_selesai'])
+                ->where('jam_selesai', '>', $validated['jam_mulai'])
+            )->exists();
+
+        if ($guruKonflik) {
+            return back()->withErrors([
+                'jam_mulai' => 'Guru sudah memiliki jadwal di jam yang sama pada hari ini!'
             ])->withInput();
         }
 
@@ -172,12 +182,8 @@ class JadwalController extends Controller
             ->where('hari', $validated['hari'])
             ->where('id_jadwal', '!=', $jadwal->id_jadwal)
             ->where(fn($q) => $q
-                ->whereBetween('jam_mulai', [$validated['jam_mulai'], $validated['jam_selesai']])
-                ->orWhereBetween('jam_selesai', [$validated['jam_mulai'], $validated['jam_selesai']])
-                ->orWhere(fn($q) => $q
-                    ->where('jam_mulai', '<=', $validated['jam_mulai'])
-                    ->where('jam_selesai', '>=', $validated['jam_selesai'])
-                )
+                ->where('jam_mulai', '<', $validated['jam_selesai'])
+                ->where('jam_selesai', '>', $validated['jam_mulai'])
             )->exists();
 
         if ($konflik) {
@@ -197,6 +203,21 @@ class JadwalController extends Controller
         if ($mapelSama) {
             return back()->withErrors([
                 'hari' => 'Mata pelajaran ini sudah dijadwalkan di kelas yang sama pada hari yang sama!'
+            ])->withInput();
+        }
+
+        // Cek 3: guru bentrok di jam & hari yang sama (kecuali jadwal ini)
+        $guruKonflik = Jadwal::whereHas('kurikulum', fn($q) => $q->where('guru_id', $kurikulum->guru_id))
+            ->where('hari', $validated['hari'])
+            ->where('id_jadwal', '!=', $jadwal->id_jadwal)
+            ->where(fn($q) => $q
+                ->where('jam_mulai', '<', $validated['jam_selesai'])
+                ->where('jam_selesai', '>', $validated['jam_mulai'])
+            )->exists();
+
+        if ($guruKonflik) {
+            return back()->withErrors([
+                'jam_mulai' => 'Guru sudah memiliki jadwal di jam yang sama pada hari ini!'
             ])->withInput();
         }
 

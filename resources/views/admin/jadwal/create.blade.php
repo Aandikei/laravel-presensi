@@ -17,11 +17,12 @@
                 {{-- Pilih Kelas --}}
                 <label class="block text-sm mb-4">
                     <span class="text-gray-700 dark:text-gray-400">Kelas</span>
-                    <select id="kelas_id" onchange="loadKurikulum(this.value)"
-                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300">
+                    <select name="kelas_id" id="kelas_id" onchange="loadKurikulum(this.value)"
+                        class="block w-full mt-1 text-sm dark:bg-gray-700 dark:text-gray-300 @error('kurikulum_id') border-red-500 @enderror">
                         <option value="">-- Pilih Kelas --</option>
                         @foreach($kelas as $k)
-                            <option value="{{ $k->id_kelas }}">
+                            <option value="{{ $k->id_kelas }}"
+                                {{ old('kelas_id') == $k->id_kelas ? 'selected' : '' }}>
                                 {{ $k->nama_kelas }} (Tingkat {{ $k->tingkat }})
                             </option>
                         @endforeach
@@ -85,7 +86,7 @@
 
     @push('scripts')
     <script>
-        function loadKurikulum(kelasId) {
+        function loadKurikulum(kelasId, selectedKurikulumId) {
             const select = document.getElementById('kurikulum_id');
             select.innerHTML = '<option value="">Loading...</option>';
 
@@ -99,10 +100,19 @@
                 .then(data => {
                     select.innerHTML = '<option value="">-- Pilih Mapel & Guru --</option>';
                     data.forEach(item => {
-                        select.innerHTML += `<option value="${item.id_kurikulum}">${item.mata_pelajaran} - ${item.guru}</option>`;
+                        const sel = item.id_kurikulum == selectedKurikulumId ? ' selected' : '';
+                        select.innerHTML += `<option value="${item.id_kurikulum}"${sel}>${item.mata_pelajaran} - ${item.guru}</option>`;
                     });
                 });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const oldKelas = '{{ old('kelas_id') }}';
+            const oldKurikulum = '{{ old('kurikulum_id') }}';
+            if (oldKelas) {
+                loadKurikulum(oldKelas, oldKurikulum);
+            }
+        });
     </script>
     @endpush
 </x-layouts.admin>
