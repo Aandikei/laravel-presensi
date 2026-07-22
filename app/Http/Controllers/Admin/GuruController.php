@@ -90,13 +90,17 @@ class GuruController extends Controller
 
                         // Mutasi
                         if ($row->transfer_token && !$row->isTransferTokenExpired()) {
-                            $html .= '<span class="text-xs text-orange-600 ml-2">⏳</span>
-                                <form method="POST" action="' . route('admin.guru.mutasi.batal', $row->id_guru) . '" class="inline ml-1">
+                            $html .= '<span class="text-xs text-orange-600">Pending</span>
+                                <form method="POST" action="' . route('admin.guru.mutasi.batal', $row->id_guru) . '" class="inline">
                                     <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                    <button type="button" title="Batal Mutasi" class="text-red-600 hover:text-red-800 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Batalkan mutasi?\')">✕</button>
+                                    <button type="button" title="Batal Mutasi" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Batalkan mutasi?\')">
+                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
                                 </form>';
                         } elseif ($row->isAktif()) {
-                            $html .= '<a href="' . route('admin.guru.mutasi', $row->id_guru) . '" title="Mutasi" class="text-orange-600 hover:text-orange-800 ml-2">
+                            $html .= '<a href="' . route('admin.guru.mutasi', $row->id_guru) . '" title="Mutasi" class="text-orange-600 hover:text-orange-800">
                                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                 </svg>
@@ -105,22 +109,34 @@ class GuruController extends Controller
 
                         // Tandai Keluar/Pensiun (hanya guru aktif & tidak dalam mutasi)
                         if (!$row->transfer_token && $row->isAktif()) {
-                            $html .= '<form method="POST" action="' . route('admin.guru.tandai-keluar', $row->id_guru) . '" class="inline ml-1">
+                            $html .= '<form method="POST" action="' . route('admin.guru.tandai-keluar', $row->id_guru) . '" class="inline">
                                 <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                <button type="button" title="Tandai Keluar" class="text-red-500 hover:text-red-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai KELUAR?\', \'Ya, Keluarkan\')">🚪</button>
+                                <button type="button" title="Tandai Keluar" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai KELUAR?\', \'Ya, Keluarkan\')">
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                </button>
                             </form>';
-                            $html .= '<form method="POST" action="' . route('admin.guru.tandai-pensiun', $row->id_guru) . '" class="inline ml-1">
+                            $html .= '<form method="POST" action="' . route('admin.guru.tandai-pensiun', $row->id_guru) . '" class="inline">
                                 <input type="hidden" name="_token" value="' . csrf_token() . '">
-                                <button type="button" title="Tandai Pensiun" class="text-gray-500 hover:text-gray-700 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai PENSIUN?\', \'Ya, Pensiunkan\')">👴</button>
+                                <button type="button" title="Tandai Pensiun" class="text-gray-500 hover:text-gray-700" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai PENSIUN?\', \'Ya, Pensiunkan\')">
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </button>
                             </form>';
                         }
 
                         // Hapus
-                        $html .= '<form method="POST" action="' . route('admin.guru.destroy', $row->id_guru) . '" class="inline ml-2">
+                        $html .= '<form method="POST" action="' . route('admin.guru.destroy', $row->id_guru) . '" class="inline">
                             <input type="hidden" name="_token" value="' . csrf_token() . '">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="button" title="Hapus" class="text-gray-400 hover:text-red-600 text-xs" onclick="confirmAction(this.closest(\'form\'), \'Yakin hapus data guru ini?\')">🗑️</button>
-                        </form>';
+                            <button type="button" title="Hapus" class="text-red-600 hover:text-red-800" onclick="confirmAction(this.closest(\'form\'), \'Yakin hapus data guru ini?\')">
+                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                            </form>';
 
                         $html .= '</div>';
                     }
