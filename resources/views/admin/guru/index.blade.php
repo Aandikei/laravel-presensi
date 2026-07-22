@@ -18,13 +18,23 @@
         <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:shadow-none dark:border dark:border-gray-700 dark:bg-gray-800 flex items-center gap-4 flex-wrap">
             <label class="text-sm text-gray-700 dark:text-gray-400">Filter Status:</label>
             <select id="filter-status" class="text-sm dark:bg-gray-700 dark:text-gray-300">
-                <option value="semua">Semua</option>
-                <option value="">Aktif</option>
+                <option value="" selected>Aktif</option>
                 <option value="mutasi">Mutasi</option>
                 <option value="keluar">Keluar</option>
                 <option value="pensiun">Pensiun</option>
             </select>
         </div>
+
+        {{-- Restore info --}}
+        @if(session('restore_info'))
+            <div class="mb-4 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800 dark:border dark:border-gray-700">
+                <ul class="space-y-1 text-sm">
+                    @foreach(session('restore_info') as $line)
+                        <li>{!! $line !!}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto bg-white dark:bg-gray-800 p-4">

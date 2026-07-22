@@ -69,6 +69,7 @@ class OrangTuaDashboardController extends Controller
 
         $totalPoin = $anakDipilih
             ? LogPoinSiswa::where('siswa_id', $anakDipilih->id_siswa)
+                ->where('instansi_id', $anakDipilih->instansi_id)
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
                 ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
@@ -143,6 +144,7 @@ class OrangTuaDashboardController extends Controller
 
         $logPoin = $anakDipilih
             ? LogPoinSiswa::where('siswa_id', $anakDipilih->id_siswa)
+                ->where('instansi_id', $anakDipilih->instansi_id)
                 ->with(['masterPoin', 'createdBy'])
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)

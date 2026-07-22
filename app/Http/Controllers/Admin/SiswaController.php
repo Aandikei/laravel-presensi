@@ -42,6 +42,7 @@ class SiswaController extends Controller
                 ->addSelect(['total_poin' => LogPoinSiswa::selectRaw('COALESCE(SUM(master_poin.jumlah_poin), 0)')
                     ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
                     ->whereColumn('log_poin_siswa.siswa_id', 'siswa.id_siswa')
+                    ->where('log_poin_siswa.instansi_id', $instansi->id_instansi)
                 ]);
 
             if ($statusFilter === 'Pindah') {
@@ -526,6 +527,8 @@ class SiswaController extends Controller
             $siswa->update(['status' => null]);
             $siswa->registrasiAkademik()
                 ->where('status', 'Keluar')
+                ->orderByDesc('tanggal_mutasi')
+                ->limit(1)
                 ->update(['status' => 'Aktif', 'tanggal_mutasi' => null]);
             $siswa->user->assignRole('siswa');
         });

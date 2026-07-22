@@ -108,6 +108,7 @@ class GuruController extends Controller
 
                 $siswaPoinTinggi = Siswa::whereIn('id_siswa', $siswaIds)
                     ->addSelect(['poin_bulan_ini' => LogPoinSiswa::whereColumn('siswa_id', 'siswa.id_siswa')
+                        ->where('instansi_id', $instansi->id_instansi)
                         ->whereMonth('tanggal', now()->month)
                         ->whereYear('tanggal', now()->year)
                         ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')

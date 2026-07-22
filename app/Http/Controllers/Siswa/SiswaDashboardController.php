@@ -56,6 +56,7 @@ class SiswaDashboardController extends Controller
         // Total poin bulan ini
         $totalPoin = $siswa
             ? LogPoinSiswa::where('siswa_id', $siswa->id_siswa)
+                ->where('instansi_id', $siswa->instansi_id)
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
                 ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')
@@ -124,6 +125,7 @@ class SiswaDashboardController extends Controller
 
         $logPoin = $siswa
             ? LogPoinSiswa::where('siswa_id', $siswa->id_siswa)
+                ->where('instansi_id', $siswa->instansi_id)
                 ->with(['masterPoin', 'createdBy'])
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)

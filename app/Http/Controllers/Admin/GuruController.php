@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
 use App\Models\Instansi;
+use App\Models\Kelas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -122,6 +123,15 @@ class GuruController extends Controller
                                 <button type="button" title="Tandai Pensiun" class="text-gray-500 hover:text-gray-700" onclick="confirmAction(this.closest(\'form\'), \'Tandai guru ini sebagai PENSIUN?\', \'Ya, Pensiunkan\')">
                                     <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </button>
+                            </form>';
+                        } elseif (!$row->transfer_token && !$row->isAktif()) {
+                            $html .= '<form method="POST" action="' . route('admin.guru.batalkan-status', $row->id_guru) . '" class="inline">
+                                <input type="hidden" name="_token" value="' . csrf_token() . '">
+                                <button type="button" title="Aktifkan Kembali" class="text-green-600 hover:text-green-800" onclick="confirmAction(this.closest(\'form\'), \'Aktifkan kembali guru ini?\', \'Ya, Aktifkan\')">
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                     </svg>
                                 </button>
                             </form>';
@@ -530,13 +540,67 @@ class GuruController extends Controller
             return back()->with('error', 'Guru ini masih aktif.');
         }
 
-        DB::transaction(function () use ($guru) {
+        $info = [];
+
+        DB::transaction(function () use ($guru, &$info) {
+            $instansi = Auth::user()->getInstansi();
+            $data = $guru->deactivated_data;
+            $user = $guru->user;
+
             $guru->update(['status' => null]);
-            $guru->user->assignRole('guru');
+            $user->assignRole('guru');
+            $info[] = '✅ Role guru — restored';
+
+            // Restore roles (skip guru — already done above)
+            if ($data && isset($data['roles'])) {
+                foreach ($data['roles'] as $role) {
+                    if ($role === 'guru') continue;
+
+                    if (in_array($role, ['kepala_sekolah', 'wakil_kepala_sekolah'])) {
+                        $alreadyTaken = User::whereHas('guru', fn($q) => $q
+                            ->where('instansi_id', $instansi->id_instansi)
+                            ->whereNull('status')
+                        )
+                            ->whereHas('roles', fn($q) => $q->where('name', $role))
+                            ->where('id', '!=', $user->id)
+                            ->exists();
+
+                        $label = $role === 'kepala_sekolah' ? 'Kepala Sekolah' : 'Wakil Kepala Sekolah';
+                        if (!$alreadyTaken) {
+                            $user->assignRole($role);
+                            $info[] = "✅ Role {$label} — restored";
+                        } else {
+                            $info[] = "⚠️ Role {$label} — skipped (sudah ada guru lain)";
+                        }
+                    }
+                }
+            }
+
+            // Restore wali kelas
+            $restoredAnyWali = false;
+            if ($data && isset($data['wali_of'])) {
+                foreach ($data['wali_of'] as $kelasId) {
+                    $kelas = Kelas::find($kelasId);
+                    if ($kelas && $kelas->guru_wali_id === null) {
+                        $kelas->update(['guru_wali_id' => $guru->id_guru]);
+                        $info[] = "✅ Wali kelas {$kelas->nama_kelas} — restored";
+                        $restoredAnyWali = true;
+                    } elseif ($kelas) {
+                        $info[] = "⚠️ Wali kelas {$kelas->nama_kelas} — skipped (sudah ada wali baru)";
+                    }
+                }
+            }
+
+            if ($restoredAnyWali) {
+                $user->assignRole('wali_kelas');
+            }
+
+            $guru->update(['deactivated_data' => null]);
         });
 
         return redirect()->route('admin.guru.index')
-            ->with('success', "Status {$guru->nama_guru} dikembalikan ke Aktif.");
+            ->with('success', "Status {$guru->nama_guru} dikembalikan ke Aktif.")
+            ->with('restore_info', $info);
     }
 
     public function destroy(Guru $guru)
@@ -556,6 +620,14 @@ class GuruController extends Controller
     private function nonaktifkanGuru(Guru $guru): void
     {
         $user = $guru->user;
+
+        // Simpan data untuk restore nanti
+        $guru->update([
+            'deactivated_data' => [
+                'roles' => $user->roles->pluck('name')->toArray(),
+                'wali_of' => $guru->kelasWali->pluck('id_kelas')->toArray(),
+            ],
+        ]);
 
         // Hapus role
         $user->removeRole('guru');

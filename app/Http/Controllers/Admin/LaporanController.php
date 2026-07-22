@@ -216,6 +216,7 @@ class LaporanController extends Controller
                 )
             )
             ->with(['logPoin' => fn($q) => $q
+                ->where('instansi_id', $instansi->id_instansi)
                 ->whereMonth('tanggal', $request->bulan)
                 ->whereYear('tanggal', $request->tahun),
                 'logPoin.masterPoin',

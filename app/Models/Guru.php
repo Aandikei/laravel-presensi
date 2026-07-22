@@ -25,10 +25,12 @@ class Guru extends Model
         'jenis_kelamin',
         'no_hp',
         'status',
+        'deactivated_data',
     ];
 
     protected $casts = [
         'transfer_token_expires_at' => 'datetime',
+        'deactivated_data' => 'array',
     ];
 
     public function user()

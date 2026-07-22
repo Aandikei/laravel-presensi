@@ -20,9 +20,7 @@ class LogPoinController extends Controller
 
         if ($request->ajax()) {
             $logPoin = LogPoinSiswa::with(['siswa', 'masterPoin', 'createdBy'])
-                ->whereHas('siswa', fn($q) =>
-                    $q->where('instansi_id', $instansi->id_instansi)
-                )
+                ->where('instansi_id', $instansi->id_instansi)
                 ->select('log_poin_siswa.*');
 
             if ($request->siswa_id) {
@@ -100,11 +98,12 @@ class LogPoinController extends Controller
 
         LogPoinSiswa::create([
             ...$validated,
+            'instansi_id' => $instansi->id_instansi,
             'created_by' => Auth::id(),
         ]);
 
         // Update rekap bulanan poin
-        $this->updateRekapPoin($validated['siswa_id'], $validated['tanggal']);
+        $this->updateRekapPoin($validated['siswa_id'], $validated['tanggal'], $instansi->id_instansi);
 
         return back()->with('success', 'Poin pelanggaran berhasil ditambahkan!');
     }
@@ -112,7 +111,7 @@ class LogPoinController extends Controller
     public function destroy(LogPoinSiswa $logPoin)
     {
         $instansi = Auth::user()->getInstansi();
-        abort_if($logPoin->siswa->instansi_id !== $instansi->id_instansi, 403);
+        abort_if($logPoin->instansi_id !== $instansi->id_instansi, 403);
 
         $tanggal = $logPoin->tanggal;
         $siswaId = $logPoin->siswa_id;
@@ -120,17 +119,18 @@ class LogPoinController extends Controller
         $logPoin->delete();
 
         // Update rekap
-        $this->updateRekapPoin($siswaId, $tanggal);
+        $this->updateRekapPoin($siswaId, $tanggal, $logPoin->instansi_id);
 
         return back()->with('success', 'Log poin berhasil dihapus!');
     }
 
-    private function updateRekapPoin(int $siswaId, string $tanggal): void
+    private function updateRekapPoin(int $siswaId, string $tanggal, int $instansiId): void
     {
         $bulan = (int) date('m', strtotime($tanggal));
         $tahun = (int) date('Y', strtotime($tanggal));
 
         $totalPoin = LogPoinSiswa::where('siswa_id', $siswaId)
+            ->where('instansi_id', $instansiId)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->join('master_poin', 'log_poin_siswa.poin_id', '=', 'master_poin.id_poin')

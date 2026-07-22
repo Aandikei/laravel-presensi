@@ -63,6 +63,7 @@ class WaliKelasController extends Controller
         abort_if(!$isSiswaSaya, 403);
 
         LogPoinSiswa::create([
+            'instansi_id' => $kelasSaya->instansi_id,
             'siswa_id'   => $validated['siswa_id'],
             'poin_id'    => $validated['poin_id'],
             'tanggal'    => now()->toDateString(),
@@ -79,7 +80,10 @@ class WaliKelasController extends Controller
         $kelasSaya = Kelas::where('guru_wali_id', $guru->id_guru)->first();
         abort_if(!$kelasSaya, 403);
 
-        $siswa = RegistrasiAkademik::with(['siswa.logPoin.masterPoin'])
+        $siswa = RegistrasiAkademik::with(['siswa' => fn($q) => $q
+            ->with(['logPoin' => fn($q2) => $q2->where('instansi_id', $kelasSaya->instansi_id)])
+            ->with(['logPoin.masterPoin']),
+        ])
             ->aktif()
             ->where('kelas_id', $kelasSaya->id_kelas)
             ->whereHas('tahunAjaran', fn($q) => $q->where('is_aktif', true))
@@ -114,6 +118,7 @@ class WaliKelasController extends Controller
 
         $logPoin = LogPoinSiswa::with(['siswa', 'masterPoin', 'createdBy'])
             ->whereIn('siswa_id', $siswaIds)
+            ->where('instansi_id', $kelasSaya->instansi_id)
             ->orderBy('tanggal', 'desc')
             ->orderBy('id_log_poin', 'desc')
             ->get();
@@ -300,7 +305,7 @@ class WaliKelasController extends Controller
 
         $siswa = Siswa::whereIn('id_siswa', $siswaIds)
             ->where('instansi_id', $kelasSaya->instansi_id)
-            ->with(['logPoin' => fn($q) => $q->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun), 'logPoin.masterPoin'])
+            ->with(['logPoin' => fn($q) => $q->where('instansi_id', $kelasSaya->instansi_id)->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun), 'logPoin.masterPoin'])
             ->orderBy('nama_siswa')
             ->get()
             ->map(function ($s) {

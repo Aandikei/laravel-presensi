@@ -10,6 +10,7 @@ class LogPoinSiswa extends Model
     protected $primaryKey = 'id_log_poin';
 
     protected $fillable = [
+        'instansi_id',
         'siswa_id',
         'absen_id',
         'poin_id',
@@ -21,6 +22,11 @@ class LogPoinSiswa extends Model
     protected $casts = [
         'tanggal' => 'date',
     ];
+
+    public function instansi()
+    {
+        return $this->belongsTo(Instansi::class, 'instansi_id', 'id_instansi');
+    }
 
     public function siswa()
     {
