@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -30,17 +29,7 @@ class SettingsController extends Controller
             'alamat'        => 'nullable|string',
             'telepon'       => 'nullable|string|max:15',
             'email'         => 'nullable|email',
-            'logo'          => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ]);
-
-        // Upload logo
-        if ($request->hasFile('logo')) {
-            // Hapus logo lama
-            if ($instansi->logo) {
-                Storage::disk('public')->delete($instansi->logo);
-            }
-            $validated['logo'] = $request->file('logo')->store('logo-instansi', 'public');
-        }
 
         $instansi->update($validated);
 

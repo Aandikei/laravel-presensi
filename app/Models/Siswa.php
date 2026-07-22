@@ -21,7 +21,6 @@ class Siswa extends Model
         'nama_siswa',
         'jenis_kelamin',
         'tanggal_lahir',
-        'foto',
         'status',
         'transfer_token',
         'transfer_token_expires_at',

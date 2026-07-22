@@ -17,7 +17,6 @@ class Instansi extends Model
         'alamat',
         'telepon',
         'email',
-        'logo',
     ];
 
     public function getLabelJenjangAttribute()

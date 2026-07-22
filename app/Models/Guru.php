@@ -24,7 +24,6 @@ class Guru extends Model
         'nama_guru',
         'jenis_kelamin',
         'no_hp',
-        'foto',
         'status',
     ];
 
